@@ -3,14 +3,19 @@ package Mark1;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.Transaction;
+import static Mark1.RobotPlayer.rc;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BlockchainUtils {
-    static RobotController rc;
+
     static final int[] acceptedTypes = {73};
-    static int parsingProgress = 1;
+    static private int parsingProgress = 1;
+    static int opponentTransactionCosts = 0;
+    static int opponentTransactions = 0;
+    static int opponentTransactionMinFee = 1000;
+    static int opponentTransactionMaxFee = 0;
 
     static int getType(Transaction transaction){
         return (transaction.getMessage()[4] >> 24) & 255;
@@ -50,6 +55,12 @@ public class BlockchainUtils {
         }
         for (int type : acceptedTypes) if(((message[4] >> 24) & 255) == type)
             return (message[4] & (255 << 16)) == (~(checksum << 16) & (255 << 16));
+
+        opponentTransactionCosts += transaction.getCost();
+        opponentTransactions++;
+        if (transaction.getCost() > opponentTransactionMaxFee) opponentTransactionMaxFee = transaction.getCost();
+        if (transaction.getCost() < opponentTransactionMinFee) opponentTransactionMinFee = transaction.getCost();
+
         return false;
     }
 
@@ -58,7 +69,7 @@ public class BlockchainUtils {
         message[0] = rc.getLocation().x;
         message[1] = rc.getLocation().y;
         addAuth(message, 73);
-        if(!rc.canSubmitTransaction(message, fee)) return false;
+        if(!rc.canSubmitTransaction(message, fee)) { System.out.println("FEJL"); return false; }
         rc.submitTransaction(message, fee);
         return true;
     }

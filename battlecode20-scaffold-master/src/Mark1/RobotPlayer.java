@@ -32,12 +32,12 @@ public strictfp class RobotPlayer {
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
         RobotPlayer.rc = rc;
-        BlockchainUtils.rc = rc;
-        Navigation.rc = rc;
+        Strategium.init();
+
 
         turnCount = 0;
 
-        System.out.println("I'm a " + rc.getType() + " and I just got created!");
+        //System.out.println("I'm a " + rc.getType() + " and I just got created!");
         //noinspection InfiniteLoopStatement
         while (true) {
             turnCount += 1;
@@ -45,7 +45,7 @@ public strictfp class RobotPlayer {
             try {
                 // Here, we've separated the controls into a different method for each RobotType.
                 // You can add the missing ones or rewrite this into your own control structure.
-                System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
+                //System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
                 switch (rc.getType()) {
                     case HQ:
                         runHQ();
@@ -89,9 +89,17 @@ public strictfp class RobotPlayer {
     static void runHQ() throws GameActionException {
         if (turnCount == 1) {
             BlockchainUtils.reportHQLocation(0);
+            BlockchainUtils.reportHQLocation(0);
+            BlockchainUtils.reportHQLocation(0);
+            BlockchainUtils.reportHQLocation(0);
+            BlockchainUtils.reportHQLocation(0);
+            BlockchainUtils.reportHQLocation(0);
+            BlockchainUtils.reportHQLocation(0);
             for (Direction dir : directions)
                 if (tryBuild(RobotType.MINER, dir)) return;
         }
+
+        runNetGun();
     }
 
     static void runMiner() throws GameActionException {
@@ -166,7 +174,16 @@ public strictfp class RobotPlayer {
     }
 
     static void runNetGun() throws GameActionException {
+        RobotInfo[] targets = rc.senseNearbyRobots(GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED, Strategium.opponentTeam);
+        RobotInfo bestTarget = null;
+        int bestTargetRange = 100;
+        for (RobotInfo target : targets) if(rc.canShootUnit(target.ID))
+            if(target.location.distanceSquaredTo(rc.getLocation()) < bestTargetRange){
+                bestTarget = target;
+                bestTargetRange = target.location.distanceSquaredTo(rc.getLocation());
+            }
 
+        if(bestTarget != null) rc.shootUnit(bestTarget.ID);
     }
 
     /**
@@ -175,7 +192,7 @@ public strictfp class RobotPlayer {
      * @return a random Direction
      */
     static Direction randomDirection() {
-        return directions[(int) (Math.random() * directions.length)];
+        return dir8[(int) (Math.random() * directions.length)];
     }
 
     /**

@@ -1,18 +1,23 @@
 package Mark1;
 
-import battlecode.common.Clock;
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.Transaction;
+import battlecode.common.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static Mark1.RobotPlayer.rc;
 
 public class Strategium {
 
     static boolean upToDate = false;
     static ArrayList<Transaction> transactions = new ArrayList<>();
     static MapLocation HQLocation = null;
+    static Team myTeam, opponentTeam;
+
+    static void init() {
+        myTeam = rc.getTeam();
+        opponentTeam = myTeam == Team.A ? Team.B : Team.A;
+    }
 
     static void gatherInfo() throws GameActionException {
         gatherInfo(0);
@@ -41,6 +46,7 @@ public class Strategium {
 
             switch (BlockchainUtils.getType(message)) {
                 case 73:
+                    if (HQLocation != null) break;
                     HQLocation = new MapLocation(message[0], message[1]);
                     System.out.println("HQ Located at: (" + HQLocation.x + ", " + HQLocation.y + ")");
                     break;

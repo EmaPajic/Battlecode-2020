@@ -3,10 +3,9 @@ package Mark1;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import static Mark1.RobotPlayer.rc;
 
 public class Navigation {
-
-    static RobotController rc;
 
     static Direction moveTowards(MapLocation target) {
 
