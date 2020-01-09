@@ -1,10 +1,22 @@
 package Mark1;
+
 import battlecode.common.*;
+
 
 public strictfp class RobotPlayer {
     static RobotController rc;
 
     static Direction[] directions = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
+    static Direction[] dir8 = {
+            Direction.NORTH,
+            Direction.EAST,
+            Direction.SOUTH,
+            Direction.WEST,
+            Direction.NORTHEAST,
+            Direction.NORTHWEST,
+            Direction.SOUTHEAST,
+            Direction.SOUTHWEST
+    };
     static RobotType[] spawnedByMiner = {RobotType.REFINERY, RobotType.VAPORATOR, RobotType.DESIGN_SCHOOL,
             RobotType.FULFILLMENT_CENTER, RobotType.NET_GUN};
 
@@ -20,6 +32,8 @@ public strictfp class RobotPlayer {
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
         RobotPlayer.rc = rc;
+        BlockchainUtils.rc = rc;
+        Navigation.rc = rc;
 
         turnCount = 0;
 
@@ -33,15 +47,33 @@ public strictfp class RobotPlayer {
                 // You can add the missing ones or rewrite this into your own control structure.
                 System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
                 switch (rc.getType()) {
-                    case HQ:                 runHQ();                break;
-                    case MINER:              runMiner();             break;
-                    case REFINERY:           runRefinery();          break;
-                    case VAPORATOR:          runVaporator();         break;
-                    case DESIGN_SCHOOL:      runDesignSchool();      break;
-                    case FULFILLMENT_CENTER: runFulfillmentCenter(); break;
-                    case LANDSCAPER:         runLandscaper();        break;
-                    case DELIVERY_DRONE:     runDeliveryDrone();     break;
-                    case NET_GUN:            runNetGun();            break;
+                    case HQ:
+                        runHQ();
+                        break;
+                    case MINER:
+                        runMiner();
+                        break;
+                    case REFINERY:
+                        runRefinery();
+                        break;
+                    case VAPORATOR:
+                        runVaporator();
+                        break;
+                    case DESIGN_SCHOOL:
+                        runDesignSchool();
+                        break;
+                    case FULFILLMENT_CENTER:
+                        runFulfillmentCenter();
+                        break;
+                    case LANDSCAPER:
+                        runLandscaper();
+                        break;
+                    case DELIVERY_DRONE:
+                        runDeliveryDrone();
+                        break;
+                    case NET_GUN:
+                        runNetGun();
+                        break;
                 }
 
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
@@ -55,24 +87,44 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
-        for (Direction dir : directions)
-            tryBuild(RobotType.MINER, dir);
+        if (turnCount == 1) {
+            BlockchainUtils.reportHQLocation(0);
+            for (Direction dir : directions)
+                if (tryBuild(RobotType.MINER, dir)) return;
+        }
     }
 
     static void runMiner() throws GameActionException {
-        tryBlockchain();
-        tryMove(randomDirection());
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
-        // tryBuild(randomSpawnedByMiner(), randomDirection());
-        for (Direction dir : directions)
-            tryBuild(RobotType.FULFILLMENT_CENTER, dir);
-        for (Direction dir : directions)
-            if (tryRefine(dir))
-                System.out.println("I refined soup! " + rc.getTeamSoup());
-        for (Direction dir : directions)
-            if (tryMine(dir))
-                System.out.println("I mined soup! " + rc.getSoupCarrying());
+        Strategium.gatherInfo();
+
+        if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
+
+            for (Direction dir : dir8)
+                if (tryMine(dir)) {
+                    return;
+                }
+            int xMin = rc.getLocation().x - 5;
+            int yMin = rc.getLocation().y - 5;
+            int xMax = rc.getLocation().x + 5;
+            int yMax = rc.getLocation().y + 5;
+            for(int i = xMin; i <= xMax; i++)
+                for(int j = yMin; j <= yMax; j++){
+                    MapLocation location = new MapLocation(i, j);
+                    if(rc.canSenseLocation(location))
+                        if(rc.senseSoup(location) > 0)
+                            if(tryMove(Navigation.moveTowards(location))) return;
+                }
+            tryMove(randomDirection());
+
+        } else {
+
+            for (Direction dir : dir8)
+                if (tryRefine(dir)) {
+                    return;
+                }
+            tryMove(Navigation.moveTowards(Strategium.HQLocation));
+
+        }
     }
 
     static void runRefinery() throws GameActionException {
@@ -170,7 +222,7 @@ public strictfp class RobotPlayer {
      * Attempts to build a given robot in a given direction.
      *
      * @param type The type of the robot to build
-     * @param dir The intended direction of movement
+     * @param dir  The intended direction of movement
      * @return true if a move was performed
      * @throws GameActionException
      */
@@ -221,4 +273,6 @@ public strictfp class RobotPlayer {
         }
         // System.out.println(rc.getRoundMessages(turnCount-1));
     }
+
+
 }
