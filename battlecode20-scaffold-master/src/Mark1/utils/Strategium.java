@@ -11,7 +11,11 @@ public class Strategium {
 
     static boolean upToDate = false;
     static ArrayList<Transaction> transactions = new ArrayList<>();
+
     public static MapLocation HQLocation = null;
+    public static MapLocation enemyHQLocation = null;
+    public static List<MapLocation> potentialEnemyHQLocations = new ArrayList<>();
+
     static Team myTeam;
     public static Team opponentTeam;
 
@@ -19,12 +23,18 @@ public class Strategium {
     private static HashMap<MapLocation, RobotInfo> enemyNetGuns = new HashMap<>();
     private static HashMap<MapLocation, RobotInfo> refineries = new HashMap<>();
     private static List<RobotInfo> enemyDrones = new ArrayList<>();
+    private static List<RobotInfo> enemyUnits = new ArrayList<>();
 
     public static MapLocation nearestRefinery = null;
     public static MapLocation nearestSoup = null;
 
+    public static MapLocation nearestWater = null;
+
+    public static RobotInfo nearestEnemyDrone;
+    public static RobotInfo nearestEnemyUnit;
+
     public static boolean[][] soup = null;
-    public static int[][] depth = null;
+    public static int[][] elevation = null;
     public static boolean[][] water;
     public static int knownSoup = 0;
 
@@ -33,6 +43,8 @@ public class Strategium {
         opponentTeam = myTeam == Team.A ? Team.B : Team.A;
 
         soup = new boolean[rc.getMapWidth()][rc.getMapHeight()];
+        water = new boolean[rc.getMapWidth()][rc.getMapHeight()];
+        elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
 
     }
 
@@ -40,14 +52,117 @@ public class Strategium {
         gatherInfo(0);
     }
 
-    private static void droneSense() {
+    private static void droneSense() throws GameActionException {
 
+        enemyUnits.clear();
+        enemyDrones.clear();
+        nearestEnemyDrone = null;
+        nearestEnemyUnit = null;
+
+        for (RobotInfo robot : rc.senseNearbyRobots()) {
+
+            if (robot.team == myTeam) {
+
+                if (robot.type == RobotType.HQ) {
+                    if (HQLocation == null) {
+                        HQLocation = robot.location;
+                        if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
+                            potentialEnemyHQLocations.add(
+                                    new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
+
+                        if (HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
+                            potentialEnemyHQLocations.add(
+                                    new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1));
+
+                        if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1 &&
+                                HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
+                            potentialEnemyHQLocations.add(
+                                    new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
+                                            rc.getMapHeight() - HQLocation.y - 1));
+                    }
+                }
+
+            } else {
+
+                if (robot.type == RobotType.HQ) enemyHQLocation = robot.location;
+                else if (robot.type == RobotType.NET_GUN) enemyNetGuns.put(robot.location, robot);
+                else if (robot.type.isBuilding()) enemyBuildings.put(robot.location, robot);
+                else if (robot.type == RobotType.DELIVERY_DRONE){
+                    enemyDrones.add(robot);
+                    if(Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyDrone))
+                        nearestEnemyDrone = robot;
+                }
+                else {
+                    enemyUnits.add(robot);
+                    if(Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyUnit))
+                    nearestEnemyUnit = robot;
+                }
+
+            }
+
+        }
+
+        Iterator<Map.Entry<MapLocation, RobotInfo>> it = enemyBuildings.entrySet().iterator();
+        while (it.hasNext()) {
+            RobotInfo building = it.next().getValue();
+            if (rc.canSenseLocation(building.location))
+                if (!rc.canSenseRobot(building.ID)) {
+                    it.remove();
+                }
+        }
+
+        it = enemyNetGuns.entrySet().iterator();
+        while (it.hasNext()) {
+            RobotInfo netGun = it.next().getValue();
+            if (rc.canSenseLocation(netGun.location))
+                if (!rc.canSenseRobot(netGun.ID)) {
+                    it.remove();
+                }
+        }
+
+        int xMin = rc.getLocation().x - 4;
+        int yMin = rc.getLocation().y - 4;
+        int xMax = rc.getLocation().x + 4;
+        int yMax = rc.getLocation().y + 4;
+        for (int i = xMin; i <= xMax; i++)
+            for (int j = yMin; j <= yMax; j++) {
+
+                MapLocation location = new MapLocation(i, j);
+                if (rc.canSenseLocation(location))
+                    water[i][j] = rc.senseFlooding(location);
+                    elevation[i][j] = rc.senseElevation(location);
+                    if(nearestWater!=null && !water[i][j]) if(nearestWater.x == i && nearestWater.y == j)
+                        nearestWater = null;
+            }
+
+        if(!rc.isReady()) findWater();
+
+    }
+
+    private static void findWater(){
+        for(int i = 0; i < rc.getMapWidth(); i++)
+            for(int j = 0; j < rc.getMapHeight(); j++) {
+                if(water[i][j]) if(Navigation.aerialDistance(i, j) < Navigation.aerialDistance(nearestWater))
+                    nearestWater = new MapLocation(i, j);
+            }
+
+        if(nearestWater != null) return;
+
+        float waterLevel = GameConstants.getWaterLevel(rc.getRoundNum());
+
+        for(int i = 0; i < rc.getMapWidth(); i++)
+            for(int j = 0; j < rc.getMapHeight(); j++) if(Navigation.aerialDistance(i, j) > 4){
+                if(elevation[i][j] < waterLevel)
+                    if(Navigation.aerialDistance(i, j) < Navigation.aerialDistance(nearestWater))
+                    nearestWater = new MapLocation(i, j);
+            }
 
     }
 
     private static void minerSense() throws GameActionException {
 
         enemyDrones.clear();
+        nearestEnemyDrone = null;
 
         for (RobotInfo robot : rc.senseNearbyRobots()) {
 
@@ -58,7 +173,11 @@ public class Strategium {
 
             } else {
 
-                if (robot.type == RobotType.DELIVERY_DRONE) enemyDrones.add(robot);
+                if (robot.type == RobotType.DELIVERY_DRONE){
+                    enemyDrones.add(robot);
+                    if(Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyDrone))
+                        nearestEnemyDrone = robot;
+                }
 
             }
 
@@ -107,7 +226,7 @@ public class Strategium {
 
             }
 
-        if (knownSoup > 0 && nearestSoup == null) scanAllSoup();
+        if (knownSoup > 0 && (nearestSoup == null || !rc.isReady())) scanAllSoup();
 
     }
 
@@ -135,7 +254,7 @@ public class Strategium {
 
         upToDate = false;
 
-        if (rc.getCooldownTurns() < 1) sense();
+        sense();
 
         do {
 
@@ -158,7 +277,21 @@ public class Strategium {
                 case 73:
                     if (HQLocation != null) break;
                     HQLocation = new MapLocation(message[0], message[1]);
-                    System.out.println("HQ Located at: (" + HQLocation.x + ", " + HQLocation.y + ")");
+
+                    if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
+                        potentialEnemyHQLocations.add(
+                                new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
+
+                    if (HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
+                        potentialEnemyHQLocations.add(
+                                new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1));
+
+                    if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1 &&
+                            HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
+                        potentialEnemyHQLocations.add(
+                                new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
+                                        rc.getMapHeight() - HQLocation.y - 1));
+
                     break;
                 default:
                     break;
