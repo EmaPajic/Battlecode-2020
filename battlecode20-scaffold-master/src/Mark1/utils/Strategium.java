@@ -6,6 +6,8 @@ import java.util.*;
 import java.util.List;
 
 import static Mark1.RobotPlayer.rc;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public class Strategium {
 
@@ -202,8 +204,8 @@ public class Strategium {
         int yMin = rc.getLocation().y - 5;
         int xMax = rc.getLocation().x + 5;
         int yMax = rc.getLocation().y + 5;
-        for (int i = xMin; i <= xMax; i++)
-            for (int j = yMin; j <= yMax; j++) {
+        for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++)
+            for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
 
                 MapLocation location = new MapLocation(i, j);
                 if (rc.canSenseLocation(location))
