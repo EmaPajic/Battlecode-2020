@@ -40,6 +40,11 @@ public class Strategium {
         gatherInfo(0);
     }
 
+    private static void droneSense() {
+
+
+    }
+
     private static void minerSense() throws GameActionException {
 
         enemyDrones.clear();
@@ -85,23 +90,24 @@ public class Strategium {
                 if (rc.canSenseLocation(location))
                     if (rc.senseSoup(location) > 0) {
 
-                        if (!soup[i][j]) knownSoup++;
-                        soup[i][j] = true;
-                        if (Navigation.aerialDistance(rc.getLocation(), i, j) <
-                                Navigation.aerialDistance(rc.getLocation(), nearestSoup))
-                            nearestSoup = new MapLocation(i, j);
+                        if (!soup[i][j]) {
+                            knownSoup++;
+                            soup[i][j] = true;
+                            if (Navigation.aerialDistance(rc.getLocation(), i, j) <
+                                    Navigation.aerialDistance(rc.getLocation(), nearestSoup))
+                                nearestSoup = new MapLocation(i, j);
+                        }
 
                     } else if (soup[i][j]) {
-                            soup[i][j] = false;
-                            knownSoup--;
-                            if(nearestSoup.x == i && nearestSoup.y == j) nearestSoup = null;
+                        soup[i][j] = false;
+                        knownSoup--;
+                        if (nearestSoup.x == i && nearestSoup.y == j) nearestSoup = null;
                     }
-
 
 
             }
 
-        if(knownSoup > 0 && nearestSoup == null) scanAllSoup();
+        if (knownSoup > 0 && nearestSoup == null) scanAllSoup();
 
     }
 
@@ -117,8 +123,11 @@ public class Strategium {
     }
 
     static private void sense() throws GameActionException {
-        switch (rc.getType()){
-            case MINER: minerSense();
+        switch (rc.getType()) {
+            case MINER:
+                minerSense();
+            case DELIVERY_DRONE:
+                droneSense();
         }
     }
 
@@ -126,7 +135,7 @@ public class Strategium {
 
         upToDate = false;
 
-        if(rc.getCooldownTurns() < 1) sense();
+        if (rc.getCooldownTurns() < 1) sense();
 
         do {
 
