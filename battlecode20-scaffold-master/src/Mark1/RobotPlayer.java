@@ -1,10 +1,13 @@
 package Mark1;
 
+import Mark1.utils.Blockchain;
+import Mark1.utils.Navigation;
+import Mark1.utils.Strategium;
 import battlecode.common.*;
 
 
 public strictfp class RobotPlayer {
-    static RobotController rc;
+    public static RobotController rc;
 
     static Direction[] directions = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
     static Direction[] dir8 = {
@@ -88,13 +91,13 @@ public strictfp class RobotPlayer {
 
     static void runHQ() throws GameActionException {
         if (turnCount == 1) {
-            BlockchainUtils.reportHQLocation(0);
-            BlockchainUtils.reportHQLocation(0);
-            BlockchainUtils.reportHQLocation(0);
-            BlockchainUtils.reportHQLocation(0);
-            BlockchainUtils.reportHQLocation(0);
-            BlockchainUtils.reportHQLocation(0);
-            BlockchainUtils.reportHQLocation(0);
+            Blockchain.reportHQLocation(0);
+            Blockchain.reportHQLocation(0);
+            Blockchain.reportHQLocation(0);
+            Blockchain.reportHQLocation(0);
+            Blockchain.reportHQLocation(0);
+            Blockchain.reportHQLocation(0);
+            Blockchain.reportHQLocation(0);
             for (Direction dir : directions)
                 if (tryBuild(RobotType.MINER, dir)) return;
         }

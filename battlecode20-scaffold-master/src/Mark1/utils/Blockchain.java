@@ -1,4 +1,4 @@
-package Mark1;
+package Mark1.utils;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
@@ -8,7 +8,7 @@ import static Mark1.RobotPlayer.rc;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlockchainUtils {
+public class Blockchain {
 
     static final int[] acceptedTypes = {73};
     static private int parsingProgress = 1;
@@ -64,7 +64,7 @@ public class BlockchainUtils {
         return false;
     }
 
-    static boolean reportHQLocation(int fee) throws GameActionException {
+    public static boolean reportHQLocation(int fee) throws GameActionException {
         int[] message = new int[7];
         message[0] = rc.getLocation().x;
         message[1] = rc.getLocation().y;

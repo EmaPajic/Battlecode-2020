@@ -1,4 +1,4 @@
-package Mark1;
+package Mark1.utils;
 
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
@@ -7,7 +7,7 @@ import static Mark1.RobotPlayer.rc;
 
 public class Navigation {
 
-    static Direction moveTowards(MapLocation target) {
+    public static Direction moveTowards(MapLocation target) {
 
         if(target == null) return Direction.CENTER;
 

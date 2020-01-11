@@ -1,4 +1,4 @@
-package Mark1;
+package Mark1.utils;
 
 import battlecode.common.*;
 
@@ -11,15 +11,16 @@ public class Strategium {
 
     static boolean upToDate = false;
     static ArrayList<Transaction> transactions = new ArrayList<>();
-    static MapLocation HQLocation = null;
-    static Team myTeam, opponentTeam;
+    public static MapLocation HQLocation = null;
+    static Team myTeam;
+    public static Team opponentTeam;
 
-    static void init() {
+    public static void init() {
         myTeam = rc.getTeam();
         opponentTeam = myTeam == Team.A ? Team.B : Team.A;
     }
 
-    static void gatherInfo() throws GameActionException {
+    public static void gatherInfo() throws GameActionException {
         gatherInfo(0);
     }
 
@@ -29,7 +30,7 @@ public class Strategium {
 
         do {
 
-            parseTransactions(BlockchainUtils.parseBlockchain(transactions));
+            parseTransactions(Blockchain.parseBlockchain(transactions));
 
         } while (Clock.getBytecodesLeft() > bytecodesReq && !upToDate);
     }
@@ -44,7 +45,7 @@ public class Strategium {
 
             int[] message = transactions.get(0).getMessage();
 
-            switch (BlockchainUtils.getType(message)) {
+            switch (Blockchain.getType(message)) {
                 case 73:
                     if (HQLocation != null) break;
                     HQLocation = new MapLocation(message[0], message[1]);
