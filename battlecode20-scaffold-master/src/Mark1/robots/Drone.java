@@ -2,10 +2,7 @@ package Mark1.robots;
 
 import Mark1.utils.Navigation;
 import Mark1.utils.Strategium;
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotInfo;
+import battlecode.common.*;
 
 import static Mark1.RobotPlayer.dir8;
 import static Mark1.RobotPlayer.rc;
@@ -21,19 +18,25 @@ public class Drone {
 
     private static State state = State.SENTRY;
 
+    private static int patrolRange = 3;
+
     public static void run() throws GameActionException {
 
         Strategium.gatherInfo();
+        System.out.println(Clock.getBytecodeNum());
+
+        patrolRange = 3 + rc.getRobotCount() / 8;
 
         if (!rc.isReady()) return;
 
         switch (state) {
             case SENTRY:
                 if (rc.isCurrentlyHoldingUnit()) {
-                    if (!drown()) patrol();
+                    drown();
                 } else if (Strategium.nearestEnemyUnit != null) {
                     if (!attack(Strategium.nearestEnemyUnit)) patrol();
                 } else patrol();
+            case TAXI: break;
 
         }
 
@@ -56,12 +59,15 @@ public class Drone {
 
         for (Direction dir : dir8) {
             MapLocation adj = rc.adjacentLocation(dir);
-            if (Strategium.water[adj.x][adj.y]) if (rc.canDropUnit(dir)) {
-                rc.dropUnit(dir);
-                return true;
-            }
+            if (rc.canSenseLocation(adj))
+                if (Strategium.water[adj.x][adj.y]) if (rc.canDropUnit(dir)) {
+                    rc.dropUnit(dir);
+                    return true;
+                }
         }
+
         if (Strategium.nearestWater != null) {
+            System.out.println(Strategium.nearestWater);
             if (Strategium.nearestWater.equals(rc.getLocation())) {
                 for (Direction dir : Navigation.moveAwayFrom(Strategium.HQLocation))
                     if (rc.canMove(dir)) {
@@ -69,26 +75,20 @@ public class Drone {
                         return true;
                     }
                 return true;
-            } else if (rc.canMove(Navigation.moveTowards(Strategium.nearestWater))) {
-                rc.move(Navigation.moveTowards(Strategium.nearestWater));
-                return true;
-            } else return false;
+            } else return Navigation.bugPath(Strategium.nearestWater);
 
         }
 
-        return false;
+        return patrol();
     }
 
     private static boolean patrol() throws GameActionException {
         if (Strategium.HQLocation == null) return false;
-        if (Navigation.aerialDistance(Strategium.HQLocation) > 3) {
-            if (rc.canMove(Navigation.moveTowards(Strategium.HQLocation))) {
-                rc.move(Navigation.moveTowards(Strategium.HQLocation));
-                return true;
-            } else return false;
-        }
+        if (Navigation.aerialDistance(Strategium.HQLocation) > patrolRange)
+            return Navigation.bugPath(Strategium.HQLocation);
 
-        if (Navigation.aerialDistance(Strategium.HQLocation) < 3) {
+
+        if (Navigation.aerialDistance(Strategium.HQLocation) < patrolRange) {
             for (Direction dir : Navigation.moveAwayFrom(Strategium.HQLocation))
                 if (rc.canMove(dir)) {
                     rc.move(dir);

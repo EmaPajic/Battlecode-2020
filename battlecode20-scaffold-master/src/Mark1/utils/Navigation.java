@@ -1,9 +1,6 @@
 package Mark1.utils;
 
-import battlecode.common.Direction;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
+import battlecode.common.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +8,63 @@ import java.util.List;
 import static Mark1.RobotPlayer.rc;
 
 public class Navigation {
+
+    private static MapLocation lastIntersection;
+    private static boolean avoiding = false;
+    private static Direction lastDirection;
+
+    private static boolean isOnLine(MapLocation destination) {
+        MapLocation line = destination.translate(-lastIntersection.x, -lastIntersection.y);
+        MapLocation point = rc.getLocation().translate(-lastIntersection.x, -lastIntersection.y);
+        if(line.equals(point)) return true;
+        if(line.x * point.x < 0  || line.y * point.y < 0) return false;
+        if(line.x == 0) return point.x == 0;
+        if(line.y == 0) return point.y == 0;
+        return Math.abs(point.x) == Math.abs(point.y);
+    }
+
+    public static boolean bugPath(MapLocation destination) throws GameActionException {
+        Direction dir = moveTowards(destination);
+        if(!avoiding) {
+            lastIntersection = rc.getLocation();
+            lastDirection = dir;
+            if(rc.canMove(dir)){
+                rc.move(dir);
+                return true;
+            }
+        }
+
+        if(avoiding && dir == lastDirection) {
+            if(rc.canMove(dir)){
+                avoiding = false;
+                lastIntersection = rc.getLocation();
+                rc.move(dir);
+                return true;
+            }
+        }
+
+        int i = 0;
+        for(i = 0; rc.canMove(dir); dir = dir.rotateRight(), i++) {
+            if (i == 8) {
+                avoiding = false;
+                rc.move(dir);
+                return true;
+            }
+        }
+        if(i > 0) {
+            rc.move(dir.rotateLeft());
+            return true;
+        }
+        for(; !rc.canMove(dir); dir = dir.rotateLeft(), i++){
+            if (i == 8){
+                return false;
+            }
+        }
+        avoiding = true;
+        rc.move(dir);
+        return true;
+    }
+
 
     public static Direction moveTowards(MapLocation target) {
 

@@ -37,8 +37,12 @@ public class Strategium {
 
     public static boolean[][] soup = null;
     public static int[][] elevation = null;
-    public static boolean[][] water;
+    public static boolean[][] water = null;
+    public static boolean[][] explored = null;
     public static int knownSoup = 0;
+    public static boolean foundWater = false;
+
+    private static Random rand;
 
     public static void init() {
         myTeam = rc.getTeam();
@@ -47,7 +51,9 @@ public class Strategium {
         soup = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         water = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
+        explored = new boolean[rc.getMapWidth()][rc.getMapHeight()];
 
+        rand = new Random();
     }
 
     public static void gatherInfo() throws GameActionException {
@@ -86,23 +92,27 @@ public class Strategium {
 
             } else {
 
-                if (robot.type == RobotType.HQ) enemyHQLocation = robot.location;
+                if (robot.type == RobotType.HQ) {
+                    enemyHQLocation = robot.location;
+                    potentialEnemyHQLocations.clear();
+                }
                 else if (robot.type == RobotType.NET_GUN) enemyNetGuns.put(robot.location, robot);
                 else if (robot.type.isBuilding()) enemyBuildings.put(robot.location, robot);
-                else if (robot.type == RobotType.DELIVERY_DRONE){
+                else if (robot.type == RobotType.DELIVERY_DRONE) {
                     enemyDrones.add(robot);
-                    if(Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyDrone))
+                    if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyDrone))
                         nearestEnemyDrone = robot;
-                }
-                else {
+                } else {
                     enemyUnits.add(robot);
-                    if(Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyUnit))
-                    nearestEnemyUnit = robot;
+                    if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyUnit))
+                        nearestEnemyUnit = robot;
                 }
 
             }
 
         }
+
+        potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
 
         Iterator<Map.Entry<MapLocation, RobotInfo>> it = enemyBuildings.entrySet().iterator();
         while (it.hasNext()) {
@@ -130,34 +140,42 @@ public class Strategium {
             for (int j = yMin; j <= yMax; j++) {
 
                 MapLocation location = new MapLocation(i, j);
-                if (rc.canSenseLocation(location))
-                    water[i][j] = rc.senseFlooding(location);
+                if (rc.canSenseLocation(location)) {
+                    explored[i][j] = true;
                     elevation[i][j] = rc.senseElevation(location);
-                    if(nearestWater!=null && !water[i][j]) if(nearestWater.x == i && nearestWater.y == j)
-                        nearestWater = null;
+                    if (rc.senseFlooding(location)) {
+                        if (!water[i][j]) {
+                            water[i][j] = true;
+                            foundWater = true;
+                        }
+                    } else {
+
+                        water[i][j] = false;
+                        if (location.equals(nearestWater))
+                            nearestWater = null;
+
+                    }
+                }
             }
 
-        if(!rc.isReady()) findWater();
+        if (!rc.isReady() && nearestWater == null) findWater();
 
     }
 
-    private static void findWater(){
-        for(int i = 0; i < rc.getMapWidth(); i++)
-            for(int j = 0; j < rc.getMapHeight(); j++) {
-                if(water[i][j]) if(Navigation.aerialDistance(i, j) < Navigation.aerialDistance(nearestWater))
-                    nearestWater = new MapLocation(i, j);
-            }
+    private static void findWater() {
+        if (foundWater)
+            for (int i = 0; i < rc.getMapWidth(); i++)
+                for (int j = 0; j < rc.getMapHeight(); j++) {
+                    if (water[i][j]) if (Navigation.aerialDistance(i, j) < Navigation.aerialDistance(nearestWater))
+                        nearestWater = new MapLocation(i, j);
+                }
 
-        if(nearestWater != null) return;
+        if (nearestWater != null) return;
 
-        float waterLevel = GameConstants.getWaterLevel(rc.getRoundNum());
-
-        for(int i = 0; i < rc.getMapWidth(); i++)
-            for(int j = 0; j < rc.getMapHeight(); j++) if(Navigation.aerialDistance(i, j) > 4){
-                if(elevation[i][j] < waterLevel)
-                    if(Navigation.aerialDistance(i, j) < Navigation.aerialDistance(nearestWater))
-                    nearestWater = new MapLocation(i, j);
-            }
+        if(!potentialEnemyHQLocations.isEmpty())
+            nearestWater = potentialEnemyHQLocations.get(
+                    rand.nextInt(potentialEnemyHQLocations.size()));
+        else nearestWater = new MapLocation(rand.nextInt(rc.getMapWidth()), rand.nextInt(rc.getMapHeight()));
 
     }
 
@@ -175,9 +193,9 @@ public class Strategium {
 
             } else {
 
-                if (robot.type == RobotType.DELIVERY_DRONE){
+                if (robot.type == RobotType.DELIVERY_DRONE) {
                     enemyDrones.add(robot);
-                    if(Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyDrone))
+                    if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyDrone))
                         nearestEnemyDrone = robot;
                 }
 
@@ -210,7 +228,7 @@ public class Strategium {
                 MapLocation location = new MapLocation(i, j);
                 if (rc.canSenseLocation(location))
                     if (rc.senseSoup(location) > 0) {
-
+                        explored[i][j] = true;
                         if (!soup[i][j]) {
                             knownSoup++;
                             soup[i][j] = true;
@@ -247,8 +265,10 @@ public class Strategium {
         switch (rc.getType()) {
             case MINER:
                 minerSense();
+                break;
             case DELIVERY_DRONE:
                 droneSense();
+                break;
         }
     }
 

@@ -1,5 +1,6 @@
 package Mark1;
 
+import Mark1.robots.Drone;
 import Mark1.utils.Blockchain;
 import Mark1.utils.Navigation;
 import Mark1.utils.Strategium;
@@ -72,7 +73,7 @@ public strictfp class RobotPlayer {
                         runLandscaper();
                         break;
                     case DELIVERY_DRONE:
-                        runDeliveryDrone();
+                        Drone.run();
                         break;
                     case NET_GUN:
                         runNetGun();
@@ -98,28 +99,40 @@ public strictfp class RobotPlayer {
         runNetGun();
     }
 
+    static boolean builtFulfillmentCenter = false;
+
     static void runMiner() throws GameActionException {
         Strategium.gatherInfo();
 
-        if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
-
+        if (rc.getTeamSoup() >= 300 && !builtFulfillmentCenter) {
             for (Direction dir : dir8)
-                if (tryMine(dir)) {
-                    return;
-                }
-            if (Strategium.nearestSoup != null)
-                if (tryMove(Navigation.moveTowards(Strategium.nearestSoup))) return;
-            tryMove(randomDirection());
-
-        } else {
-
-            for (Direction dir : dir8)
-                if (tryRefine(dir)) {
-                    return;
-                }
-            tryMove(Navigation.moveTowards(Strategium.nearestRefinery));
-
+                if (rc.adjacentLocation(dir).isAdjacentTo(Strategium.HQLocation))
+                    if (tryBuild(RobotType.FULFILLMENT_CENTER, dir)) {
+                        builtFulfillmentCenter = true;
+                        return;
+                    }
         }
+
+            if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
+
+                for (Direction dir : dir8)
+                    if (tryMine(dir)) {
+                        return;
+                    }
+                if (Strategium.nearestSoup != null)
+                    if (Navigation.bugPath(Strategium.nearestSoup)) return;
+                tryMove(randomDirection());
+
+            } else {
+
+                for (Direction dir : dir8) {
+                    if (tryRefine(dir)) {
+                        return;
+                    }
+                }
+                Navigation.bugPath(Strategium.nearestRefinery);
+
+            }
     }
 
     static void runRefinery() throws GameActionException {
