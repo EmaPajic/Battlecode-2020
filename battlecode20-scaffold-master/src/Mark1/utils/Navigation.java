@@ -25,4 +25,14 @@ public class Navigation {
         return Direction.CENTER;
 
     }
+
+    public static int aerialDistance(MapLocation source, MapLocation destination){
+        if(source == null || destination == null) return Integer.MAX_VALUE;
+        return Math.max(Math.abs(source.x - destination.x), Math.abs(source.y - destination.y));
+    }
+
+    public static int aerialDistance(MapLocation source, int destX, int destY){
+        if(source == null) return  Integer.MAX_VALUE;
+        return Math.max(Math.abs(source.x - destX), Math.abs(source.y - destY));
+    }
 }

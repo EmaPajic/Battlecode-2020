@@ -91,13 +91,6 @@ public strictfp class RobotPlayer {
 
     static void runHQ() throws GameActionException {
         if (turnCount == 1) {
-            Blockchain.reportHQLocation(0);
-            Blockchain.reportHQLocation(0);
-            Blockchain.reportHQLocation(0);
-            Blockchain.reportHQLocation(0);
-            Blockchain.reportHQLocation(0);
-            Blockchain.reportHQLocation(0);
-            Blockchain.reportHQLocation(0);
             for (Direction dir : directions)
                 if (tryBuild(RobotType.MINER, dir)) return;
         }
@@ -114,17 +107,8 @@ public strictfp class RobotPlayer {
                 if (tryMine(dir)) {
                     return;
                 }
-            int xMin = rc.getLocation().x - 5;
-            int yMin = rc.getLocation().y - 5;
-            int xMax = rc.getLocation().x + 5;
-            int yMax = rc.getLocation().y + 5;
-            for(int i = xMin; i <= xMax; i++)
-                for(int j = yMin; j <= yMax; j++){
-                    MapLocation location = new MapLocation(i, j);
-                    if(rc.canSenseLocation(location))
-                        if(rc.senseSoup(location) > 0)
-                            if(tryMove(Navigation.moveTowards(location))) return;
-                }
+            if (Strategium.nearestSoup != null)
+                if (tryMove(Navigation.moveTowards(Strategium.nearestSoup))) return;
             tryMove(randomDirection());
 
         } else {
@@ -133,7 +117,7 @@ public strictfp class RobotPlayer {
                 if (tryRefine(dir)) {
                     return;
                 }
-            tryMove(Navigation.moveTowards(Strategium.HQLocation));
+            tryMove(Navigation.moveTowards(Strategium.nearestRefinery));
 
         }
     }
@@ -180,13 +164,14 @@ public strictfp class RobotPlayer {
         RobotInfo[] targets = rc.senseNearbyRobots(GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED, Strategium.opponentTeam);
         RobotInfo bestTarget = null;
         int bestTargetRange = 100;
-        for (RobotInfo target : targets) if(rc.canShootUnit(target.ID))
-            if(target.location.distanceSquaredTo(rc.getLocation()) < bestTargetRange){
-                bestTarget = target;
-                bestTargetRange = target.location.distanceSquaredTo(rc.getLocation());
-            }
+        for (RobotInfo target : targets)
+            if (rc.canShootUnit(target.ID))
+                if (target.location.distanceSquaredTo(rc.getLocation()) < bestTargetRange) {
+                    bestTarget = target;
+                    bestTargetRange = target.location.distanceSquaredTo(rc.getLocation());
+                }
 
-        if(bestTarget != null) rc.shootUnit(bestTarget.ID);
+        if (bestTarget != null) rc.shootUnit(bestTarget.ID);
     }
 
     /**
