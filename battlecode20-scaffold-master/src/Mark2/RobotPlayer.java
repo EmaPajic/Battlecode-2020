@@ -7,9 +7,6 @@ import Mark2.utils.TwoMinerController;
 import battlecode.common.*;
 import Mark2.utils.Navigation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 public strictfp class RobotPlayer {
     public static RobotController rc;
@@ -28,7 +25,7 @@ public strictfp class RobotPlayer {
     static int numMiners = 0;
     static int numLandscapers = 0;
     static int numDrones = 0;
-    static int landscaperTurns = -1;
+    static int landscaperTurns = 0;
 
     static Direction[] directions = {
             Direction.NORTH,

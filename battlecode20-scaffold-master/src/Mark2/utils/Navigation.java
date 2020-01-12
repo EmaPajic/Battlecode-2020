@@ -296,8 +296,8 @@ public class Navigation {
     public static MapLocation clamp(MapLocation location){
         int x = location.x;
         int y = location.y;
-        if(x >= rc.getMapWidth()) x = rc.getMapWidth();
-        if(y >= rc.getMapHeight()) y = rc.getMapHeight();
+        if(x >= rc.getMapWidth()) x = rc.getMapWidth() - 1;
+        if(y >= rc.getMapHeight()) y = rc.getMapHeight() - 1;
         if(x < 0) x = 0;
         if(y < 0) y = 0;
         return  new MapLocation(x, y);
