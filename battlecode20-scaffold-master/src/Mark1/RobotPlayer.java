@@ -4,6 +4,7 @@ import Mark1.robots.Drone;
 import Mark1.utils.Blockchain;
 import Mark1.utils.Navigation;
 import Mark1.utils.Strategium;
+import Mark1.utils.TwoMinerController;
 import battlecode.common.*;
 
 
@@ -25,6 +26,15 @@ public strictfp class RobotPlayer {
             RobotType.FULFILLMENT_CENTER, RobotType.NET_GUN};
 
     static int turnCount;
+    public static MapLocation hqLocation;
+    public static MapLocation designSchoolLocation;
+    public static MapLocation fulfillmentCenterLocation;
+    public static MapLocation netGunLocation1;
+    public static MapLocation netGunLocation2;
+    public static MapLocation netGunLocation3;
+    public static MapLocation vaporatorLocation1;
+    public static MapLocation vaporatorLocation2;
+    public static int myFun = 0;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -37,7 +47,23 @@ public strictfp class RobotPlayer {
         // and to get information on its current status.
         RobotPlayer.rc = rc;
         Strategium.init();
-
+        if (rc.getType() == RobotType.MINER) {
+            if (rc.getRobotCount() == 2) {
+                myFun = 1; // main search miner
+            }
+            else if (rc.getRobotCount() == 3) {
+                myFun = 2; // 2nd search miner
+            }
+            else {
+                myFun = 3; // build miner
+            }
+        }
+        else if (rc.getType() == RobotType.LANDSCAPER) {
+            myFun = 1; // protect yourself
+        }
+        else if (rc.getType() == RobotType.DELIVERY_DRONE) {
+            myFun = 1;
+        }
 
         turnCount = 0;
 
@@ -95,7 +121,10 @@ public strictfp class RobotPlayer {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.MINER, dir)) return;
         }
-
+        if (turnCount == 2) {
+            for (Direction dir : directions)
+                if (tryBuild(RobotType.MINER, dir)) return;
+        }
         runNetGun();
     }
 
@@ -113,28 +142,38 @@ public strictfp class RobotPlayer {
                     }
         }
 
-            if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
-
-                for (Direction dir : dir8)
-                    if (tryMine(dir)) {
-                        return;
-                    }
-                if (Strategium.nearestSoup != null)
-                    if (Navigation.bugPath(Strategium.nearestSoup)) return;
-                tryMove(randomDirection());
-
-            } else {
-
-                for (Direction dir : dir8) {
-                    if (tryRefine(dir)) {
-                        return;
-                    }
+        if (hqLocation == null) {
+            // search surroundings for hq
+            RobotInfo[] robots = rc.senseNearbyRobots();
+            for (RobotInfo robot : robots) {
+                if (robot.type == RobotType.HQ && robot.team == rc.getTeam()) {
+                    hqLocation = robot.location;
+                    designSchoolLocation = new MapLocation(hqLocation.x - 1, hqLocation.y);
+                    fulfillmentCenterLocation = new MapLocation(hqLocation.x, hqLocation.y - 1);
+                    vaporatorLocation1 = new MapLocation(hqLocation.x, hqLocation.y + 1);
+                    vaporatorLocation2 = new MapLocation(hqLocation.x + 1, hqLocation.y);
+                    netGunLocation1 = new MapLocation(hqLocation.x - 1, hqLocation.y + 1);
+                    netGunLocation2 = new MapLocation(hqLocation.x + 1, hqLocation.y + 1);
+                    netGunLocation3 = new MapLocation(hqLocation.x + 1, hqLocation.y - 1);
+                    System.out.println("Found HQ!");
                 }
-                Navigation.bugPath(Strategium.nearestRefinery);
-
             }
+            TwoMinerController.init();
+        }
+
+        if (myFun < 3)
+            runSearchMiner();
+        else
+            runBuildMiner();
+    }
+    
+    static void runSearchMiner() throws GameActionException {
+        TwoMinerController.control();
     }
 
+    static void runBuildMiner() throws GameActionException {
+
+    }
     static void runRefinery() throws GameActionException {
         // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
     }
@@ -205,7 +244,7 @@ public strictfp class RobotPlayer {
         return spawnedByMiner[(int) (Math.random() * spawnedByMiner.length)];
     }
 
-    static boolean tryMove() throws GameActionException {
+    public static boolean tryMove() throws GameActionException {
         for (Direction dir : directions)
             if (tryMove(dir))
                 return true;
@@ -228,7 +267,7 @@ public strictfp class RobotPlayer {
      * @return true if a move was performed
      * @throws GameActionException
      */
-    static boolean tryMove(Direction dir) throws GameActionException {
+    public static boolean tryMove(Direction dir) throws GameActionException {
         // System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
         if (rc.isReady() && rc.canMove(dir)) {
             rc.move(dir);
@@ -244,7 +283,7 @@ public strictfp class RobotPlayer {
      * @return true if a move was performed
      * @throws GameActionException
      */
-    static boolean tryBuild(RobotType type, Direction dir) throws GameActionException {
+    public static boolean tryBuild(RobotType type, Direction dir) throws GameActionException {
         if (rc.isReady() && rc.canBuildRobot(type, dir)) {
             rc.buildRobot(type, dir);
             return true;
@@ -258,7 +297,7 @@ public strictfp class RobotPlayer {
      * @return true if a move was performed
      * @throws GameActionException
      */
-    static boolean tryMine(Direction dir) throws GameActionException {
+    public static boolean tryMine(Direction dir) throws GameActionException {
         if (rc.isReady() && rc.canMineSoup(dir)) {
             rc.mineSoup(dir);
             return true;
@@ -272,7 +311,7 @@ public strictfp class RobotPlayer {
      * @return true if a move was performed
      * @throws GameActionException
      */
-    static boolean tryRefine(Direction dir) throws GameActionException {
+    public static boolean tryRefine(Direction dir) throws GameActionException {
         if (rc.isReady() && rc.canDepositSoup(dir)) {
             rc.depositSoup(dir, rc.getSoupCarrying());
             return true;
