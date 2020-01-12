@@ -17,11 +17,11 @@ public strictfp class RobotPlayer {
     static MapLocation netGunLocation1;
     static MapLocation netGunLocation2;
     static MapLocation netGunLocation3;
-    public static MapLocation vaporatorLocation1;
+    static MapLocation vaporatorLocation1;
     static MapLocation vaporatorLocation2;
     static int buildstage = 0; // tells miners what to build
 
-    public static int myFun = 0;
+    static int myFun = 0;
     static int numMiners = 0;
     static int numLandscapers = 0;
     static int numDrones = 0;
@@ -226,7 +226,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runDesignSchool() throws GameActionException {
-        if (numLandscapers == 1 && !(rc.getRoundNum() > 500 || rc.getRobotCount() > 10)) {
+        if (numLandscapers == 1 && !(rc.getRoundNum() > 500 || rc.getRobotCount() > 8)) {
             return;
         }
         else {
@@ -237,16 +237,15 @@ public strictfp class RobotPlayer {
     }
 
     static void runFulfillmentCenter() throws GameActionException {
-        //if(rc.getRoundNum() % 100 == 0)
-        //    for (Direction dir : directions)
-        //        tryBuild(RobotType.DELIVERY_DRONE, dir);
+        if(rc.getRoundNum() % 100 == 0)
+            for (Direction dir : directions)
+                tryBuild(RobotType.DELIVERY_DRONE, dir);
     }
 
     static void runLandscaper() throws GameActionException {
-        if (landscaperTurns == -1) {
-            if (tryMove(Direction.WEST)) {
-                ++landscaperTurns;
-            }
+        if (landscaperTurns == 0 && (rc.getLocation().x == hqLocation.x - 1)
+                && (rc.getLocation().y == hqLocation.y - 1)) {
+            tryMove(Direction.WEST);
         }
         else if ((landscaperTurns % 3 == 0) && rc.getDirtCarrying() < 1) {
             Direction digDir;
