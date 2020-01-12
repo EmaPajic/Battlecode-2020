@@ -2,6 +2,7 @@ package Mark2.robots;
 
 import Mark2.utils.Navigation;
 import Mark2.utils.Strategium;
+import Mark2.utils.Wall;
 import battlecode.common.*;
 
 import static Mark2.RobotPlayer.dir8;
@@ -16,7 +17,16 @@ public class Drone {
         SWARMER
     }
 
+    private enum Payload {
+        POTENTIAL,
+        FRIENDLY_LANDSCAPER,
+        UNRULY_MINER,
+        BIOLOGICAL,
+        ENEMY
+    }
     private static State state = State.SENTRY;
+
+    private static Payload payload = Payload.POTENTIAL;
 
     private static int patrolRange = 3;
 
@@ -32,15 +42,20 @@ public class Drone {
 
         if (!rc.isReady()) return;
 
-        switch (state) {
-            case SENTRY:
-                if (rc.isCurrentlyHoldingUnit()) {
-                    drown();
-                } else if (Strategium.nearestEnemyUnit != null) {
-                    if (!attack(Strategium.nearestEnemyUnit)) patrol();
-                } else patrol();
-            case TAXI: break;
-
+        switch (payload) {
+            case ENEMY:
+            case BIOLOGICAL:
+                drown();
+            break;
+            case POTENTIAL:
+                if (Strategium.nearestEnemyUnit != null) if (attack(Strategium.nearestEnemyUnit)) break;
+                if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
+                patrol();
+                break;
+            case UNRULY_MINER:
+            case FRIENDLY_LANDSCAPER:
+                climb();
+                break;
         }
 
 
@@ -49,6 +64,17 @@ public class Drone {
     private static boolean attack(RobotInfo target) throws GameActionException {
         if (rc.canPickUpUnit(target.ID)) {
             rc.pickUpUnit(target.ID);
+            if(target.team == Strategium.myTeam) {
+                switch (target.type) {
+                    case LANDSCAPER:
+                        payload = Payload.FRIENDLY_LANDSCAPER;
+                        return true;
+                    case MINER:
+                        payload = Payload.UNRULY_MINER;
+                        return true;
+                }
+            }
+            payload = target.team == Strategium.opponentTeam ? Payload.ENEMY : Payload.BIOLOGICAL;
             return true;
         }
         return Navigation.bugPath(target.location);
@@ -61,6 +87,7 @@ public class Drone {
             if (rc.canSenseLocation(adj))
                 if (Strategium.water[adj.x][adj.y]) if (rc.canDropUnit(dir)) {
                     rc.dropUnit(dir);
+                    payload = Payload.POTENTIAL;
                     return true;
                 }
         }
@@ -154,5 +181,14 @@ public class Drone {
 
         return Navigation.bugPath(waypoint);
 
+    }
+
+    private static boolean climb() throws GameActionException {
+        for (Direction dir : dir8) if(rc.canDropUnit(dir)) if(Wall.isOnWall(dir)) {
+            rc.dropUnit(dir);
+            payload = Payload.POTENTIAL;
+            return true;
+        }
+        return Navigation.bugPath(Strategium.HQLocation);
     }
 }

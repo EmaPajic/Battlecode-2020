@@ -19,7 +19,7 @@ public class Strategium {
     public static List<MapLocation> potentialEnemyHQLocations = new ArrayList<>();
     public static boolean onWallAndBlocking = false;
 
-    static Team myTeam;
+    public static Team myTeam;
     public static Team opponentTeam;
 
     public static HashMap<MapLocation, RobotInfo> enemyBuildings = new HashMap<>();
@@ -35,6 +35,7 @@ public class Strategium {
 
     public static RobotInfo nearestEnemyDrone;
     public static RobotInfo nearestEnemyUnit;
+    public static RobotInfo blockedUnit;
 
     public static boolean[][] soup = null;
     public static int[][] elevation = null;
@@ -84,6 +85,7 @@ public class Strategium {
         enemyDrones.clear();
         nearestEnemyDrone = null;
         nearestEnemyUnit = null;
+        blockedUnit = null;
 
         RobotInfo[] robots = rc.senseNearbyRobots();
 
@@ -109,6 +111,8 @@ public class Strategium {
                                     new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
                                             rc.getMapHeight() - HQLocation.y - 1));
                     }
+                } else if (robot.location.equals(Wall.launchPad) && Wall.isLaunchPadBlocked()) {
+                    blockedUnit = robot;
                 }
 
             } else {

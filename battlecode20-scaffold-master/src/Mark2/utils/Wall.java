@@ -1,7 +1,10 @@
 package Mark2.utils;
 
+import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
+
+import static Mark2.RobotPlayer.rc;
 
 public class Wall {
     private static final int[] wallX = {0, 1, 2, 2, 2, 2, 2, 1, 0, -1, -2, -2, -2, -2, -2, -1};
@@ -25,4 +28,15 @@ public class Wall {
         }
         return false;
     }
+
+    public static boolean isLaunchPadBlocked(){
+        int threshold = Strategium.elevation[launchPad.x][launchPad.y] + 3;
+        return Strategium.elevation[launchPad.x -1][launchPad.y - 1] > threshold;
+    }
+
+    public static boolean isOnWall(Direction direction){
+        return Navigation.aerialDistance(rc.adjacentLocation(direction), Strategium.HQLocation) == 2;
+    }
+
+
 }
