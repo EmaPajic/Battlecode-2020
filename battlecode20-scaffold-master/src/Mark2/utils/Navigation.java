@@ -13,6 +13,8 @@ public class Navigation {
     private static boolean avoiding = false;
     private static Direction lastDirection;
 
+    public static int frustration = 0;
+
     private static boolean isOnLine(MapLocation destination) {
         MapLocation line = destination.translate(-lastIntersection.x, -lastIntersection.y);
         MapLocation point = rc.getLocation().translate(-lastIntersection.x, -lastIntersection.y);
@@ -51,6 +53,8 @@ public class Navigation {
                 return true;
             }
         }
+
+        frustration++;
 
         int i = 0;
         for(i = 0; Strategium.canSafelyMove(dir); dir = dir.rotateRight(), i++) {

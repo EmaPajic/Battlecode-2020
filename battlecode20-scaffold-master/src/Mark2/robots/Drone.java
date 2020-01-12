@@ -33,6 +33,7 @@ public class Drone {
     private static int patrolWaypointIndex = 1;
     private static MapLocation waypoint;
 
+
     public static void run() throws GameActionException {
 
         Strategium.gatherInfo();
@@ -116,8 +117,10 @@ public class Drone {
 
         if (Strategium.HQLocation == null) return false;
 
-        if(waypoint == null || rc.getLocation().equals(waypoint)) {
+        if(waypoint == null || rc.getLocation().equals(waypoint) || Navigation.frustration >= 100) {
+            Navigation.frustration = 0;
             patrolWaypointIndex = (patrolWaypointIndex + 1) % 4;
+            if(Strategium.rand.nextInt(100) > 90) patrolWaypointIndex = (patrolWaypointIndex + 1) % 4;
 
 
             switch (patrolWaypointIndex) {
@@ -192,6 +195,7 @@ public class Drone {
             payload = Payload.POTENTIAL;
             return true;
         }
+        if(Navigation.frustration >= 100) state = State.PREDATOR;
         return Navigation.bugPath(Strategium.HQLocation);
     }
 

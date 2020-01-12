@@ -49,7 +49,7 @@ public class Strategium {
     public static boolean shouldBuildLandscaper = false;
     public static boolean shouldCircle = false;
 
-    private static Random rand;
+    public static Random rand;
 
     public static void init() {
         myTeam = rc.getTeam();
