@@ -32,7 +32,7 @@ public class OneMinerController{
     int turnsToReturn;
     int turnsToRefine;
     
-    final int MINER_COST = 150;
+    final int MINER_COST = 150; // cost of miner, change with games const
     final int SOUP_PER_TURN = 7; // soup that miner can extract per turn
     boolean alreadyMining;
 
