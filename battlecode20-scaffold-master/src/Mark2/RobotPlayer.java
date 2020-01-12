@@ -303,9 +303,20 @@ public strictfp class RobotPlayer {
                 ++landscaperTurns;
             }
             else {
-                goToDir = Navigation.moveTowards(goToLoc);
-                if(tryMove(goToDir)) {
-                    ++landscaperTurns;
+                RobotInfo robot = rc.senseRobotAtLocation(goToLoc);
+                if (robot == null) {
+                    if (goToDir == Direction.EAST)
+                        goToDir = Direction.SOUTHEAST;
+                    if (goToDir == Direction.SOUTH)
+                        goToDir = Direction.SOUTHWEST;
+                    if (goToDir == Direction.WEST)
+                        goToDir = Direction.NORTHWEST;
+                    if (goToDir == Direction.NORTH)
+                        goToDir = Direction.NORTHEAST;
+
+                    if (tryMove(goToDir)) {
+                        ++landscaperTurns;
+                    }
                 }
                 else {
                     Direction digDir;
