@@ -206,7 +206,8 @@ public strictfp class RobotPlayer {
         Direction goToDir = Navigation.moveToBuild(goToLoc);
         if (goToDir == Direction.CENTER) {
             // add build permission
-            if (tryBuild(type, buildDir)) {
+            if (tryBuild(type, buildDir) ||
+                    rc.senseElevation(rc.getLocation().add(buildDir)) + 4 < rc.senseElevation(rc.getLocation())) {
                 ++buildstage;
             }
         }
