@@ -28,14 +28,23 @@ public class Navigation {
         if(!avoiding) {
             lastIntersection = rc.getLocation();
             lastDirection = dir;
-            if(rc.canMove(dir)){
+            if(Strategium.canSafelyMove(dir)){
                 rc.move(dir);
                 return true;
             }
+            MapLocation obstacle = rc.adjacentLocation(dir);
+            if(rc.canSenseLocation(obstacle)){
+                RobotInfo robot = rc.senseRobotAtLocation(obstacle);
+                if(robot != null) {
+                    if(robot.team == Strategium.myTeam && robot.ID > rc.getID() && !robot.type.isBuilding())
+                        return false;
+                }
+            }
+
         }
 
         if(avoiding && dir == lastDirection) {
-            if(rc.canMove(dir)){
+            if(Strategium.canSafelyMove(dir)){
                 avoiding = false;
                 lastIntersection = rc.getLocation();
                 rc.move(dir);
@@ -44,7 +53,7 @@ public class Navigation {
         }
 
         int i = 0;
-        for(i = 0; rc.canMove(dir); dir = dir.rotateRight(), i++) {
+        for(i = 0; Strategium.canSafelyMove(dir); dir = dir.rotateRight(), i++) {
             if (i == 8) {
                 avoiding = false;
                 rc.move(dir);
@@ -55,7 +64,7 @@ public class Navigation {
             rc.move(dir.rotateLeft());
             return true;
         }
-        for(; !rc.canMove(dir); dir = dir.rotateLeft(), i++){
+        for(; !Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++){
             if (i == 8){
                 return false;
             }
@@ -271,5 +280,15 @@ public class Navigation {
 
     public static int aerialDistance(int destX, int destY) {
         return aerialDistance(rc.getLocation(), destX, destY);
+    }
+
+    public static MapLocation clamp(MapLocation location){
+        int x = location.x;
+        int y = location.y;
+        if(x >= rc.getMapWidth()) x = rc.getMapWidth();
+        if(y >= rc.getMapHeight()) y = rc.getMapHeight();
+        if(x < 0) x = 0;
+        if(y < 0) y = 0;
+        return  new MapLocation(x, y);
     }
 }

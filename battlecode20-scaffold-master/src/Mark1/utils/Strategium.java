@@ -21,11 +21,11 @@ public class Strategium {
     static Team myTeam;
     public static Team opponentTeam;
 
-    private static HashMap<MapLocation, RobotInfo> enemyBuildings = new HashMap<>();
-    private static HashMap<MapLocation, RobotInfo> enemyNetGuns = new HashMap<>();
+    public static HashMap<MapLocation, RobotInfo> enemyBuildings = new HashMap<>();
+    public static HashMap<MapLocation, RobotInfo> enemyNetGuns = new HashMap<>();
     private static HashMap<MapLocation, RobotInfo> refineries = new HashMap<>();
     private static List<RobotInfo> enemyDrones = new ArrayList<>();
-    private static List<RobotInfo> enemyUnits = new ArrayList<>();
+    public static List<RobotInfo> enemyUnits = new ArrayList<>();
 
     public static MapLocation nearestRefinery = null;
     public static MapLocation nearestSoup = null;
@@ -58,6 +58,23 @@ public class Strategium {
 
     public static void gatherInfo() throws GameActionException {
         gatherInfo(0);
+    }
+
+    public static boolean canSafelyMove(Direction dir) throws GameActionException {
+        if(!rc.canMove(dir)) return false;
+        MapLocation target = rc.adjacentLocation(dir);
+        switch (rc.getType()){
+            case MINER:
+            case LANDSCAPER:
+                for(RobotInfo drone : enemyDrones) if(target.isAdjacentTo(drone.location)) return false;
+                if(rc.senseFlooding(target)) return false;
+                break;
+            case DELIVERY_DRONE:
+                for(MapLocation gun : enemyNetGuns.keySet()) if(target.isWithinDistanceSquared(
+                        gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) return false;
+        }
+
+        return true;
     }
 
     private static void droneSense() throws GameActionException {
@@ -95,6 +112,7 @@ public class Strategium {
                 if (robot.type == RobotType.HQ) {
                     enemyHQLocation = robot.location;
                     potentialEnemyHQLocations.clear();
+                    enemyNetGuns.put(robot.location, robot);
                 }
                 else if (robot.type == RobotType.NET_GUN) enemyNetGuns.put(robot.location, robot);
                 else if (robot.type.isBuilding()) enemyBuildings.put(robot.location, robot);
@@ -246,7 +264,7 @@ public class Strategium {
 
             }
 
-        if (knownSoup > 0 && (nearestSoup == null || !rc.isReady())) scanAllSoup();
+        if (knownSoup > 0 && nearestSoup == null) scanAllSoup();
 
     }
 

@@ -20,6 +20,9 @@ public class Drone {
 
     private static int patrolRange = 3;
 
+    private static int patrolWaypointIndex = 0;
+    private static MapLocation waypoint;
+
     public static void run() throws GameActionException {
 
         Strategium.gatherInfo();
@@ -48,11 +51,7 @@ public class Drone {
             rc.pickUpUnit(target.ID);
             return true;
         }
-        if (rc.canMove(Navigation.moveTowards(target.location))) {
-            rc.move(Navigation.moveTowards(target.location));
-            return true;
-        }
-        return false;
+        return Navigation.bugPath(target.location);
     }
 
     private static boolean drown() throws GameActionException {
@@ -83,26 +82,77 @@ public class Drone {
     }
 
     private static boolean patrol() throws GameActionException {
+
+
         if (Strategium.HQLocation == null) return false;
-        if (Navigation.aerialDistance(Strategium.HQLocation) > patrolRange)
-            return Navigation.bugPath(Strategium.HQLocation);
+
+        if(waypoint == null || rc.getLocation().equals(waypoint)) {
+            patrolWaypointIndex = (patrolWaypointIndex + 1) % 4;
 
 
-        if (Navigation.aerialDistance(Strategium.HQLocation) < patrolRange) {
-            for (Direction dir : Navigation.moveAwayFrom(Strategium.HQLocation))
-                if (rc.canMove(dir)) {
-                    rc.move(dir);
-                    return true;
+            switch (patrolWaypointIndex) {
+                case 0:
+                    waypoint = Strategium.HQLocation.translate(patrolRange, patrolRange);
+                    break;
+                case 1:
+                    waypoint = Strategium.HQLocation.translate(-patrolRange, patrolRange);
+                    break;
+                case 2:
+                    waypoint = Strategium.HQLocation.translate(-patrolRange, -patrolRange);
+                    break;
+                default:
+                    waypoint = Strategium.HQLocation.translate(patrolRange, -patrolRange);
+                    break;
+            }
+
+            boolean changed = false;
+
+            do {
+                changed = false;
+                for (MapLocation gun : Strategium.enemyNetGuns.keySet())
+                    while (waypoint.isWithinDistanceSquared(
+                            gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) {
+                        switch (patrolWaypointIndex) {
+                            case 0:
+                                waypoint = waypoint.translate(0, -1);
+                                break;
+                            case 1:
+                                waypoint = waypoint.translate(1, 0);
+                                break;
+                            case 2:
+                                waypoint = waypoint.translate(0, 1);
+                                break;
+                            default:
+                                waypoint = waypoint.translate(-1, 0);
+                                break;
+                        }
+                        changed = true;
+                    }
+
+                for (MapLocation building : Strategium.enemyBuildings.keySet()) {
+                    if (building.equals(waypoint)) {
+                        switch (patrolWaypointIndex) {
+                            case 0:
+                                waypoint = waypoint.translate(0, -1);
+                                break;
+                            case 1:
+                                waypoint = waypoint.translate(1, 0);
+                                break;
+                            case 2:
+                                waypoint = waypoint.translate(0, 1);
+                                break;
+                            default:
+                                waypoint = waypoint.translate(-1, 0);
+                                break;
+                        }
+                        changed = true;
+                    }
                 }
-            return false;
+            } while (changed);
+            waypoint = Navigation.clamp(waypoint);
         }
 
-        if (rc.canMove(Navigation.clockwiseSquare(Strategium.HQLocation))) {
-            rc.move(Navigation.clockwiseSquare(Strategium.HQLocation));
-            return true;
-        }
-
-        return false;
+        return Navigation.bugPath(waypoint);
 
     }
 }
