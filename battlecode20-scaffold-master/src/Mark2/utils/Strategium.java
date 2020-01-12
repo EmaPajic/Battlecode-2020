@@ -339,19 +339,21 @@ public class Strategium {
                 if (robot.type == RobotType.HQ && robot.team == rc.getTeam()) {
                     HQLocation = robot.location;
                     Wall.init();
+                    break;
                 }
-                break;
             }
         }
 
-        if (HQLocation != null) if (Navigation.aerialDistance(HQLocation) == 2){
-            if(!rc.getLocation().equals(Strategium.HQLocation.translate(-1, -2))) shouldCircle = true;
+        if (HQLocation != null) if (Navigation.aerialDistance(HQLocation) <= 2){
+            if(rc.getLocation().equals(HQLocation.translate(-1, -1))) shouldCircle = true;
+            else if(!rc.getLocation().equals(HQLocation.translate(-1, -2)))
+                shouldCircle = rc.senseRobotAtLocation(Wall.clockwise(rc.getLocation())) == null;
             else  {
 
                 shouldCircle = rc.senseRobotAtLocation(Strategium.HQLocation.translate(-1, -1)) == null;
-                if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-2, -2)) != null)
+                if (rc.senseRobotAtLocation(HQLocation.translate(-2, -2)) != null)
                     shouldCircle = false;
-                if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-2, -1)) != null)
+                if (rc.senseRobotAtLocation(HQLocation.translate(-2, -1)) != null)
                     shouldBuildLandscaper = false;
 
             }
