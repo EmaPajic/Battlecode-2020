@@ -38,5 +38,13 @@ public class Wall {
         return Navigation.aerialDistance(rc.adjacentLocation(direction), Strategium.HQLocation) == 2;
     }
 
+    public static boolean stuckOnWall(MapLocation location){
+        return (isLaunchPadBlocked() && launchPad.equals(location)) ||
+                (Navigation.aerialDistance(location, Strategium.HQLocation) == 2 &&
+                        Strategium.elevation[location.x][location.y] > 15) ||
+                (Navigation.aerialDistance(location, Strategium.HQLocation) == 3 &&
+                        Strategium.elevation[location.x][location.y] < 0);
+    }
+
 
 }

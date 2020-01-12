@@ -36,6 +36,7 @@ public class Strategium {
     public static RobotInfo nearestEnemyDrone;
     public static RobotInfo nearestEnemyUnit;
     public static RobotInfo blockedUnit;
+    public static RobotInfo blockingUnit;
 
     public static boolean[][] soup = null;
     public static int[][] elevation = null;
@@ -86,6 +87,7 @@ public class Strategium {
         nearestEnemyDrone = null;
         nearestEnemyUnit = null;
         blockedUnit = null;
+        blockingUnit = null;
 
         RobotInfo[] robots = rc.senseNearbyRobots();
 
@@ -111,8 +113,12 @@ public class Strategium {
                                     new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
                                             rc.getMapHeight() - HQLocation.y - 1));
                     }
-                } else if (robot.location.equals(Wall.launchPad) && Wall.isLaunchPadBlocked()) {
-                    blockedUnit = robot;
+                } else if(robot.type == RobotType.LANDSCAPER) {
+                    if (robot.location.equals(Wall.launchPad) && Wall.isLaunchPadBlocked()) {
+                        blockedUnit = robot;
+                    }
+                } else if (robot.type == RobotType.MINER) {
+                    if (Wall.stuckOnWall(robot.location)) blockingUnit = robot;
                 }
 
             } else {

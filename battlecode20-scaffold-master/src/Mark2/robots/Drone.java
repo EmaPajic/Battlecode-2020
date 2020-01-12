@@ -49,10 +49,13 @@ public class Drone {
             break;
             case POTENTIAL:
                 if (Strategium.nearestEnemyUnit != null) if (attack(Strategium.nearestEnemyUnit)) break;
+                if (Strategium.blockingUnit != null) if (attack(Strategium.blockingUnit)) break;
                 if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
                 patrol();
                 break;
             case UNRULY_MINER:
+                remove();
+                break;
             case FRIENDLY_LANDSCAPER:
                 climb();
                 break;
@@ -190,5 +193,16 @@ public class Drone {
             return true;
         }
         return Navigation.bugPath(Strategium.HQLocation);
+    }
+
+    private static boolean remove() throws GameActionException {
+        for (Direction dir : dir8) if(rc.canDropUnit(dir))
+            if(Navigation.aerialDistance(Strategium.HQLocation, rc.adjacentLocation(dir)) > 3) {
+            rc.dropUnit(dir);
+            payload = Payload.POTENTIAL;
+            return true;
+        }
+
+        return patrol();
     }
 }
