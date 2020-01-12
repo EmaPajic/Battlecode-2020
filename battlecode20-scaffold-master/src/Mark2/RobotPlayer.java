@@ -243,25 +243,70 @@ public strictfp class RobotPlayer {
                 tryBuild(RobotType.DELIVERY_DRONE, dir);
     }
 
+    static void runLateLandscaper() throws GameActionException {
+        if (rc.getDirtCarrying() >= 1) {
+            Direction depositDirtDir = getOptimalDepositDir();
+            if (rc.canDepositDirt(depositDirtDir)) {
+                rc.depositDirt(depositDirtDir);
+            }
+        }
+        ArrayList<Direction> digDirs = new ArrayList<>();
+        if (rc.getLocation().x == hqLocation.x - 2) {
+            digDirs.add(Direction.WEST);
+            digDirs.add(Direction.NORTHWEST);
+            digDirs.add(Direction.SOUTHWEST);
+        } else if (rc.getLocation().x == hqLocation.x + 2) {
+            digDirs.add(Direction.EAST);
+            digDirs.add(Direction.NORTHEAST);
+            digDirs.add(Direction.SOUTHEAST);
+        } else if (rc.getLocation().y == hqLocation.y - 2) {
+            digDirs.add(Direction.SOUTH);
+            digDirs.add(Direction.SOUTHEAST);
+            digDirs.add(Direction.SOUTHWEST);
+        } else {
+            digDirs.add(Direction.NORTH);
+            digDirs.add(Direction.NORTHEAST);
+            digDirs.add(Direction.NORTHWEST);
+        }
+        for (Direction digDir : digDirs) {
+            if (rc.canDigDirt(digDir)) {
+                rc.digDirt(digDir);
+                ++landscaperTurns;
+                return;
+            }
+        }
+    }
+
     static void runLandscaper() throws GameActionException {
         if (landscaperTurns == 0 && (rc.getLocation().x == hqLocation.x - 1)
                 && (rc.getLocation().y == hqLocation.y - 1)) {
             tryMove(Direction.WEST);
         }
         else if ((landscaperTurns % 3 == 0) && rc.getDirtCarrying() < 1) {
-            Direction digDir;
+            ArrayList<Direction> digDirs = new ArrayList<>();
             if (rc.getLocation().x == hqLocation.x - 2) {
-                digDir = Direction.WEST;
+                digDirs.add(Direction.WEST);
+                digDirs.add(Direction.NORTHWEST);
+                digDirs.add(Direction.SOUTHWEST);
             } else if (rc.getLocation().x == hqLocation.x + 2) {
-                digDir = Direction.EAST;
+                digDirs.add(Direction.EAST);
+                digDirs.add(Direction.NORTHEAST);
+                digDirs.add(Direction.SOUTHEAST);
             } else if (rc.getLocation().y == hqLocation.y - 2) {
-                digDir = Direction.SOUTH;
+                digDirs.add(Direction.SOUTH);
+                digDirs.add(Direction.SOUTHEAST);
+                digDirs.add(Direction.SOUTHWEST);
             } else {
-                digDir = Direction.NORTH;
+                digDirs.add(Direction.NORTH);
+                digDirs.add(Direction.NORTHEAST);
+                digDirs.add(Direction.NORTHWEST);
             }
-            if (rc.canDigDirt(digDir)) {
-                rc.digDirt(digDir);
-                ++landscaperTurns;
+            for (Direction digDir : digDirs) {
+                if (rc.canDigDirt(digDir)) {
+                    rc.digDirt(digDir);
+                    ++landscaperTurns;
+                    return;
+                }
             }
         }
         else if (landscaperTurns % 3 == 1 || (landscaperTurns % 3 == 0 && rc.getDirtCarrying() >= 1)) {
