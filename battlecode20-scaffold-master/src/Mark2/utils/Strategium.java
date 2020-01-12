@@ -382,7 +382,7 @@ public class Strategium {
 
         sense();
 
-        do {
+        if(rc.getType() == RobotType.HQ) do {
 
             parseTransactions(Blockchain.parseBlockchain(transactions));
 
