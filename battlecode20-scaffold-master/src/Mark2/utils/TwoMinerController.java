@@ -91,38 +91,6 @@ public class TwoMinerController {
     }
 
     public static void control() throws GameActionException {
-        if(rc.canSenseLocation(hqLocation)) {
-            if(rc.canSenseLocation(vaporatorLocation1)) {
-                RobotInfo maybeVaporator = rc.senseRobotAtLocation(vaporatorLocation1);
-                if(maybeVaporator != null) {
-                    if(maybeVaporator.getType() == RobotType.VAPORATOR) {
-                        Strategium.vaporatorBuilt = true;
-                        Strategium.nearestRefinery = null;
-                    }
-                }
-            }
-        }
-        Strategium.gatherInfo();
-        if(Strategium.nearestRefinery == null && Navigation.aerialDistance(hqLocation) >= 2) {
-            MapLocation furthestLocation = null;
-            for(Direction dir : dir8) {
-                if (rc.canBuildRobot(RobotType.REFINERY, dir)) {
-                    if (furthestLocation == null)
-                        furthestLocation = rc.getLocation().add(dir);
-                    else {
-                        if (Navigation.aerialDistance(furthestLocation, hqLocation) <
-                                Navigation.aerialDistance(rc.getLocation().add(dir), hqLocation)) {
-                            furthestLocation = rc.getLocation().add(dir);
-                        }
-                    }
-                }
-            }
-            if(Navigation.aerialDistance(furthestLocation, hqLocation) < 4) {
-                Navigation.bugPath(furthestLocation);
-            }
-            tryBuild(RobotType.REFINERY, rc.getLocation().directionTo(furthestLocation));
-        }
-
         if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
 
             for (Direction dir : dir8)
