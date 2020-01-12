@@ -21,7 +21,7 @@ public class Wall {
     }
 
     public static boolean onWallAndBlocking(RobotInfo[] victims, MapLocation location){
-        for(int i = 15; i-- > 0;) if (wall[i].equals(location)) {
+        for(int i = 16; i-- > 0;) if (wall[i].equals(location)) {
             for(RobotInfo robot : victims) if(wall[(15 + i) % 16].equals(robot.location) && !robot.type.isBuilding())
                 return true;
             return false;
@@ -47,7 +47,7 @@ public class Wall {
     }
 
     public static MapLocation clockwise(MapLocation location){
-        for (int i = 15; i-- > 0;) if (location.equals(wall[i])) return wall[(i + 1) % 16];
+        for (int i = 16; i-- > 0;) if (location.equals(wall[i])) return wall[(i + 1) % 16];
         return null;
     }
 

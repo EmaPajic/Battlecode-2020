@@ -348,8 +348,9 @@ public class Strategium {
         if (HQLocation != null){
             if (Navigation.aerialDistance(HQLocation) <= 2){
                 if(rc.getLocation().equals(HQLocation.translate(-1, -1))) shouldCircle = true;
-                else if(!rc.getLocation().equals(HQLocation.translate(-1, -2)))
+                else if(!rc.getLocation().equals(HQLocation.translate(-1, -2))) {
                     shouldCircle = rc.senseRobotAtLocation(Wall.clockwise(rc.getLocation())) == null;
+                }
                 else  {
 
                     shouldCircle = rc.senseRobotAtLocation(Strategium.HQLocation.translate(-1, -1)) == null;
@@ -383,8 +384,8 @@ public class Strategium {
                 }
             }
         }
-        if(cntLandscapper >= cntWall - 1)
-            shouldCircle = false;
+//        if(cntLandscapper >= cntWall - 1)
+//            shouldCircle = false;
     }
 
     static private void sense() throws GameActionException {
