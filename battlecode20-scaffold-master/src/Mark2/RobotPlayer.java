@@ -268,6 +268,7 @@ public strictfp class RobotPlayer {
             }
         }
         else if (landscaperTurns % 3 == 1 || (landscaperTurns % 3 == 0 && rc.getDirtCarrying() >= 1)) {
+            if (landscaperTurns % 3 == 0) landscaperTurns = 1;
             Direction depositDirtDir = getOptimalDepositDir();
             if (rc.canDepositDirt(depositDirtDir)) {
                 rc.depositDirt(depositDirtDir);
