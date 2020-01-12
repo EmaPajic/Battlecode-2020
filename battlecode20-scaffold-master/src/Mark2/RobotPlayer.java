@@ -7,15 +7,12 @@ import Mark2.utils.TwoMinerController;
 import battlecode.common.*;
 import Mark2.utils.Navigation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 public strictfp class RobotPlayer {
     public static RobotController rc;
     static int turnCount = 0;
     public static MapLocation hqLocation = null;
-    static MapLocation designSchoolLocation;
+    public static MapLocation designSchoolLocation;
     static MapLocation fulfillmentCenterLocation;
     static MapLocation netGunLocation1;
     static MapLocation netGunLocation2;
@@ -28,7 +25,7 @@ public strictfp class RobotPlayer {
     static int numMiners = 0;
     static int numLandscapers = 0;
     static int numDrones = 0;
-    static int landscaperTurns = -1;
+    static int landscaperTurns = 0;
 
     static Direction[] directions = {
             Direction.NORTH,
@@ -241,15 +238,14 @@ public strictfp class RobotPlayer {
 
     static void runFulfillmentCenter() throws GameActionException {
         if(rc.getRoundNum() % 100 == 0)
-        for (Direction dir : directions)
-            tryBuild(RobotType.DELIVERY_DRONE, dir);
+            for (Direction dir : directions)
+                tryBuild(RobotType.DELIVERY_DRONE, dir);
     }
 
-        static void runLandscaper() throws GameActionException {
-        if (landscaperTurns == -1) {
-            if (tryMove(Direction.WEST)) {
-                ++landscaperTurns;
-            }
+    static void runLandscaper() throws GameActionException {
+        if (landscaperTurns == 0 && (rc.getLocation().x == hqLocation.x - 1)
+                && (rc.getLocation().y == hqLocation.y - 1)) {
+            tryMove(Direction.WEST);
         }
         else if ((landscaperTurns % 3 == 0) && rc.getDirtCarrying() < 1) {
             Direction digDir;
