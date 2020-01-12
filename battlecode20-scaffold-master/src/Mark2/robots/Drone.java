@@ -20,7 +20,7 @@ public class Drone {
 
     private static int patrolRange = 3;
 
-    private static int patrolWaypointIndex = 0;
+    private static int patrolWaypointIndex = 1;
     private static MapLocation waypoint;
 
     public static void run() throws GameActionException {

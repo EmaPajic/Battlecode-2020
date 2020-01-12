@@ -17,6 +17,7 @@ public class Strategium {
     public static MapLocation HQLocation = null;
     public static MapLocation enemyHQLocation = null;
     public static List<MapLocation> potentialEnemyHQLocations = new ArrayList<>();
+    public static boolean onWallAndBlocking = false;
 
     static Team myTeam;
     public static Team opponentTeam;
@@ -84,13 +85,16 @@ public class Strategium {
         nearestEnemyDrone = null;
         nearestEnemyUnit = null;
 
-        for (RobotInfo robot : rc.senseNearbyRobots()) {
+        RobotInfo[] robots = rc.senseNearbyRobots();
+
+        for (RobotInfo robot : robots) {
 
             if (robot.team == myTeam) {
 
                 if (robot.type == RobotType.HQ) {
                     if (HQLocation == null) {
                         HQLocation = robot.location;
+                        Wall.init();
                         if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
                             potentialEnemyHQLocations.add(
                                     new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
@@ -201,12 +205,18 @@ public class Strategium {
 
         enemyDrones.clear();
         nearestEnemyDrone = null;
+        RobotInfo[] robots = rc.senseNearbyRobots();
 
-        for (RobotInfo robot : rc.senseNearbyRobots()) {
+        if(HQLocation != null) onWallAndBlocking = Wall.onWallAndBlocking(robots, rc.getLocation());
+
+        for (RobotInfo robot : robots) {
 
             if (robot.team == myTeam) {
 
-                if (robot.type == RobotType.HQ) HQLocation = robot.location;
+                if (robot.type == RobotType.HQ){
+                    HQLocation = robot.location;
+                    Wall.init();
+                }
                 if (robot.type.canRefine()) refineries.put(robot.location, robot);
 
             } else {
