@@ -44,6 +44,7 @@ public class Strategium {
     public static boolean[][] explored = null;
     public static int knownSoup = 0;
     public static boolean foundWater = false;
+    public static boolean vaporatorBuilt = false;
 
     private static Random rand;
 
@@ -251,11 +252,13 @@ public class Strategium {
         }
 
         nearestRefinery = null;
-        for (MapLocation refinery : refineries.keySet())
+        for (MapLocation refinery : refineries.keySet()) {
+            if(refinery == HQLocation && Strategium.vaporatorBuilt)
+                continue;
             if (Navigation.aerialDistance(nearestRefinery, rc.getLocation()) >
                     Navigation.aerialDistance(refinery, rc.getLocation()))
                 nearestRefinery = refinery;
-
+        }
         int xMin = rc.getLocation().x - 5;
         int yMin = rc.getLocation().y - 5;
         int xMax = rc.getLocation().x + 5;
