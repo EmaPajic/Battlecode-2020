@@ -245,13 +245,13 @@ public strictfp class RobotPlayer {
             tryBuild(RobotType.DELIVERY_DRONE, dir);
     }
 
-    static void runLandscaper() throws GameActionException {
+        static void runLandscaper() throws GameActionException {
         if (landscaperTurns == -1) {
             if (tryMove(Direction.WEST)) {
                 ++landscaperTurns;
             }
         }
-        else if ((landscaperTurns % 5 == 0 || landscaperTurns % 5 == 1) && rc.getDirtCarrying() < 2) {
+        else if ((landscaperTurns % 3 == 0) && rc.getDirtCarrying() < 1) {
             Direction digDir;
             if (rc.getLocation().x == hqLocation.x - 2) {
                 digDir = Direction.WEST;
@@ -264,14 +264,14 @@ public strictfp class RobotPlayer {
             }
             if (rc.canDigDirt(digDir)) {
                 rc.digDirt(digDir);
-                landscaperTurns += 3;
+                ++landscaperTurns;
             }
         }
-        else if (landscaperTurns % 5 == 2 || landscaperTurns % 5 == 3 ||
-                (landscaperTurns % 5 == 0 || landscaperTurns % 5 == 1) && rc.getDirtCarrying() >= 2) {
-            if (landscaperTurns % 5 < 2) landscaperTurns = 2;
-            if (rc.canDepositDirt(Direction.CENTER)) {
-                rc.depositDirt(Direction.CENTER);
+        else if (landscaperTurns % 3 == 1 || (landscaperTurns % 3 == 0 && rc.getDirtCarrying() >= 1)) {
+            if (landscaperTurns % 3 == 0) landscaperTurns = 1;
+            Direction depositDirtDir = getOptimalDepositDir();
+            if (rc.canDepositDirt(depositDirtDir)) {
+                rc.depositDirt(depositDirtDir);
                 ++landscaperTurns;
             }
         }
@@ -343,6 +343,105 @@ public strictfp class RobotPlayer {
             }
 
         }
+    }
+
+    static Direction getOptimalDepositDir() throws GameActionException{
+        Direction prevStepDir = null;
+        Direction nextStepDir = null;
+        Direction edgeDir = null;
+        if (rc.getLocation().x == hqLocation.x - 2 && rc.getLocation().y == hqLocation.y + 2) {
+            nextStepDir = Direction.EAST;
+            prevStepDir = Direction.SOUTH;
+        }
+        else if (rc.getLocation().x == hqLocation.x - 2 && rc.getLocation().y == hqLocation.y - 2) {
+            nextStepDir = Direction.NORTH;
+            prevStepDir = Direction.EAST;
+        }
+        else if (rc.getLocation().x == hqLocation.x - 2) {
+            if (rc.getLocation().y == hqLocation.y + 1) {
+                edgeDir = Direction.NORTHEAST;
+            }
+            if (rc.getLocation().y == hqLocation.y - 1) {
+                edgeDir = Direction.SOUTHEAST;
+            }
+            nextStepDir = Direction.NORTH;
+            prevStepDir = Direction.SOUTH;
+        }
+        else if (rc.getLocation().y == hqLocation.y + 2 && rc.getLocation().x == hqLocation.x + 2) {
+            nextStepDir = Direction.SOUTH;
+            prevStepDir = Direction.WEST;
+        }
+        else if (rc.getLocation().y == hqLocation.y + 2) {
+            if (rc.getLocation().x == hqLocation.x + 1) {
+                edgeDir = Direction.SOUTHEAST;
+            }
+            if (rc.getLocation().x == hqLocation.x - 1) {
+                edgeDir = Direction.SOUTHWEST;
+            }
+            nextStepDir = Direction.EAST;
+            prevStepDir = Direction.WEST;
+        }
+        else if (rc.getLocation().x == hqLocation.x + 2 && rc.getLocation().y == hqLocation.y - 2) {
+            nextStepDir = Direction.WEST;
+            prevStepDir = Direction.NORTH;
+        }
+        else if (rc.getLocation().x == hqLocation.x + 2) {
+            if (rc.getLocation().y == hqLocation.y + 1) {
+                edgeDir = Direction.NORTHWEST;
+            }
+            if (rc.getLocation().y == hqLocation.y - 1) {
+                edgeDir = Direction.SOUTHWEST;
+            }
+            nextStepDir = Direction.SOUTH;
+            prevStepDir = Direction.NORTH;
+        }
+        else if (rc.getLocation().y == hqLocation.y - 2) {
+            if (rc.getLocation().x == hqLocation.x + 1) {
+                edgeDir = Direction.NORTHEAST;
+            }
+            if (rc.getLocation().x == hqLocation.x - 1) {
+                edgeDir = Direction.NORTHWEST;
+            }
+            nextStepDir = Direction.WEST;
+            prevStepDir = Direction.EAST;
+        }
+
+        MapLocation prevLoc = rc.getLocation().add(prevStepDir);
+        MapLocation nextLoc = rc.getLocation().add(nextStepDir);
+        MapLocation edgeLoc = null;
+        int elevationPrev = rc.senseElevation(prevLoc);
+        int elevationNext = rc.senseElevation(nextLoc);
+        int elevationCurr = rc.senseElevation(rc.getLocation());
+        int elevationEgde = -1;
+        if (edgeDir != null) {
+            edgeLoc = rc.getLocation().add(edgeDir);
+            elevationEgde = rc.senseElevation(edgeLoc);
+        }
+        System.out.println("Prev: " + elevationPrev + " " + prevStepDir.toString() + " " + prevLoc.toString());
+        System.out.println("Curr: " + elevationCurr + " " + Direction.CENTER.toString() + rc.getLocation());
+        System.out.println("Next: " + elevationNext + " " + nextStepDir.toString() + " " + nextLoc.toString());
+        if (edgeDir != null)
+            System.out.println("Edge: " + elevationEgde + " " + edgeDir.toString() + " " + edgeLoc.toString());
+        if (elevationPrev < elevationNext && elevationPrev < elevationCurr) {
+            if (edgeDir != null) {
+                if (elevationEgde < elevationPrev)
+                    return edgeDir;
+            }
+            return prevStepDir;
+        }
+
+        if (elevationNext < elevationPrev && elevationNext < elevationCurr) {
+            if (edgeDir != null) {
+                if (elevationEgde < elevationNext)
+                    return edgeDir;
+            }
+            return nextStepDir;
+        }
+        if (edgeDir != null) {
+            if (elevationEgde < elevationCurr)
+                return edgeDir;
+        }
+        return  Direction.CENTER;
     }
 
     static void runDeliveryDrone() throws GameActionException {
