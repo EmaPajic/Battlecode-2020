@@ -7,25 +7,27 @@ import Mark2.utils.TwoMinerController;
 import battlecode.common.*;
 import Mark2.utils.Navigation;
 
+import java.util.ArrayList;
+
 
 public strictfp class RobotPlayer {
     public static RobotController rc;
     static int turnCount = 0;
     public static MapLocation hqLocation = null;
-    static MapLocation designSchoolLocation;
+    public static MapLocation designSchoolLocation;
     static MapLocation fulfillmentCenterLocation;
     static MapLocation netGunLocation1;
     static MapLocation netGunLocation2;
     static MapLocation netGunLocation3;
-    static MapLocation vaporatorLocation1;
-    static MapLocation vaporatorLocation2;
+    public static MapLocation vaporatorLocation1;
+    public static MapLocation vaporatorLocation2;
     static int buildstage = 0; // tells miners what to build
 
     static int myFun = 0;
     static int numMiners = 0;
     static int numLandscapers = 0;
     static int numDrones = 0;
-    static int landscaperTurns = -1;
+    static int landscaperTurns = 0;
 
     static Direction[] directions = {
             Direction.NORTH,
@@ -206,7 +208,8 @@ public strictfp class RobotPlayer {
         Direction goToDir = Navigation.moveToBuild(goToLoc);
         if (goToDir == Direction.CENTER) {
             // add build permission
-            if (tryBuild(type, buildDir)) {
+            if (tryBuild(type, buildDir) ||
+                    rc.senseElevation(rc.getLocation().add(buildDir)) + 4 < rc.senseElevation(rc.getLocation())) {
                 ++buildstage;
             }
         }
@@ -237,37 +240,84 @@ public strictfp class RobotPlayer {
     }
 
     static void runFulfillmentCenter() throws GameActionException {
-        /*for (Direction dir : directions)
-            tryBuild(RobotType.DELIVERY_DRONE, dir);*/
+        if(rc.getRoundNum() % 100 == 0)
+            for (Direction dir : directions)
+                tryBuild(RobotType.DELIVERY_DRONE, dir);
+    }
+
+    static void runLateLandscaper() throws GameActionException {
+        if (rc.getDirtCarrying() >= 1) {
+            Direction depositDirtDir = getOptimalDepositDir();
+            if (rc.canDepositDirt(depositDirtDir)) {
+                rc.depositDirt(depositDirtDir);
+            }
+        }
+        ArrayList<Direction> digDirs = new ArrayList<>();
+        if (rc.getLocation().x == hqLocation.x - 2) {
+            digDirs.add(Direction.WEST);
+            digDirs.add(Direction.NORTHWEST);
+            digDirs.add(Direction.SOUTHWEST);
+        } else if (rc.getLocation().x == hqLocation.x + 2) {
+            digDirs.add(Direction.EAST);
+            digDirs.add(Direction.NORTHEAST);
+            digDirs.add(Direction.SOUTHEAST);
+        } else if (rc.getLocation().y == hqLocation.y - 2) {
+            digDirs.add(Direction.SOUTH);
+            digDirs.add(Direction.SOUTHEAST);
+            digDirs.add(Direction.SOUTHWEST);
+        } else {
+            digDirs.add(Direction.NORTH);
+            digDirs.add(Direction.NORTHEAST);
+            digDirs.add(Direction.NORTHWEST);
+        }
+        for (Direction digDir : digDirs) {
+            if (rc.canDigDirt(digDir)) {
+                rc.digDirt(digDir);
+                return;
+            }
+        }
     }
 
     static void runLandscaper() throws GameActionException {
-        if (landscaperTurns == -1) {
-            if (tryMove(Direction.WEST)) {
-                ++landscaperTurns;
-            }
+        Strategium.gatherInfo();
+        if (!Strategium.shouldCircle)
+            runLateLandscaper();
+        if (landscaperTurns == 0 && (rc.getLocation().x == hqLocation.x - 1)
+                && (rc.getLocation().y == hqLocation.y - 1)) {
+            tryMove(Direction.WEST);
         }
-        else if ((landscaperTurns % 5 == 0 || landscaperTurns % 5 == 1) && rc.getDirtCarrying() < 2) {
-            Direction digDir;
+        else if ((landscaperTurns % 3 == 0) && rc.getDirtCarrying() < 1) {
+            ArrayList<Direction> digDirs = new ArrayList<>();
             if (rc.getLocation().x == hqLocation.x - 2) {
-                digDir = Direction.WEST;
+                digDirs.add(Direction.WEST);
+                digDirs.add(Direction.NORTHWEST);
+                digDirs.add(Direction.SOUTHWEST);
             } else if (rc.getLocation().x == hqLocation.x + 2) {
-                digDir = Direction.EAST;
+                digDirs.add(Direction.EAST);
+                digDirs.add(Direction.NORTHEAST);
+                digDirs.add(Direction.SOUTHEAST);
             } else if (rc.getLocation().y == hqLocation.y - 2) {
-                digDir = Direction.SOUTH;
+                digDirs.add(Direction.SOUTH);
+                digDirs.add(Direction.SOUTHEAST);
+                digDirs.add(Direction.SOUTHWEST);
             } else {
-                digDir = Direction.NORTH;
+                digDirs.add(Direction.NORTH);
+                digDirs.add(Direction.NORTHEAST);
+                digDirs.add(Direction.NORTHWEST);
             }
-            if (rc.canDigDirt(digDir)) {
-                rc.digDirt(digDir);
-                landscaperTurns += 3;
+            for (Direction digDir : digDirs) {
+                if (rc.canDigDirt(digDir)) {
+                    rc.digDirt(digDir);
+                    ++landscaperTurns;
+                    return;
+                }
             }
         }
-        else if (landscaperTurns % 5 == 2 || landscaperTurns % 5 == 3 ||
-                (landscaperTurns % 5 == 0 || landscaperTurns % 5 == 1) && rc.getDirtCarrying() >= 2) {
-            if (landscaperTurns % 5 < 2) landscaperTurns = 2;
-            if (rc.canDepositDirt(Direction.CENTER)) {
-                rc.depositDirt(Direction.CENTER);
+        else if (landscaperTurns % 3 == 1 || (landscaperTurns % 3 == 0 && rc.getDirtCarrying() >= 1)) {
+            if (landscaperTurns % 3 == 0) landscaperTurns = 1;
+            Direction depositDirtDir = getOptimalDepositDir();
+            if (rc.canDepositDirt(depositDirtDir)) {
+                rc.depositDirt(depositDirtDir);
                 ++landscaperTurns;
             }
         }
@@ -303,9 +353,20 @@ public strictfp class RobotPlayer {
                 ++landscaperTurns;
             }
             else {
-                goToDir = Navigation.moveTowards(goToLoc);
-                if(tryMove(goToDir)) {
-                    ++landscaperTurns;
+                RobotInfo robot = rc.senseRobotAtLocation(goToLoc);
+                if (robot == null) {
+                    if (goToDir == Direction.EAST)
+                        goToDir = Direction.SOUTHEAST;
+                    if (goToDir == Direction.SOUTH)
+                        goToDir = Direction.SOUTHWEST;
+                    if (goToDir == Direction.WEST)
+                        goToDir = Direction.NORTHWEST;
+                    if (goToDir == Direction.NORTH)
+                        goToDir = Direction.NORTHEAST;
+
+                    if (tryMove(goToDir)) {
+                        ++landscaperTurns;
+                    }
                 }
                 else {
                     Direction digDir;
@@ -330,21 +391,107 @@ public strictfp class RobotPlayer {
         }
     }
 
-    static void runDeliveryDrone() throws GameActionException {
-        Team enemy = rc.getTeam().opponent();
-        if (!rc.isCurrentlyHoldingUnit()) {
-            // See if there are any enemy robots within striking range (distance 1 from lumberjack's radius)
-            RobotInfo[] robots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
-
-            if (robots.length > 0) {
-                // Pick up a first robot within range
-                rc.pickUpUnit(robots[0].getID());
-                System.out.println("I picked up " + robots[0].getID() + "!");
-            }
-        } else {
-            // No close robots, so search for robots within sight radius
-            tryMove(randomDirection());
+    static Direction getOptimalDepositDir() throws GameActionException{
+        Direction prevStepDir = null;
+        Direction nextStepDir = null;
+        Direction edgeDir = null;
+        if (rc.getLocation().x == hqLocation.x - 2 && rc.getLocation().y == hqLocation.y + 2) {
+            nextStepDir = Direction.EAST;
+            prevStepDir = Direction.SOUTH;
         }
+        else if (rc.getLocation().x == hqLocation.x - 2 && rc.getLocation().y == hqLocation.y - 2) {
+            nextStepDir = Direction.NORTH;
+            prevStepDir = Direction.EAST;
+        }
+        else if (rc.getLocation().x == hqLocation.x - 2) {
+            if (rc.getLocation().y == hqLocation.y + 1) {
+                edgeDir = Direction.NORTHEAST;
+            }
+            if (rc.getLocation().y == hqLocation.y - 1) {
+                edgeDir = Direction.SOUTHEAST;
+            }
+            nextStepDir = Direction.NORTH;
+            prevStepDir = Direction.SOUTH;
+        }
+        else if (rc.getLocation().y == hqLocation.y + 2 && rc.getLocation().x == hqLocation.x + 2) {
+            nextStepDir = Direction.SOUTH;
+            prevStepDir = Direction.WEST;
+        }
+        else if (rc.getLocation().y == hqLocation.y + 2) {
+            if (rc.getLocation().x == hqLocation.x + 1) {
+                edgeDir = Direction.SOUTHEAST;
+            }
+            if (rc.getLocation().x == hqLocation.x - 1) {
+                edgeDir = Direction.SOUTHWEST;
+            }
+            nextStepDir = Direction.EAST;
+            prevStepDir = Direction.WEST;
+        }
+        else if (rc.getLocation().x == hqLocation.x + 2 && rc.getLocation().y == hqLocation.y - 2) {
+            nextStepDir = Direction.WEST;
+            prevStepDir = Direction.NORTH;
+        }
+        else if (rc.getLocation().x == hqLocation.x + 2) {
+            if (rc.getLocation().y == hqLocation.y + 1) {
+                edgeDir = Direction.NORTHWEST;
+            }
+            if (rc.getLocation().y == hqLocation.y - 1) {
+                edgeDir = Direction.SOUTHWEST;
+            }
+            nextStepDir = Direction.SOUTH;
+            prevStepDir = Direction.NORTH;
+        }
+        else if (rc.getLocation().y == hqLocation.y - 2) {
+            if (rc.getLocation().x == hqLocation.x + 1) {
+                edgeDir = Direction.NORTHEAST;
+            }
+            if (rc.getLocation().x == hqLocation.x - 1) {
+                edgeDir = Direction.NORTHWEST;
+            }
+            nextStepDir = Direction.WEST;
+            prevStepDir = Direction.EAST;
+        }
+
+        MapLocation prevLoc = rc.getLocation().add(prevStepDir);
+        MapLocation nextLoc = rc.getLocation().add(nextStepDir);
+        MapLocation edgeLoc = null;
+        int elevationPrev = rc.senseElevation(prevLoc);
+        int elevationNext = rc.senseElevation(nextLoc);
+        int elevationCurr = rc.senseElevation(rc.getLocation());
+        int elevationEgde = -1;
+        if (edgeDir != null) {
+            edgeLoc = rc.getLocation().add(edgeDir);
+            elevationEgde = rc.senseElevation(edgeLoc);
+        }
+        System.out.println("Prev: " + elevationPrev + " " + prevStepDir.toString() + " " + prevLoc.toString());
+        System.out.println("Curr: " + elevationCurr + " " + Direction.CENTER.toString() + rc.getLocation());
+        System.out.println("Next: " + elevationNext + " " + nextStepDir.toString() + " " + nextLoc.toString());
+        if (edgeDir != null)
+            System.out.println("Edge: " + elevationEgde + " " + edgeDir.toString() + " " + edgeLoc.toString());
+        if (elevationPrev < elevationNext && elevationPrev < elevationCurr) {
+            if (edgeDir != null) {
+                if (elevationEgde < elevationPrev)
+                    return edgeDir;
+            }
+            return prevStepDir;
+        }
+
+        if (elevationNext < elevationPrev && elevationNext < elevationCurr) {
+            if (edgeDir != null) {
+                if (elevationEgde < elevationNext)
+                    return edgeDir;
+            }
+            return nextStepDir;
+        }
+        if (edgeDir != null) {
+            if (elevationEgde < elevationCurr)
+                return edgeDir;
+        }
+        return  Direction.CENTER;
+    }
+
+    static void runDeliveryDrone() throws GameActionException {
+        Drone.run();
     }
 
     static void runNetGun() throws GameActionException {

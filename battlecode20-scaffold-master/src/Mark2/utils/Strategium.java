@@ -17,8 +17,9 @@ public class Strategium {
     public static MapLocation HQLocation = null;
     public static MapLocation enemyHQLocation = null;
     public static List<MapLocation> potentialEnemyHQLocations = new ArrayList<>();
+    public static boolean onWallAndBlocking = false;
 
-    static Team myTeam;
+    public static Team myTeam;
     public static Team opponentTeam;
 
     public static HashMap<MapLocation, RobotInfo> enemyBuildings = new HashMap<>();
@@ -34,6 +35,8 @@ public class Strategium {
 
     public static RobotInfo nearestEnemyDrone;
     public static RobotInfo nearestEnemyUnit;
+    public static RobotInfo blockedUnit;
+    public static RobotInfo blockingUnit;
 
     public static boolean[][] soup = null;
     public static int[][] elevation = null;
@@ -41,8 +44,12 @@ public class Strategium {
     public static boolean[][] explored = null;
     public static int knownSoup = 0;
     public static boolean foundWater = false;
+    public static boolean vaporatorBuilt = false;
 
-    private static Random rand;
+    public static boolean shouldBuildLandscaper = false;
+    public static boolean shouldCircle = false;
+
+    public static Random rand;
 
     public static void init() {
         myTeam = rc.getTeam();
@@ -60,18 +67,42 @@ public class Strategium {
         gatherInfo(0);
     }
 
+    private static void industrySense() throws GameActionException {
+
+        if (HQLocation == null) {
+            for (RobotInfo robot : rc.senseNearbyRobots()) {
+                if (robot.type == RobotType.HQ && robot.team == rc.getTeam()) {
+                    HQLocation = robot.location;
+                    Wall.init();
+                }
+                break;
+            }
+        }
+
+        if (HQLocation != null) {
+            shouldBuildLandscaper = rc.senseRobotAtLocation(Strategium.HQLocation.translate(-1, -1)) == null;
+            if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-2, -2)) != null)
+                shouldBuildLandscaper = false;
+            if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-1, -2)) != null)
+                shouldBuildLandscaper = false;
+
+        }
+
+    }
+
     public static boolean canSafelyMove(Direction dir) throws GameActionException {
-        if(!rc.canMove(dir)) return false;
+        if (!rc.canMove(dir)) return false;
         MapLocation target = rc.adjacentLocation(dir);
-        switch (rc.getType()){
+        switch (rc.getType()) {
             case MINER:
             case LANDSCAPER:
-                for(RobotInfo drone : enemyDrones) if(target.isAdjacentTo(drone.location)) return false;
-                if(rc.senseFlooding(target)) return false;
+                for (RobotInfo drone : enemyDrones) if (target.isAdjacentTo(drone.location)) return false;
+                if (rc.senseFlooding(target)) return false;
                 break;
             case DELIVERY_DRONE:
-                for(MapLocation gun : enemyNetGuns.keySet()) if(target.isWithinDistanceSquared(
-                        gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) return false;
+                for (MapLocation gun : enemyNetGuns.keySet())
+                    if (target.isWithinDistanceSquared(
+                            gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) return false;
         }
 
         return true;
@@ -83,14 +114,19 @@ public class Strategium {
         enemyDrones.clear();
         nearestEnemyDrone = null;
         nearestEnemyUnit = null;
+        blockedUnit = null;
+        blockingUnit = null;
 
-        for (RobotInfo robot : rc.senseNearbyRobots()) {
+        RobotInfo[] robots = rc.senseNearbyRobots();
+
+        for (RobotInfo robot : robots) {
 
             if (robot.team == myTeam) {
 
                 if (robot.type == RobotType.HQ) {
                     if (HQLocation == null) {
                         HQLocation = robot.location;
+                        Wall.init();
                         if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
                             potentialEnemyHQLocations.add(
                                     new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
@@ -105,6 +141,14 @@ public class Strategium {
                                     new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
                                             rc.getMapHeight() - HQLocation.y - 1));
                     }
+                } else if (HQLocation != null) {
+                    if (robot.type == RobotType.LANDSCAPER) {
+                        if (robot.location.equals(Wall.launchPad) && Wall.isLaunchPadBlocked()) {
+                            blockedUnit = robot;
+                        }
+                    } else if (robot.type == RobotType.MINER) {
+                        if (Wall.stuckOnWall(robot.location)) blockingUnit = robot;
+                    }
                 }
 
             } else {
@@ -113,8 +157,7 @@ public class Strategium {
                     enemyHQLocation = robot.location;
                     potentialEnemyHQLocations.clear();
                     enemyNetGuns.put(robot.location, robot);
-                }
-                else if (robot.type == RobotType.NET_GUN) enemyNetGuns.put(robot.location, robot);
+                } else if (robot.type == RobotType.NET_GUN) enemyNetGuns.put(robot.location, robot);
                 else if (robot.type.isBuilding()) enemyBuildings.put(robot.location, robot);
                 else if (robot.type == RobotType.DELIVERY_DRONE) {
                     enemyDrones.add(robot);
@@ -182,15 +225,15 @@ public class Strategium {
 
     private static void findWater() {
         if (foundWater)
-            for (int i = 0; i < rc.getMapWidth(); i++)
-                for (int j = 0; j < rc.getMapHeight(); j++) {
+            for (int i = rc.getMapWidth(); i-- > 0; )
+                for (int j = rc.getMapHeight(); j-- > 0; ) {
                     if (water[i][j]) if (Navigation.aerialDistance(i, j) < Navigation.aerialDistance(nearestWater))
                         nearestWater = new MapLocation(i, j);
                 }
 
         if (nearestWater != null) return;
 
-        if(!potentialEnemyHQLocations.isEmpty())
+        if (!potentialEnemyHQLocations.isEmpty())
             nearestWater = potentialEnemyHQLocations.get(
                     rand.nextInt(potentialEnemyHQLocations.size()));
         else nearestWater = new MapLocation(rand.nextInt(rc.getMapWidth()), rand.nextInt(rc.getMapHeight()));
@@ -201,12 +244,18 @@ public class Strategium {
 
         enemyDrones.clear();
         nearestEnemyDrone = null;
+        RobotInfo[] robots = rc.senseNearbyRobots();
 
-        for (RobotInfo robot : rc.senseNearbyRobots()) {
+        if (HQLocation != null) onWallAndBlocking = Wall.onWallAndBlocking(robots, rc.getLocation());
+
+        for (RobotInfo robot : robots) {
 
             if (robot.team == myTeam) {
 
-                if (robot.type == RobotType.HQ) HQLocation = robot.location;
+                if (robot.type == RobotType.HQ) {
+                    HQLocation = robot.location;
+                    Wall.init();
+                }
                 if (robot.type.canRefine()) refineries.put(robot.location, robot);
 
             } else {
@@ -231,11 +280,13 @@ public class Strategium {
         }
 
         nearestRefinery = null;
-        for (MapLocation refinery : refineries.keySet())
+        for (MapLocation refinery : refineries.keySet()) {
+            if (refinery == HQLocation && Strategium.vaporatorBuilt)
+                continue;
             if (Navigation.aerialDistance(nearestRefinery, rc.getLocation()) >
                     Navigation.aerialDistance(refinery, rc.getLocation()))
                 nearestRefinery = refinery;
-
+        }
         int xMin = rc.getLocation().x - 5;
         int yMin = rc.getLocation().y - 5;
         int xMax = rc.getLocation().x + 5;
@@ -273,10 +324,38 @@ public class Strategium {
             nearestSoup = null;
             return;
         }
-        for (int i = 0; i < rc.getMapWidth(); i++)
-            for (int j = 0; j < rc.getMapHeight(); j++)
+        for (int i = rc.getMapWidth(); i-- > 0; )
+            for (int j = rc.getMapHeight(); j-- > 0; )
                 if (soup[i][j] && Navigation.aerialDistance(rc.getLocation(), i, j) <
                         Navigation.aerialDistance(rc.getLocation(), nearestSoup)) nearestSoup = new MapLocation(i, j);
+    }
+
+    static private void landscaperSense() throws GameActionException {
+
+        shouldCircle = false;
+
+        if (HQLocation == null) {
+            for (RobotInfo robot : rc.senseNearbyRobots()) {
+                if (robot.type == RobotType.HQ && robot.team == rc.getTeam()) {
+                    HQLocation = robot.location;
+                    Wall.init();
+                }
+                break;
+            }
+        }
+
+        if (HQLocation != null) if (Navigation.aerialDistance(HQLocation) == 2){
+            if(!rc.getLocation().equals(Strategium.HQLocation.translate(-1, -2))) shouldCircle = true;
+            else  {
+
+                shouldCircle = rc.senseRobotAtLocation(Strategium.HQLocation.translate(-1, -1)) == null;
+                if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-2, -2)) != null)
+                    shouldCircle = false;
+                if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-2, -1)) != null)
+                    shouldBuildLandscaper = false;
+
+            }
+        }
     }
 
     static private void sense() throws GameActionException {
@@ -287,6 +366,13 @@ public class Strategium {
             case DELIVERY_DRONE:
                 droneSense();
                 break;
+            case LANDSCAPER:
+                landscaperSense();
+                break;
+            case DESIGN_SCHOOL:
+            case FULFILLMENT_CENTER:
+                industrySense();
+                break;
         }
     }
 
@@ -296,7 +382,7 @@ public class Strategium {
 
         sense();
 
-        do {
+        if(rc.getType() == RobotType.HQ) do {
 
             parseTransactions(Blockchain.parseBlockchain(transactions));
 

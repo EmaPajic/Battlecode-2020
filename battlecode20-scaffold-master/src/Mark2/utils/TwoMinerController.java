@@ -2,12 +2,11 @@ package Mark2.utils;
 
 import Mark2.utils.Navigation;
 import Mark2.utils.Strategium;
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotType;
+import battlecode.common.*;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static Mark2.RobotPlayer.*;
 import static Mark2.RobotPlayer.tryMove;
@@ -92,11 +91,31 @@ public class TwoMinerController {
     }
 
     public static void control() throws GameActionException {
+
+        if(rc.canSenseLocation(hqLocation)) {
+            if(rc.canSenseLocation(vaporatorLocation2)) {
+                RobotInfo maybeVaporator = rc.senseRobotAtLocation(vaporatorLocation2);
+                if(maybeVaporator != null) {
+                    if(maybeVaporator.getType() == RobotType.VAPORATOR) {
+                        Strategium.vaporatorBuilt = true;
+                        Strategium.nearestRefinery = null;
+                    }
+                }
+            }
+        }
+        if(Strategium.vaporatorBuilt && Navigation.aerialDistance(hqLocation) < 4) {
+            Navigation.bugPath(currentTarget);
+            if (rc.getLocation().distanceSquaredTo(currentTarget) < 5) {
+                currentTargetIndex = (currentTargetIndex + 1) % searchRoute.size();
+                currentTarget = searchRoute.get(currentTargetIndex);
+            }
+        }
         if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
 
             for (Direction dir : dir8)
                 if (rc.canMineSoup(dir)) {
-                    if(Navigation.aerialDistance(rc.getLocation(), Strategium.nearestRefinery) > 8) {
+                    if(Navigation.aerialDistance(Strategium.nearestRefinery) > 7 &&
+                            Navigation.aerialDistance(hqLocation) > 4) {
                         int xMin = rc.getLocation().x - 3;
                         int yMin = rc.getLocation().y - 3;
                         int xMax = rc.getLocation().x + 3;
