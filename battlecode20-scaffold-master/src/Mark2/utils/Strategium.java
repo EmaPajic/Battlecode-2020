@@ -5,6 +5,7 @@ import battlecode.common.*;
 import java.util.*;
 import java.util.List;
 
+import static Mark2.RobotPlayer.hqLocation;
 import static Mark2.RobotPlayer.rc;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -47,7 +48,7 @@ public class Strategium {
     public static boolean vaporatorBuilt = false;
 
     public static boolean shouldBuildLandscaper = false;
-    public static boolean shouldCircle = false;
+    public static boolean shouldCircle = true;
 
     public static Random rand;
 
@@ -74,9 +75,8 @@ public class Strategium {
                 if (robot.type == RobotType.HQ && robot.team == rc.getTeam()) {
                     HQLocation = robot.location;
                     Wall.init();
-                    break;
                 }
-
+                break;
             }
         }
 
@@ -84,7 +84,7 @@ public class Strategium {
             shouldBuildLandscaper = rc.senseRobotAtLocation(Strategium.HQLocation.translate(-1, -1)) == null;
             if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-2, -2)) != null)
                 shouldBuildLandscaper = false;
-            if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-2, -1)) != null)
+            if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-1, -2)) != null)
                 shouldBuildLandscaper = false;
 
         }
@@ -333,32 +333,31 @@ public class Strategium {
 
     static private void landscaperSense() throws GameActionException {
 
-        shouldCircle = false;
+        shouldCircle = true;
 
-        if (HQLocation == null) {
-            for (RobotInfo robot : rc.senseNearbyRobots()) {
-                if (robot.type == RobotType.HQ && robot.team == rc.getTeam()) {
-                    HQLocation = robot.location;
-                    Wall.init();
-                    break;
+        int xMin = rc.getLocation().x - 4;
+        int yMin = rc.getLocation().y - 4;
+        int xMax = rc.getLocation().x + 4;
+        int yMax = rc.getLocation().y + 4;
+        int cntWall = 0;
+        int cntLandscapper = 0;
+        for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++) {
+            for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
+
+                MapLocation location = new MapLocation(i, j);
+                if (rc.canSenseLocation(location)) {
+                    if (Navigation.aerialDistance(hqLocation, location) == 2) {
+                        ++cntWall;
+                        if (rc.senseRobotAtLocation(location) != null) {
+                            if (rc.senseRobotAtLocation(location).getType() == RobotType.LANDSCAPER)
+                                ++cntLandscapper;
+                        }
+                    }
                 }
             }
         }
-
-        if (HQLocation != null) if (Navigation.aerialDistance(HQLocation) <= 2){
-            if(rc.getLocation().equals(HQLocation.translate(-1, -1))) shouldCircle = true;
-            else if(!rc.getLocation().equals(HQLocation.translate(-1, -2)))
-                shouldCircle = rc.senseRobotAtLocation(Wall.clockwise(rc.getLocation())) == null;
-            else  {
-
-                shouldCircle = rc.senseRobotAtLocation(Strategium.HQLocation.translate(-1, -1)) == null;
-                if (rc.senseRobotAtLocation(HQLocation.translate(-2, -2)) != null)
-                    shouldCircle = false;
-                if (rc.senseRobotAtLocation(HQLocation.translate(-2, -1)) != null)
-                    shouldBuildLandscaper = false;
-
-            }
-        }
+        if(cntLandscapper >= cntWall - 1)
+            shouldCircle = false;
     }
 
     static private void sense() throws GameActionException {
