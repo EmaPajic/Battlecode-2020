@@ -4,6 +4,7 @@ import Mark1.robots.Drone;
 import Mark1.utils.Blockchain;
 import Mark1.utils.Navigation;
 import Mark1.utils.Strategium;
+import Mark1.utils.TwoMinerController;
 import battlecode.common.*;
 
 
@@ -165,7 +166,14 @@ public strictfp class RobotPlayer {
         else
             runBuildMiner();
     }
+    
+    static void runSearchMiner() throws GameActionException {
+        TwoMinerController.control();
+    }
 
+    static void runBuildMiner() throws GameActionException {
+
+    }
     static void runRefinery() throws GameActionException {
         // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
     }
