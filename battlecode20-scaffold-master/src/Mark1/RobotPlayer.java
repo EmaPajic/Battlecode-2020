@@ -132,7 +132,7 @@ public strictfp class RobotPlayer {
 
     static void runMiner() throws GameActionException {
         Strategium.gatherInfo();
-
+        /*
         if (rc.getTeamSoup() >= 300 && !builtFulfillmentCenter) {
             for (Direction dir : dir8)
                 if (rc.adjacentLocation(dir).isAdjacentTo(Strategium.HQLocation))
@@ -141,7 +141,7 @@ public strictfp class RobotPlayer {
                         return;
                     }
         }
-
+        */
         if (hqLocation == null) {
             // search surroundings for hq
             RobotInfo[] robots = rc.senseNearbyRobots();

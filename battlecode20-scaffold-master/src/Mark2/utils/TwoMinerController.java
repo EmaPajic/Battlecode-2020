@@ -92,11 +92,16 @@ public class TwoMinerController {
     }
 
     public static void control() throws GameActionException {
+        if(rc.getRoundNum() > 300 && Navigation.aerialDistance(hqLocation) < 8 &&
+                Navigation.aerialDistance(hqLocation) > 2) {
+            Navigation.bugPath(new MapLocation(rc.getMapWidth() - hqLocation.x,
+                    rc.getMapHeight() - hqLocation.y));
+        }
         if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
 
             for (Direction dir : dir8)
                 if (rc.canMineSoup(dir)) {
-                    if(Navigation.aerialDistance(rc.getLocation(), Strategium.nearestRefinery) > 8) {
+                    if(Navigation.aerialDistance(rc.getLocation(), Strategium.nearestRefinery) > 7) {
                         int xMin = rc.getLocation().x - 3;
                         int yMin = rc.getLocation().y - 3;
                         int xMax = rc.getLocation().x + 3;
