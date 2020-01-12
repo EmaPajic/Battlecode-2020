@@ -6,7 +6,9 @@ import Mark2.utils.Strategium;
 import Mark2.utils.TwoMinerController;
 import battlecode.common.*;
 import Mark2.utils.Navigation;
+
 import java.util.ArrayList;
+
 
 public strictfp class RobotPlayer {
     public static RobotController rc;
@@ -271,13 +273,15 @@ public strictfp class RobotPlayer {
         for (Direction digDir : digDirs) {
             if (rc.canDigDirt(digDir)) {
                 rc.digDirt(digDir);
-                ++landscaperTurns;
                 return;
             }
         }
     }
 
     static void runLandscaper() throws GameActionException {
+        Strategium.gatherInfo();
+        if (!Strategium.shouldCircle)
+            runLateLandscaper();
         if (landscaperTurns == 0 && (rc.getLocation().x == hqLocation.x - 1)
                 && (rc.getLocation().y == hqLocation.y - 1)) {
             tryMove(Direction.WEST);
