@@ -18,7 +18,7 @@ public strictfp class RobotPlayer {
     static MapLocation netGunLocation2;
     static MapLocation netGunLocation3;
     public static MapLocation vaporatorLocation1;
-    static MapLocation vaporatorLocation2;
+    public static MapLocation vaporatorLocation2;
     static int buildstage = 0; // tells miners what to build
 
     static int myFun = 0;
