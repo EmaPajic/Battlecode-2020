@@ -74,8 +74,9 @@ public class Strategium {
                 if (robot.type == RobotType.HQ && robot.team == rc.getTeam()) {
                     HQLocation = robot.location;
                     Wall.init();
+                    break;
                 }
-                break;
+
             }
         }
 
@@ -83,7 +84,7 @@ public class Strategium {
             shouldBuildLandscaper = rc.senseRobotAtLocation(Strategium.HQLocation.translate(-1, -1)) == null;
             if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-2, -2)) != null)
                 shouldBuildLandscaper = false;
-            if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-1, -2)) != null)
+            if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-2, -1)) != null)
                 shouldBuildLandscaper = false;
 
         }
