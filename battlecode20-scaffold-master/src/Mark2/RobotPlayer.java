@@ -6,7 +6,7 @@ import Mark2.utils.Strategium;
 import Mark2.utils.TwoMinerController;
 import battlecode.common.*;
 import Mark2.utils.Navigation;
-
+import java.util.ArrayList;
 
 public strictfp class RobotPlayer {
     public static RobotController rc;
