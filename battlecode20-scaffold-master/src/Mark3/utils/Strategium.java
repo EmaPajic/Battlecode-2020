@@ -29,9 +29,11 @@ public class Strategium {
     private static HashMap<MapLocation, RobotInfo> refineries = new HashMap<>();
     private static List<RobotInfo> enemyDrones = new ArrayList<>();
     public static List<RobotInfo> enemyUnits = new ArrayList<>();
+    public static List<RobotInfo> alliedDrones = new ArrayList<>();
     public static boolean[] robotsMet;
     public static int numDronesMet = 0;
     public static int dronesMetWithLowerID = 0;
+    public static RobotInfo nearestLandscaper = null;
 
     public static MapLocation nearestRefinery = null;
     public static MapLocation nearestSoup = null;
@@ -70,9 +72,9 @@ public class Strategium {
     }
 
     private static RobotType robotAt(MapLocation location) throws GameActionException {
-        if(!rc.canSenseLocation(location)) return null;
+        if (!rc.canSenseLocation(location)) return null;
         RobotInfo robot = rc.senseRobotAtLocation(location);
-        if(robot == null) return null;
+        if (robot == null) return null;
         return robot.type;
     }
 
@@ -116,10 +118,27 @@ public class Strategium {
                 if (rc.senseFlooding(target)) return false;
                 break;
             case DELIVERY_DRONE:
-                if (Drone.state == Drone.State.SWARMER || Drone.state == Drone.State.TAXI) return true;
-                for (MapLocation gun : enemyNetGuns.keySet())
-                    if (target.isWithinDistanceSquared(
-                            gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) return false;
+                switch (Drone.state) {
+                    case SWARMER:
+                        return true;
+                    case TAXI:
+                        if (!water[target.x][target.y]) return true;
+                        for (MapLocation gun : enemyNetGuns.keySet())
+                            if (target.isWithinDistanceSquared(
+                                    gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) {
+                                if (enemyHQLocation == null) return false;
+                                int range = target.distanceSquaredTo(gun);
+                                for (RobotInfo drone : alliedDrones)
+                                    if (drone.location.distanceSquaredTo(gun) <= range) return true;
+                                return false;
+                            }
+                        return true;
+                    default:
+                        for (MapLocation gun : enemyNetGuns.keySet())
+                            if (target.isWithinDistanceSquared(
+                                    gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) return false;
+                        return true;
+                }
         }
 
         return true;
@@ -129,10 +148,13 @@ public class Strategium {
 
         enemyUnits.clear();
         enemyDrones.clear();
+        alliedDrones.clear();
         nearestEnemyDrone = null;
         nearestEnemyUnit = null;
         blockedUnit = null;
         blockingUnit = null;
+        nearestLandscaper = null;
+
 
         RobotInfo[] robots = rc.senseNearbyRobots();
 
@@ -163,14 +185,20 @@ public class Strategium {
                         if (robot.location.equals(Wall.launchPad) && Wall.isLaunchPadBlocked()) {
                             blockedUnit = robot;
                         }
+                        if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestLandscaper) &&
+                                Navigation.aerialDistance(robot.location, HQLocation) <= 2) nearestLandscaper = robot;
                     } else if (robot.type == RobotType.MINER) {
                         if (Wall.stuckOnWall(robot.location)) blockingUnit = robot;
                     }
                 }
-                if (robot.type == RobotType.DELIVERY_DRONE && !robotsMet[robot.ID]) {
-                    robotsMet[robot.ID] = true;
-                    numDronesMet++;
-                    if(robot.ID < rc.getID()) dronesMetWithLowerID++;
+                if (robot.type == RobotType.DELIVERY_DRONE) {
+                    alliedDrones.add(robot);
+
+                    if (!robotsMet[robot.ID]) {
+                        robotsMet[robot.ID] = true;
+                        numDronesMet++;
+                        if (robot.ID < rc.getID()) dronesMetWithLowerID++;
+                    }
                 }
 
             } else {
@@ -275,23 +303,8 @@ public class Strategium {
             if (robot.team == myTeam) {
 
                 if (robot.type == RobotType.HQ) {
+                    HQLocation = robot.location;
                     Wall.init();
-                    if(HQLocation == null) {
-                        HQLocation = robot.location;
-                        if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
-                            potentialEnemyHQLocations.add(
-                                    new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
-
-                        if (HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                            potentialEnemyHQLocations.add(
-                                    new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1));
-
-                        if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1 &&
-                                HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                            potentialEnemyHQLocations.add(
-                                    new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
-                                            rc.getMapHeight() - HQLocation.y - 1));
-                    }
                 }
                 if (robot.type.canRefine()) refineries.put(robot.location, robot);
 
@@ -383,11 +396,11 @@ public class Strategium {
             }
         }
 
-        if (HQLocation != null){
+        if (HQLocation != null) {
             Wall.scanWall();
-            if (Navigation.aerialDistance(HQLocation) <= 2){
-                if(rc.getLocation().equals(HQLocation.translate(-1, -1))) shouldCircle = true;
-                else if(!rc.getLocation().equals(HQLocation.translate(-1, -2))) {
+            if (Navigation.aerialDistance(HQLocation) <= 2) {
+                if (rc.getLocation().equals(HQLocation.translate(-1, -1))) shouldCircle = true;
+                else if (!rc.getLocation().equals(HQLocation.translate(-1, -2))) {
                     shouldCircle = robotAt(Wall.clockwise(rc.getLocation())) != RobotType.LANDSCAPER;
                     System.out.println(shouldCircle);
                     if (Math.abs(rc.senseElevation(Wall.clockwise(rc.getLocation())) -
@@ -401,8 +414,7 @@ public class Strategium {
 
                     System.out.println(shouldCircle);
                     System.out.println(rc.senseElevation(Wall.clockwise(rc.getLocation())));
-                }
-                else  {
+                } else {
 
                     shouldCircle = true;//robotAt(Strategium.HQLocation.translate(-1, -1)) != RobotType.LANDSCAPER;
                     if (robotAt(HQLocation.translate(-2, -2)) == RobotType.LANDSCAPER)
@@ -445,8 +457,8 @@ public class Strategium {
                 }
             }
 
-            for(RobotInfo robot : rc.senseNearbyRobots()) {
-                if(robot.type != RobotType.LANDSCAPER) if(Wall.onWallAndBlocking(robots, robot.location))
+            for (RobotInfo robot : rc.senseNearbyRobots()) {
+                if (robot.type != RobotType.LANDSCAPER) if (Wall.onWallAndBlocking(robots, robot.location))
                     shouldCircle = true;
             }
 
@@ -482,7 +494,7 @@ public class Strategium {
 
         sense();
 
-        if(rc.getType() == RobotType.HQ) do {
+        if (rc.getType() == RobotType.HQ) do {
 
             parseTransactions(Blockchain.parseBlockchain(transactions));
 

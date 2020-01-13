@@ -33,6 +33,12 @@ public class Navigation {
         return 0;
     }
 
+    public static boolean diagonal(MapLocation a, MapLocation b){
+        if (a == null || b == null) return false;
+        MapLocation distance = a.translate(-b.x, -b.y);
+        return Math.abs(distance.x) == Math.abs(distance.y);
+    }
+
     public static int frustration = 0;
 
     public static boolean goodLandingSpot(MapLocation location){

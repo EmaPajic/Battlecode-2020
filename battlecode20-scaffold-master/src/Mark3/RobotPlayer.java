@@ -273,7 +273,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runFulfillmentCenter() throws GameActionException {
-        if (numDrones < 3 )
+        if (numDrones < 3)
             for (Direction dir : directions) {
                 if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
                     ++numDrones;

@@ -33,6 +33,8 @@ public class TwoMinerController {
     static MapLocation NORTHEAST;
     static MapLocation SOUTHWEST;
     static MapLocation SOUTHEAST;
+    static int[] adjecencyCount = {0, 0, 0, 0, 0, 0, 0, 0};
+    static int[] adjecencyID = {-1, -1, -1, -1, -1, -1, -1, -1};
 
     static void chooseSearchRoute() {
         MAP_CENTER = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
@@ -91,7 +93,41 @@ public class TwoMinerController {
     }
 
     public static void control() throws GameActionException {
-        System.out.println(2);
+        // Avoid collisions
+
+        for(int i = 0; i < 8; ++i) {
+            Direction dir = dir8[i];
+            if(rc.canSenseLocation(rc.getLocation().add(dir))) {
+                RobotInfo info = rc.senseRobotAtLocation(rc.getLocation().add(dir));
+                if(info != null) {
+                    if(info.getID() == adjecencyID[i]) {
+                        ++adjecencyCount[i];
+                    }
+                    else {
+                        adjecencyCount[i] = 1;
+                        adjecencyID[i] = info.getID();
+                    }
+                }
+                else {
+                    adjecencyCount[i] = 0;
+                    adjecencyID[i] = -1;
+                }
+            }
+        }
+        for(int i = 0; i < 8; ++i) {
+            if(adjecencyCount[i] > 50) {
+                List<Direction> away = Navigation.moveAwayFrom(rc.getLocation().add(dir8[i]));
+                for(Direction awayDir : away) {
+                    if(tryMove(awayDir)) {
+                        adjecencyCount[i] = 0;
+                        return;
+                    }
+                }
+            }
+        }
+
+
+        // Build DesignCenter near enemy
         for(MapLocation enemyLocation : Strategium.potentialEnemyHQLocations) {
             System.out.println("Pot" + Strategium.potentialEnemyHQLocations);
             if(rc.canSenseLocation(enemyLocation)) {
