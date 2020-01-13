@@ -1,13 +1,11 @@
 package Mark2;
 
 import Mark2.robots.Drone;
-import Mark2.utils.Blockchain;
-import Mark2.utils.Strategium;
-import Mark2.utils.TwoMinerController;
+import Mark2.utils.*;
 import battlecode.common.*;
-import Mark2.utils.Navigation;
 
 import java.util.ArrayList;
+import java.util.SimpleTimeZone;
 
 
 public strictfp class RobotPlayer {
@@ -70,18 +68,14 @@ public strictfp class RobotPlayer {
         if (rc.getType() == RobotType.MINER) {
             if (rc.getRobotCount() == 2) {
                 myFun = 1; // main search miner
-            }
-            else if (rc.getRobotCount() == 3) {
+            } else if (rc.getRobotCount() == 3) {
                 myFun = 2; // 2nd search miner
-            }
-            else {
+            } else {
                 myFun = 3; // build miner
             }
-        }
-        else if (rc.getType() == RobotType.LANDSCAPER) {
+        } else if (rc.getType() == RobotType.LANDSCAPER) {
             myFun = 1; // protect yourself
-        }
-        else if (rc.getType() == RobotType.DELIVERY_DRONE) {
+        } else if (rc.getType() == RobotType.DELIVERY_DRONE) {
             myFun = 1;
         }
         if (hqLocation == null) {
@@ -113,15 +107,33 @@ public strictfp class RobotPlayer {
                 // You can add the missing ones or rewrite this into your own control structure.
                 System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
                 switch (rc.getType()) {
-                    case HQ:                 runHQ();                break;
-                    case MINER:              runMiner();             break;
-                    case REFINERY:           runRefinery();          break;
-                    case VAPORATOR:          runVaporator();         break;
-                    case DESIGN_SCHOOL:      runDesignSchool();      break;
-                    case FULFILLMENT_CENTER: runFulfillmentCenter(); break;
-                    case LANDSCAPER:         runLandscaper();        break;
-                    case DELIVERY_DRONE:     runDeliveryDrone();     break;
-                    case NET_GUN:            runNetGun();            break;
+                    case HQ:
+                        runHQ();
+                        break;
+                    case MINER:
+                        runMiner();
+                        break;
+                    case REFINERY:
+                        runRefinery();
+                        break;
+                    case VAPORATOR:
+                        runVaporator();
+                        break;
+                    case DESIGN_SCHOOL:
+                        runDesignSchool();
+                        break;
+                    case FULFILLMENT_CENTER:
+                        runFulfillmentCenter();
+                        break;
+                    case LANDSCAPER:
+                        runLandscaper();
+                        break;
+                    case DELIVERY_DRONE:
+                        runDeliveryDrone();
+                        break;
+                    case NET_GUN:
+                        runNetGun();
+                        break;
                 }
 
                 // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
@@ -139,17 +151,16 @@ public strictfp class RobotPlayer {
             if (tryBuild(RobotType.MINER, Direction.WEST)) {
                 ++numMiners;
             }
-        }
-        else if (numMiners < 2) {
+        } else if (numMiners < 2) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.MINER, dir)) {
                     ++numMiners;
                 }
-        }
-        else {
+        } else {
             runNetGun();
         }
     }
+
     static boolean builtFulfillmentCenter = false;
 
     static void runMiner() throws GameActionException {
@@ -165,24 +176,40 @@ public strictfp class RobotPlayer {
     }
 
     static void runBuildMiner() throws GameActionException {
-        switch(buildstage) {
+        switch (buildstage) {
             case -1:
                 if (tryMove(Direction.WEST)) {
                     ++buildstage;
                 }
                 break;
-            case 0: build(RobotType.DESIGN_SCHOOL, designSchoolLocation); break;
-            case 1: build(RobotType.VAPORATOR, vaporatorLocation1); break;
-            case 2: build(RobotType.VAPORATOR, vaporatorLocation2); break;
-            case 3: build(RobotType.FULFILLMENT_CENTER, fulfillmentCenterLocation); break;
-            case 4: build(RobotType.NET_GUN, netGunLocation1); break;
-            case 5: build(RobotType.NET_GUN, netGunLocation2); break;
-            case 6: build(RobotType.NET_GUN, netGunLocation3); break;
-            case 7: runSearchMiner(); break;
+            case 0:
+                build(RobotType.DESIGN_SCHOOL, designSchoolLocation);
+                break;
+            case 1:
+                build(RobotType.VAPORATOR, vaporatorLocation1);
+                break;
+            case 2:
+                build(RobotType.VAPORATOR, vaporatorLocation2);
+                break;
+            case 3:
+                build(RobotType.FULFILLMENT_CENTER, fulfillmentCenterLocation);
+                break;
+            case 4:
+                build(RobotType.NET_GUN, netGunLocation1);
+                break;
+            case 5:
+                build(RobotType.NET_GUN, netGunLocation2);
+                break;
+            case 6:
+                build(RobotType.NET_GUN, netGunLocation3);
+                break;
+            case 7:
+                runSearchMiner();
+                break;
         }
     }
 
-    static void build(RobotType type, MapLocation loc) throws GameActionException{
+    static void build(RobotType type, MapLocation loc) throws GameActionException {
 
         MapLocation goToLoc = null;
         Direction buildDir = null;
@@ -212,14 +239,14 @@ public strictfp class RobotPlayer {
                     rc.senseElevation(rc.getLocation().add(buildDir)) + 4 < rc.senseElevation(rc.getLocation())) {
                 ++buildstage;
             }
-        }
-        else {
+        } else {
             if (!tryMove(goToDir)) {
                 goToDir = Navigation.moveTowards(goToLoc);
                 tryMove(goToDir);
             }
         }
     }
+
     static void runRefinery() throws GameActionException {
         // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
     }
@@ -229,10 +256,10 @@ public strictfp class RobotPlayer {
     }
 
     static void runDesignSchool() throws GameActionException {
+        Strategium.gatherInfo();
         if (numLandscapers == 1 && !(rc.getRoundNum() > 500 || rc.getRobotCount() > 8)) {
             return;
-        }
-        else {
+        } else if (Strategium.shouldBuildLandscaper) {
             if (tryBuild(RobotType.LANDSCAPER, Direction.SOUTH)) {
                 ++numLandscapers;
             }
@@ -240,7 +267,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runFulfillmentCenter() throws GameActionException {
-        if(rc.getRoundNum() % 100 == 0)
+        if (rc.getRoundNum() % 100 == 0)
             for (Direction dir : directions)
                 tryBuild(RobotType.DELIVERY_DRONE, dir);
     }
@@ -248,7 +275,7 @@ public strictfp class RobotPlayer {
     static void runLateLandscaper() throws GameActionException {
         if (rc.getDirtCarrying() >= 1) {
             Direction depositDirtDir = getOptimalDepositDir();
-            if (rc.canDepositDirt(depositDirtDir)) {
+            if (rc.canDepositDirt(depositDirtDir) && Wall.shouldBuild(depositDirtDir)) {
                 rc.depositDirt(depositDirtDir);
             }
         }
@@ -280,13 +307,14 @@ public strictfp class RobotPlayer {
 
     static void runLandscaper() throws GameActionException {
         Strategium.gatherInfo();
-        if (!Strategium.shouldCircle)
+        if (!Strategium.shouldCircle) {
             runLateLandscaper();
+            return;
+        }
         if (landscaperTurns == 0 && (rc.getLocation().x == hqLocation.x - 1)
                 && (rc.getLocation().y == hqLocation.y - 1)) {
             tryMove(Direction.WEST);
-        }
-        else if ((landscaperTurns % 3 == 0) && rc.getDirtCarrying() < 1) {
+        } else if ((landscaperTurns % 3 == 0) && rc.getDirtCarrying() < 1) {
             ArrayList<Direction> digDirs = new ArrayList<>();
             if (rc.getLocation().x == hqLocation.x - 2) {
                 digDirs.add(Direction.WEST);
@@ -312,98 +340,84 @@ public strictfp class RobotPlayer {
                     return;
                 }
             }
-        }
-        else if (landscaperTurns % 3 == 1 || (landscaperTurns % 3 == 0 && rc.getDirtCarrying() >= 1)) {
+        } else if (landscaperTurns % 3 == 1 || (landscaperTurns % 3 == 0 && rc.getDirtCarrying() >= 1)) {
             if (landscaperTurns % 3 == 0) landscaperTurns = 1;
             Direction depositDirtDir = getOptimalDepositDir();
-            if (rc.canDepositDirt(depositDirtDir)) {
+            if (rc.canDepositDirt(depositDirtDir) && Wall.shouldBuild(depositDirtDir)) {
                 rc.depositDirt(depositDirtDir);
                 ++landscaperTurns;
+                return;
             }
         }
-        else {
-            MapLocation goToLoc = null;
-            if (rc.getLocation().x == hqLocation.x - 2 && rc.getLocation().y == hqLocation.y + 2) {
-                goToLoc = rc.getLocation().add(Direction.EAST);
-            }
-            else if (rc.getLocation().x == hqLocation.x - 2) {
-                goToLoc = rc.getLocation().add(Direction.NORTH);
-            }
-            else if (rc.getLocation().y == hqLocation.y + 2 && rc.getLocation().x == hqLocation.x + 2) {
-                goToLoc = rc.getLocation().add(Direction.SOUTH);
-            }
-            else if (rc.getLocation().y == hqLocation.y + 2) {
-                goToLoc = rc.getLocation().add(Direction.EAST);
-            }
-            else if (rc.getLocation().x == hqLocation.x + 2 && rc.getLocation().y == hqLocation.y - 2) {
-                goToLoc = rc.getLocation().add(Direction.WEST);
-            }
-            else if (rc.getLocation().x == hqLocation.x + 2) {
-                goToLoc = rc.getLocation().add(Direction.SOUTH);
-            }
-            else if (rc.getLocation().y == hqLocation.y - 2 && rc.getLocation().x == hqLocation.x - 2) {
-                goToLoc = rc.getLocation().add(Direction.NORTH);
-            }
-            else if (rc.getLocation().y == hqLocation.y - 2) {
-                goToLoc = rc.getLocation().add(Direction.WEST);
-            }
 
-            Direction goToDir = Navigation.moveToBuild(goToLoc);
-            if (tryMove(goToDir)) {
-                ++landscaperTurns;
-            }
-            else {
-                RobotInfo robot = rc.senseRobotAtLocation(goToLoc);
-                if (robot == null) {
-                    if (goToDir == Direction.EAST)
-                        goToDir = Direction.SOUTHEAST;
-                    if (goToDir == Direction.SOUTH)
-                        goToDir = Direction.SOUTHWEST;
-                    if (goToDir == Direction.WEST)
-                        goToDir = Direction.NORTHWEST;
-                    if (goToDir == Direction.NORTH)
-                        goToDir = Direction.NORTHEAST;
-
-                    if (tryMove(goToDir)) {
-                        ++landscaperTurns;
-                    }
-                }
-                else {
-                    Direction digDir;
-                    if (rc.getLocation().x == hqLocation.x - 2) {
-                        digDir = Direction.WEST;
-                    }
-                    else if (rc.getLocation().x == hqLocation.x + 2) {
-                        digDir = Direction.EAST;
-                    }
-                    else if (rc.getLocation().y == hqLocation.y - 2) {
-                        digDir = Direction.SOUTH;
-                    }
-                    else {
-                        digDir = Direction.NORTH;
-                    }
-                    if (rc.canDigDirt(digDir)) {
-                        rc.digDirt(digDir);
-                    }
-                }
-            }
-
+        MapLocation goToLoc = null;
+        if (rc.getLocation().x == hqLocation.x - 2 && rc.getLocation().y == hqLocation.y + 2) {
+            goToLoc = rc.getLocation().add(Direction.EAST);
+        } else if (rc.getLocation().x == hqLocation.x - 2) {
+            goToLoc = rc.getLocation().add(Direction.NORTH);
+        } else if (rc.getLocation().y == hqLocation.y + 2 && rc.getLocation().x == hqLocation.x + 2) {
+            goToLoc = rc.getLocation().add(Direction.SOUTH);
+        } else if (rc.getLocation().y == hqLocation.y + 2) {
+            goToLoc = rc.getLocation().add(Direction.EAST);
+        } else if (rc.getLocation().x == hqLocation.x + 2 && rc.getLocation().y == hqLocation.y - 2) {
+            goToLoc = rc.getLocation().add(Direction.WEST);
+        } else if (rc.getLocation().x == hqLocation.x + 2) {
+            goToLoc = rc.getLocation().add(Direction.SOUTH);
+        } else if (rc.getLocation().y == hqLocation.y - 2 && rc.getLocation().x == hqLocation.x - 2) {
+            goToLoc = rc.getLocation().add(Direction.NORTH);
+        } else if (rc.getLocation().y == hqLocation.y - 2) {
+            goToLoc = rc.getLocation().add(Direction.WEST);
         }
+
+        Direction goToDir = Navigation.moveToBuild(goToLoc);
+        if (tryMove(goToDir)) {
+            ++landscaperTurns;
+        } else {
+            RobotInfo robot = rc.senseRobotAtLocation(goToLoc);
+            if (robot == null) {
+                if (goToDir == Direction.EAST)
+                    goToDir = Direction.SOUTHEAST;
+                if (goToDir == Direction.SOUTH)
+                    goToDir = Direction.SOUTHWEST;
+                if (goToDir == Direction.WEST)
+                    goToDir = Direction.NORTHWEST;
+                if (goToDir == Direction.NORTH)
+                    goToDir = Direction.NORTHEAST;
+
+                if (tryMove(goToDir)) {
+                    ++landscaperTurns;
+                }
+            } else {
+                Direction digDir;
+                if (rc.getLocation().x == hqLocation.x - 2) {
+                    digDir = Direction.WEST;
+                } else if (rc.getLocation().x == hqLocation.x + 2) {
+                    digDir = Direction.EAST;
+                } else if (rc.getLocation().y == hqLocation.y - 2) {
+                    digDir = Direction.SOUTH;
+                } else {
+                    digDir = Direction.NORTH;
+                }
+                if (rc.canDigDirt(digDir)) {
+                    rc.digDirt(digDir);
+                }
+            }
+        }
+
+
     }
 
-    static Direction getOptimalDepositDir() throws GameActionException{
+    static Direction getOptimalDepositDir() throws GameActionException {
         Direction prevStepDir = null;
         Direction nextStepDir = null;
         Direction edgeDir = null;
         if (rc.getLocation().x == hqLocation.x - 2 && rc.getLocation().y == hqLocation.y + 2) {
             nextStepDir = Direction.EAST;
             prevStepDir = Direction.SOUTH;
-        }
-        else if (rc.getLocation().x == hqLocation.x - 2 && rc.getLocation().y == hqLocation.y - 2) {
+        } else if (rc.getLocation().x == hqLocation.x - 2 && rc.getLocation().y == hqLocation.y - 2) {
             nextStepDir = Direction.NORTH;
             prevStepDir = Direction.EAST;
-        }
-        else if (rc.getLocation().x == hqLocation.x - 2) {
+        } else if (rc.getLocation().x == hqLocation.x - 2) {
             if (rc.getLocation().y == hqLocation.y + 1) {
                 edgeDir = Direction.NORTHEAST;
             }
@@ -412,12 +426,10 @@ public strictfp class RobotPlayer {
             }
             nextStepDir = Direction.NORTH;
             prevStepDir = Direction.SOUTH;
-        }
-        else if (rc.getLocation().y == hqLocation.y + 2 && rc.getLocation().x == hqLocation.x + 2) {
+        } else if (rc.getLocation().y == hqLocation.y + 2 && rc.getLocation().x == hqLocation.x + 2) {
             nextStepDir = Direction.SOUTH;
             prevStepDir = Direction.WEST;
-        }
-        else if (rc.getLocation().y == hqLocation.y + 2) {
+        } else if (rc.getLocation().y == hqLocation.y + 2) {
             if (rc.getLocation().x == hqLocation.x + 1) {
                 edgeDir = Direction.SOUTHEAST;
             }
@@ -426,12 +438,10 @@ public strictfp class RobotPlayer {
             }
             nextStepDir = Direction.EAST;
             prevStepDir = Direction.WEST;
-        }
-        else if (rc.getLocation().x == hqLocation.x + 2 && rc.getLocation().y == hqLocation.y - 2) {
+        } else if (rc.getLocation().x == hqLocation.x + 2 && rc.getLocation().y == hqLocation.y - 2) {
             nextStepDir = Direction.WEST;
             prevStepDir = Direction.NORTH;
-        }
-        else if (rc.getLocation().x == hqLocation.x + 2) {
+        } else if (rc.getLocation().x == hqLocation.x + 2) {
             if (rc.getLocation().y == hqLocation.y + 1) {
                 edgeDir = Direction.NORTHWEST;
             }
@@ -440,8 +450,7 @@ public strictfp class RobotPlayer {
             }
             nextStepDir = Direction.SOUTH;
             prevStepDir = Direction.NORTH;
-        }
-        else if (rc.getLocation().y == hqLocation.y - 2) {
+        } else if (rc.getLocation().y == hqLocation.y - 2) {
             if (rc.getLocation().x == hqLocation.x + 1) {
                 edgeDir = Direction.NORTHEAST;
             }
@@ -468,7 +477,7 @@ public strictfp class RobotPlayer {
         System.out.println("Next: " + elevationNext + " " + nextStepDir.toString() + " " + nextLoc.toString());
         if (edgeDir != null)
             System.out.println("Edge: " + elevationEgde + " " + edgeDir.toString() + " " + edgeLoc.toString());
-        if (elevationPrev < elevationNext && elevationPrev < elevationCurr) {
+        if (elevationPrev <= elevationNext && elevationPrev < elevationCurr) {
             if (edgeDir != null) {
                 if (elevationEgde < elevationPrev)
                     return edgeDir;
@@ -487,7 +496,7 @@ public strictfp class RobotPlayer {
             if (elevationEgde < elevationCurr)
                 return edgeDir;
         }
-        return  Direction.CENTER;
+        return Direction.CENTER;
     }
 
     static void runDeliveryDrone() throws GameActionException {
