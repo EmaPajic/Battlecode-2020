@@ -97,10 +97,10 @@ public class Strategium {
         System.out.println(HQLocation);
 
         if (HQLocation != null) {
-            shouldBuildLandscaper = rc.senseRobotAtLocation(Strategium.HQLocation.translate(-1, -1)) == null;
-            if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-2, -2)) != null)
+            shouldBuildLandscaper = robotAt(Strategium.HQLocation.translate(-1, -1)) != RobotType.LANDSCAPER;
+            if (robotAt(Strategium.HQLocation.translate(-2, -2)) == RobotType.LANDSCAPER)
                 shouldBuildLandscaper = false;
-            if (rc.senseRobotAtLocation(Strategium.HQLocation.translate(-2, -1)) != null)
+            if (robotAt(Strategium.HQLocation.translate(-2, -1)) == RobotType.LANDSCAPER)
                 shouldBuildLandscaper = false;
 
         }
@@ -400,11 +400,15 @@ public class Strategium {
                 else if (!rc.getLocation().equals(HQLocation.translate(-1, -2))) {
                     shouldCircle = robotAt(Wall.clockwise(rc.getLocation())) != RobotType.LANDSCAPER;
                     System.out.println(shouldCircle);
-                    if (rc.senseElevation(Wall.clockwise(rc.getLocation())) > 3 + rc.senseElevation(rc.getLocation()))
-                        shouldCircle = false;
-                    System.out.println(shouldCircle);
-                    if (rc.senseElevation(Wall.clockwise(rc.getLocation())) < -3 + rc.senseElevation(rc.getLocation()))
-                        shouldCircle = false;
+                    if (Math.abs(rc.senseElevation(Wall.clockwise(rc.getLocation())) -
+                            rc.senseElevation(rc.getLocation())) > 3) {
+                        if(Math.abs(rc.senseElevation(Wall.clockwise(Wall.clockwise(rc.getLocation()))) -
+                                rc.senseElevation(rc.getLocation())) > 3 ||
+                                Navigation.aerialDistance(rc.getLocation(),
+                                        Wall.clockwise(Wall.clockwise(rc.getLocation()))) > 1)
+                            shouldCircle = false;
+                    }
+
                     System.out.println(shouldCircle);
                     System.out.println(rc.senseElevation(Wall.clockwise(rc.getLocation())));
                 } else {
@@ -414,10 +418,16 @@ public class Strategium {
                         shouldCircle = false;
                     if (robotAt(HQLocation.translate(-2, -1)) == RobotType.LANDSCAPER)
                         shouldCircle = false;
-                    if (rc.senseElevation(Wall.clockwise(rc.getLocation())) > 3 + rc.senseElevation(rc.getLocation()))
-                        shouldCircle = false;
-                    if (rc.senseElevation(Wall.clockwise(rc.getLocation())) < -3 + rc.senseElevation(rc.getLocation()))
-                        shouldCircle = false;
+                    if (Math.abs(rc.senseElevation(Wall.clockwise(rc.getLocation())) -
+                            rc.senseElevation(rc.getLocation())) > 3) {
+                        if(Math.abs(rc.senseElevation(Wall.clockwise(Wall.clockwise(rc.getLocation()))) -
+                                rc.senseElevation(rc.getLocation())) > 3 ||
+                                Navigation.aerialDistance(rc.getLocation(),
+                                        Wall.clockwise(Wall.clockwise(rc.getLocation()))) > 1)
+                            shouldCircle = false;
+                    }
+
+
 
 /*
         shouldCircle = true;
