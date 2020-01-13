@@ -33,6 +33,7 @@ public class Strategium {
     public static boolean[] robotsMet;
     public static int numDronesMet = 0;
     public static int dronesMetWithLowerID = 0;
+    public static RobotInfo nearestLandscaper = null;
 
     public static MapLocation nearestRefinery = null;
     public static MapLocation nearestSoup = null;
@@ -121,8 +122,7 @@ public class Strategium {
                     case SWARMER:
                         return true;
                     case TAXI:
-                        if (Navigation.goodLandingSpot(target)) return true;
-                        if (Navigation.diagonal(target, enemyHQLocation)) return true;
+                        if (!water[target.x][target.y]) return true;
                         for (MapLocation gun : enemyNetGuns.keySet())
                             if (target.isWithinDistanceSquared(
                                     gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) {
@@ -153,6 +153,7 @@ public class Strategium {
         nearestEnemyUnit = null;
         blockedUnit = null;
         blockingUnit = null;
+        nearestLandscaper = null;
 
 
         RobotInfo[] robots = rc.senseNearbyRobots();
@@ -184,6 +185,8 @@ public class Strategium {
                         if (robot.location.equals(Wall.launchPad) && Wall.isLaunchPadBlocked()) {
                             blockedUnit = robot;
                         }
+                        if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestLandscaper) &&
+                        Navigation.aerialDistance(robot.location, HQLocation) <= 2) nearestLandscaper = robot;
                     } else if (robot.type == RobotType.MINER) {
                         if (Wall.stuckOnWall(robot.location)) blockingUnit = robot;
                     }

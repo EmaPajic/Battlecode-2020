@@ -59,7 +59,7 @@ public class Drone {
                 if ((Strategium.dronesMetWithLowerID - 4) * 5 > Strategium.numDronesMet) state = State.PREDATOR;
                 break;
             case PREDATOR:
-                if (Strategium.numDronesMet > 50 || rc.getRoundNum() > 2000) state = State.SWARMER;
+                if (Strategium.numDronesMet > 50) state = State.SWARMER;
                 break;
             case SWARMER:
                 if (Strategium.dronesMetWithLowerID >= Strategium.numDronesMet * 9 / 10) state = State.TAXI;
@@ -79,6 +79,7 @@ public class Drone {
             case POTENTIAL:
                 if (Strategium.nearestEnemyUnit != null) if (attack(Strategium.nearestEnemyUnit)) break;
                 if (Strategium.blockingUnit != null) if (attack(Strategium.blockingUnit)) break;
+                if (state == State.TAXI && Strategium.nearestLandscaper!=null) if(attack(Strategium.nearestLandscaper)) break;
                 if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
                 patrol();
                 break;
@@ -275,6 +276,7 @@ public class Drone {
     private static boolean climb() throws GameActionException {
         switch (state) {
             case SENTRY:
+            case SWARMER:
                 for (Direction dir : dir8)
                     if (rc.canDropUnit(dir)) if (Wall.isOnWall(dir)) {
                         rc.dropUnit(dir);
@@ -286,13 +288,10 @@ public class Drone {
                     state = State.PREDATOR;
                 }
                 return Navigation.bugPath(Strategium.HQLocation);
-            case SWARMER:
-                state = State.TAXI;
             case PREDATOR:
             case TAXI:
                 for (Direction dir : dir8)
-                    if (Navigation.goodLandingSpot(rc.adjacentLocation(dir)))
-                        if (rc.canDropUnit(dir)) {
+                        if (rc.canDropUnit(dir)) if (Navigation.goodLandingSpot(rc.adjacentLocation(dir))) {
                             rc.dropUnit(dir);
                             payload = Payload.POTENTIAL;
                             return true;
