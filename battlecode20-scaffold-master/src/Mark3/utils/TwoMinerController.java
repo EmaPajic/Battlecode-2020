@@ -35,6 +35,7 @@ public class TwoMinerController {
     static MapLocation SOUTHEAST;
     static int[] adjecencyCount = {0, 0, 0, 0, 0, 0, 0, 0};
     static int[] adjecencyID = {-1, -1, -1, -1, -1, -1, -1, -1};
+    static int designSchoolsBuilt = 0;
 
     static void chooseSearchRoute() {
         MAP_CENTER = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
@@ -93,7 +94,6 @@ public class TwoMinerController {
     }
 
     public static void control() throws GameActionException {
-        System.out.println("Adj count: " + adjecencyCount);
         // Avoid collisions
         for(int i = 0; i < 8; ++i) {
             Direction dir = dir8[i];
@@ -128,23 +128,44 @@ public class TwoMinerController {
 
         // Build DesignCenter near enemy
         for(MapLocation enemyLocation : Strategium.potentialEnemyHQLocations) {
-            System.out.println("Pot" + Strategium.potentialEnemyHQLocations);
+            System.out.println("Pot" + Strategium.potentialEnemyHQLocations.toString());
             if(rc.canSenseLocation(enemyLocation)) {
                 RobotInfo info = rc.senseRobotAtLocation(enemyLocation);
                 if(info != null)
-                if(info.getTeam() == Strategium.opponentTeam && info.getType() == RobotType.HQ) {
-                    if(Navigation.aerialDistance(enemyLocation) > 3) {
-                        Navigation.bugPath(enemyLocation);
-                    }
-                    else {
-                        for (Direction dir : dir8) {
-                            if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, dir) &&
-                                Navigation.aerialDistance(rc.getLocation().add(dir),enemyLocation) <= 1)  {
-                                tryBuild(RobotType.DESIGN_SCHOOL, dir);
+                    if(info.getTeam() == Strategium.opponentTeam && info.getType() == RobotType.HQ) {
+                        if(Navigation.aerialDistance(enemyLocation) > 3) {
+                            Navigation.bugPath(enemyLocation);
+                        }
+                        else if(designSchoolsBuilt == 0) {
+                            int xMin = enemyLocation.x - 3;
+                            int yMin = enemyLocation.y - 3;
+                            int xMax = enemyLocation.x + 3;
+                            int yMax = enemyLocation.y + 3;
+                            int designSchoolExists = 0;
+                            for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++) {
+                                for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
+                                    MapLocation location = new MapLocation(i, j);
+                                    if (rc.canSenseLocation(location)) {
+                                        RobotInfo Designinfo = rc.senseRobotAtLocation(location);
+                                        if(Designinfo != null)
+                                            if(Designinfo.getType() == RobotType.DESIGN_SCHOOL &&
+                                                    Designinfo.getTeam() == Strategium.myTeam) {
+                                                designSchoolExists = 1;
+                                                break;
+                                        }
+                                    }
+                                }
+                            }
+                            if(designSchoolExists == 0)
+                            for (Direction dir : dir8) {
+                                if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, dir) &&
+                                        Navigation.aerialDistance(rc.getLocation().add(dir),enemyLocation) <= 2)  {
+                                    if(tryBuild(RobotType.DESIGN_SCHOOL, dir))
+                                        designSchoolsBuilt = 1;
+                                }
                             }
                         }
                     }
-                }
             }
         }
         if(rc.canSenseLocation(hqLocation)) {
