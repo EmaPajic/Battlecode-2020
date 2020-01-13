@@ -81,6 +81,23 @@ public strictfp class RobotPlayer {
                     System.out.println("Found HQ!");
                 }
             }
+            if (hqLocation == null) {
+                hqLocation = new MapLocation(rc.getMapWidth() - rc.getLocation().x - 1,
+                        rc.getMapHeight() - rc.getLocation().y - 1);
+            }
+            if (hqLocation.x != rc.getMapWidth() - hqLocation.x - 1)
+                Strategium.potentialEnemyHQLocations.add(
+                        new MapLocation(rc.getMapWidth() - hqLocation.x - 1, hqLocation.y));
+
+            if (hqLocation.y != rc.getMapHeight() - hqLocation.y - 1)
+                Strategium.potentialEnemyHQLocations.add(
+                        new MapLocation(hqLocation.x, rc.getMapHeight() - hqLocation.y - 1));
+
+            if (hqLocation.x != rc.getMapWidth() - hqLocation.x - 1 &&
+                    hqLocation.y != rc.getMapHeight() - hqLocation.y - 1)
+                Strategium.potentialEnemyHQLocations.add(
+                        new MapLocation(rc.getMapWidth() - hqLocation.x - 1,
+                                rc.getMapHeight() - hqLocation.y - 1));
         }
         if (rc.getType() == RobotType.MINER) {
             if (Navigation.aerialDistance(fulfillmentCenterLocation) > 0) {
@@ -149,7 +166,7 @@ public strictfp class RobotPlayer {
             if (tryBuild(RobotType.MINER, Direction.SOUTH)) {
                 ++numMiners;
             }
-        } else if (numMiners < 2 || (numMiners > 2 && numMiners < 9)) {
+        } else if (numMiners < 2 || (numMiners > 2 && numMiners < 8)) {
             for (Direction dir : directions)
                 if(dir != Direction.SOUTH)
                     if (tryBuild(RobotType.MINER, dir)) {
@@ -262,6 +279,16 @@ public strictfp class RobotPlayer {
     }
 
     static void runDesignSchool() throws GameActionException {
+        RobotInfo[] robots = rc.senseNearbyRobots();
+        for (RobotInfo robot : robots) {
+            if (robot.type == RobotType.HQ && robot.team == Strategium.opponentTeam && numLandscapers < 5) {
+                for (Direction dir : directions) {
+                    if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                        ++numLandscapers;
+                    }
+                }
+            }
+        }
         Strategium.gatherInfo();
         if (numLandscapers == 1 && !(rc.getRoundNum() > 300)) {
             return;
@@ -282,72 +309,67 @@ public strictfp class RobotPlayer {
                 }
             }
         if ((rc.getRoundNum() > 600) && !Strategium.shouldBuildLandscaper) {
-                if (tryBuild(RobotType.DELIVERY_DRONE, Direction.WEST)) {
-                    ++numDrones;
-                    return;
-                }
+            if (tryBuild(RobotType.DELIVERY_DRONE, Direction.WEST)) {
+                ++numDrones;
+                return;
+            }
 
         }
     }
 
     static void runAttackLandscaper() throws GameActionException {
-        if (Mark2.utils.Strategium.enemyHQLocation != null) {
-            if (Mark2.utils.Navigation.aerialDistance(rc.getLocation(), Mark2.utils.Strategium.enemyHQLocation) == 1) {
+        if (Strategium.enemyHQLocation != null) {
+            if (Navigation.aerialDistance(rc.getLocation(), Strategium.enemyHQLocation) == 1) {
                 if (rc.getDirtCarrying() >= 1) {
-                    Direction depositDirtDir = Mark2.utils.Navigation.moveTowards(Mark2.utils.Strategium.enemyHQLocation);
+                    Direction depositDirtDir = Navigation.moveTowards(Strategium.enemyHQLocation);
                     if (rc.canDepositDirt(depositDirtDir)) {
                         rc.depositDirt(depositDirtDir);
                     }
-                }
-                else {
-                    for(Direction dir : dir8) {
+                } else {
+                    for (Direction dir : dir8) {
                         if (rc.canDigDirt(dir)) {
                             rc.digDirt(dir);
                         }
                     }
                 }
-            }
-            else if (Mark2.utils.Navigation.aerialDistance(rc.getLocation(), Mark2.utils.Strategium.enemyHQLocation) == 2) {
-                Direction dirToHQ = Mark2.utils.Navigation.moveTowards(Mark2.utils.Strategium.enemyHQLocation);
+            } else if (Navigation.aerialDistance(rc.getLocation(), Strategium.enemyHQLocation) == 2) {
+                Direction dirToHQ = Navigation.moveTowards(Strategium.enemyHQLocation);
                 MapLocation locToHQ = rc.getLocation().add(dirToHQ);
                 if (rc.senseElevation(locToHQ) > rc.senseElevation(rc.getLocation()) + 3) {
                     if (rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit) {
-                        for(Direction dir : dir8) {
+                        for (Direction dir : dir8) {
                             if (rc.canDigDirt(dir)) {
                                 rc.digDirt(dir);
                             }
                         }
-                    }
-                    else {
-                        Direction depositDirtDir = Mark2.utils.Navigation.moveTowards(locToHQ.subtract(dirToHQ));
+                    } else {
+                        Direction depositDirtDir = Navigation.moveTowards(locToHQ.subtract(dirToHQ));
                         if (rc.canDepositDirt(depositDirtDir)) {
                             rc.depositDirt(depositDirtDir);
                         }
                     }
-                }
-                else {
+                } else {
                     if (rc.canMove(dirToHQ) && rc.isReady()) {
                         tryMove(dirToHQ);
                     }
                 }
+            } else {
+                Navigation.bugPath(Strategium.enemyHQLocation);
             }
-            else {
-                Mark2.utils.Navigation.bugPath(Mark2.utils.Strategium.enemyHQLocation);
-            }
-        }
-        else {
-            int currentTargetIndex = 0;
-            MapLocation currentTarget = Mark2.utils.Strategium.potentialEnemyHQLocations.get(currentTargetIndex);
-            Mark2.utils.Navigation.bugPath(currentTarget);
-            if (rc.getLocation().distanceSquaredTo(currentTarget) < 5) {
-                RobotInfo[] robots = rc.senseNearbyRobots();
-                for (RobotInfo robot : robots) {
-                    if (robot.type == RobotType.HQ && robot.team == Mark2.utils.Strategium.opponentTeam) {
-                        Mark2.utils.Strategium.enemyHQLocation = robot.getLocation();
-                    }
+        } else {
+            RobotInfo[] robots = rc.senseNearbyRobots();
+            for (RobotInfo robot : robots) {
+                if (robot.type == RobotType.HQ && robot.team == Strategium.opponentTeam) {
+                    Strategium.enemyHQLocation = robot.getLocation();
+                    return;
                 }
+            }
+            int currentTargetIndex = 0;
+            MapLocation currentTarget = Strategium.potentialEnemyHQLocations.get(currentTargetIndex);
+            Navigation.bugPath(currentTarget);
+            if (rc.getLocation().distanceSquaredTo(currentTarget) < 5) {
                 ++currentTargetIndex;
-                currentTarget = Mark2.utils.Strategium.potentialEnemyHQLocations.get(currentTargetIndex % 3);
+                currentTarget = Strategium.potentialEnemyHQLocations.get(currentTargetIndex % 3);
             }
         }
     }
@@ -388,7 +410,9 @@ public strictfp class RobotPlayer {
 
     static void runLandscaper() throws GameActionException {
         Strategium.gatherInfo();
-        if (Mark2.utils.Navigation.aerialDistance(rc.getLocation(), hqLocation) > 4) {
+        if (hqLocation == null)
+            runAttackLandscaper();
+        if (Navigation.aerialDistance(rc.getLocation(), hqLocation) > 4) {
             runAttackLandscaper();
         }
         if (!Strategium.shouldCircle) {
