@@ -93,8 +93,8 @@ public class TwoMinerController {
     }
 
     public static void control() throws GameActionException {
+        System.out.println("Adj count: " + adjecencyCount);
         // Avoid collisions
-
         for(int i = 0; i < 8; ++i) {
             Direction dir = dir8[i];
             if(rc.canSenseLocation(rc.getLocation().add(dir))) {
@@ -116,8 +116,7 @@ public class TwoMinerController {
         }
         for(int i = 0; i < 8; ++i) {
             if(adjecencyCount[i] > 50) {
-                List<Direction> away = Navigation.moveAwayFrom(rc.getLocation().add(dir8[i]));
-                for(Direction awayDir : away) {
+                for(Direction awayDir : dir8) {
                     if(tryMove(awayDir)) {
                         adjecencyCount[i] = 0;
                         return;
