@@ -77,6 +77,18 @@ public class Drone {
                 drown();
                 break;
             case POTENTIAL:
+                if (rc.adjacentLocation(Direction.NORTHEAST).equals(Strategium.HQLocation)) {
+                    boolean canMove = false;
+                    for (Direction dir : dir8) if(rc.canMove(dir)) canMove = true;
+                    if (!canMove)
+                        for (Direction dir : dir8) if(rc.canSenseLocation(rc.adjacentLocation(dir))) {
+                            RobotInfo blocker = rc.senseRobotAtLocation(rc.adjacentLocation(Direction.SOUTHWEST));
+                            if (blocker != null) if (blocker.type == RobotType.LANDSCAPER) {
+                                if(attack(blocker)) break;
+                            }
+                        }
+
+                }
                 if (Strategium.nearestEnemyUnit != null) if (attack(Strategium.nearestEnemyUnit)) break;
                 if (Strategium.blockingUnit != null) if (attack(Strategium.blockingUnit)) break;
                 if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
@@ -283,7 +295,6 @@ public class Drone {
                     }
                 if (Navigation.frustration >= 100) {
                     Navigation.frustration = 0;
-                    state = State.PREDATOR;
                 }
                 return Navigation.bugPath(Strategium.HQLocation);
             case SWARMER:
