@@ -1,5 +1,6 @@
 package Mark2.utils;
 
+import Mark2.robots.Drone;
 import battlecode.common.*;
 
 import java.util.*;
@@ -28,6 +29,9 @@ public class Strategium {
     private static HashMap<MapLocation, RobotInfo> refineries = new HashMap<>();
     private static List<RobotInfo> enemyDrones = new ArrayList<>();
     public static List<RobotInfo> enemyUnits = new ArrayList<>();
+    public static boolean[] robotsMet;
+    public static int numDronesMet = 0;
+    public static int dronesMetWithLowerID = 0;
 
     public static MapLocation nearestRefinery = null;
     public static MapLocation nearestSoup = null;
@@ -60,6 +64,7 @@ public class Strategium {
         water = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
         explored = new boolean[rc.getMapWidth()][rc.getMapHeight()];
+        robotsMet = new boolean[GameConstants.MAX_ROBOT_ID];
 
         rand = new Random();
     }
@@ -111,6 +116,7 @@ public class Strategium {
                 if (rc.senseFlooding(target)) return false;
                 break;
             case DELIVERY_DRONE:
+                if (Drone.state == Drone.State.SWARMER || Drone.state == Drone.State.TAXI) return true;
                 for (MapLocation gun : enemyNetGuns.keySet())
                     if (target.isWithinDistanceSquared(
                             gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) return false;
@@ -160,6 +166,11 @@ public class Strategium {
                     } else if (robot.type == RobotType.MINER) {
                         if (Wall.stuckOnWall(robot.location)) blockingUnit = robot;
                     }
+                }
+                if (robot.type == RobotType.DELIVERY_DRONE && !robotsMet[robot.ID]) {
+                    robotsMet[robot.ID] = true;
+                    numDronesMet++;
+                    if(robot.ID < rc.getID()) dronesMetWithLowerID++;
                 }
 
             } else {

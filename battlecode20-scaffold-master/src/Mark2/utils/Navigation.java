@@ -16,7 +16,35 @@ public class Navigation {
     private static Direction lastAvoidingDirection = Direction.SOUTHEAST;
     private static MapLocation lastDestination;
 
+    private static int typeMobility(RobotType type){
+        switch (type) {
+            case REFINERY:
+            case HQ:
+            case FULFILLMENT_CENTER:
+            case DESIGN_SCHOOL:
+            case VAPORATOR:
+            case NET_GUN:
+                return -1;
+            case LANDSCAPER: return 10;
+            case MINER: return 20;
+            case COW: return 30;
+            case DELIVERY_DRONE: return 50;
+        }
+        return 0;
+    }
+
     public static int frustration = 0;
+
+    public static boolean goodLandingSpot(MapLocation location){
+        if(location == null) return false;
+        if(Strategium.enemyHQLocation == null) return false;
+        if(Strategium.water[location.x][location.y]) return false;
+        if(location.distanceSquaredTo(Strategium.enemyHQLocation) > RobotType.LANDSCAPER.sensorRadiusSquared)
+            return false;
+        if(location.isAdjacentTo(Strategium.enemyHQLocation)) return true;
+        if(Strategium.elevation[location.x][location.y] > 15) return true;
+        return false;
+    }
 
     private static boolean isOnLine(MapLocation destination) {
         MapLocation line = destination.translate(-lastIntersection.x, -lastIntersection.y);
@@ -49,8 +77,8 @@ public class Navigation {
                 RobotInfo robot = rc.senseRobotAtLocation(obstacle);
                 if(robot != null) {
                     if(robot.team == Strategium.myTeam && robot.ID > rc.getID() && !robot.type.isBuilding() &&
-                            frustration < 100) {
-                        frustration += 50;
+                            frustration < typeMobility(robot.type)) {
+                        frustration += 10;
                         return false;
                     }
                 }

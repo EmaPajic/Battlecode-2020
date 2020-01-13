@@ -5,12 +5,15 @@ import Mark2.utils.Strategium;
 import Mark2.utils.Wall;
 import battlecode.common.*;
 
+import java.util.Iterator;
+import java.util.Set;
+
 import static Mark2.RobotPlayer.dir8;
 import static Mark2.RobotPlayer.rc;
 
 public class Drone {
 
-    private enum State {
+    public enum State {
         SENTRY,
         TAXI,
         PREDATOR,
@@ -24,7 +27,8 @@ public class Drone {
         BIOLOGICAL,
         ENEMY
     }
-    private static State state = State.SENTRY;
+
+    public static State state = State.SENTRY;
 
     private static Payload payload = Payload.POTENTIAL;
 
@@ -33,21 +37,45 @@ public class Drone {
     private static int patrolWaypointIndex = 1;
     private static MapLocation waypoint;
 
+    private static Iterator<MapLocation> target = null;
+
+    private static MapLocation getTarget(Set<MapLocation> set) {
+        if (target != null) if (target.hasNext()) return target.next();
+        if (!set.isEmpty()) {
+            target = set.iterator();
+            return target.next();
+        }
+        return null;
+    }
+
 
     public static void run() throws GameActionException {
 
         Strategium.gatherInfo();
 
         patrolRange = 3 + rc.getRobotCount() / 8;
+        switch (state) {
+            case SENTRY:
+                if ((Strategium.dronesMetWithLowerID - 4) * 5 > Strategium.numDronesMet) state = State.PREDATOR;
+                break;
+            case PREDATOR:
+                if (Strategium.numDronesMet > 50 || rc.getRoundNum() > 2000) state = State.SWARMER;
+                break;
+            case SWARMER:
+                if (Strategium.dronesMetWithLowerID >= Strategium.numDronesMet * 9 / 10) state = State.TAXI;
+                break;
+        }
 
-        if (!rc.isReady()) return; else System.out.println("NOT READY");
+        System.out.println(state);
+
+        if (!rc.isReady()) return;
         System.out.println(payload);
 
         switch (payload) {
             case ENEMY:
             case BIOLOGICAL:
                 drown();
-            break;
+                break;
             case POTENTIAL:
                 if (Strategium.nearestEnemyUnit != null) if (attack(Strategium.nearestEnemyUnit)) break;
                 if (Strategium.blockingUnit != null) if (attack(Strategium.blockingUnit)) break;
@@ -68,7 +96,7 @@ public class Drone {
     private static boolean attack(RobotInfo target) throws GameActionException {
         if (rc.canPickUpUnit(target.ID)) {
             rc.pickUpUnit(target.ID);
-            if(target.team == Strategium.myTeam) {
+            if (target.team == Strategium.myTeam) {
                 switch (target.type) {
                     case LANDSCAPER:
                         payload = Payload.FRIENDLY_LANDSCAPER;
@@ -116,77 +144,128 @@ public class Drone {
 
     private static boolean patrol() throws GameActionException {
 
-        System.out.println("PATROL:" + waypoint);
-
-
         if (Strategium.HQLocation == null) return false;
 
-        if(waypoint == null || rc.getLocation().equals(waypoint) || Navigation.frustration >= 100) {
+        if (waypoint == null || rc.getLocation().equals(waypoint) || Navigation.frustration >= 100) {
             Navigation.frustration = 0;
             patrolWaypointIndex = (patrolWaypointIndex + 1) % 4;
-            if(Strategium.rand.nextInt(100) > 90) patrolWaypointIndex = (patrolWaypointIndex + 1) % 4;
+            if (Strategium.rand.nextInt(100) > 90) patrolWaypointIndex = (patrolWaypointIndex + 1) % 4;
+
+            switch (state) {
+                case SENTRY:
+                    switch (patrolWaypointIndex) {
+                        case 0:
+                            waypoint = Strategium.HQLocation.translate(patrolRange, patrolRange);
+                            break;
+                        case 1:
+                            waypoint = Strategium.HQLocation.translate(-patrolRange, patrolRange);
+                            break;
+                        case 2:
+                            waypoint = Strategium.HQLocation.translate(-patrolRange, -patrolRange);
+                            break;
+                        default:
+                            waypoint = Strategium.HQLocation.translate(patrolRange, -patrolRange);
+                            break;
+                    }
+
+                    boolean changed = false;
+
+                    do {
+                        changed = false;
+                        for (MapLocation gun : Strategium.enemyNetGuns.keySet())
+                            while (waypoint.isWithinDistanceSquared(
+                                    gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) {
+                                switch (patrolWaypointIndex) {
+                                    case 0:
+                                        waypoint = waypoint.translate(0, -1);
+                                        break;
+                                    case 1:
+                                        waypoint = waypoint.translate(1, 0);
+                                        break;
+                                    case 2:
+                                        waypoint = waypoint.translate(0, 1);
+                                        break;
+                                    default:
+                                        waypoint = waypoint.translate(-1, 0);
+                                        break;
+                                }
+                                changed = true;
+                            }
+
+                        for (MapLocation building : Strategium.enemyBuildings.keySet()) {
+                            if (building.equals(waypoint)) {
+                                switch (patrolWaypointIndex) {
+                                    case 0:
+                                        waypoint = waypoint.translate(0, -1);
+                                        break;
+                                    case 1:
+                                        waypoint = waypoint.translate(1, 0);
+                                        break;
+                                    case 2:
+                                        waypoint = waypoint.translate(0, 1);
+                                        break;
+                                    default:
+                                        waypoint = waypoint.translate(-1, 0);
+                                        break;
+                                }
+                                changed = true;
+                            }
+                        }
+                    } while (changed);
+                    waypoint = Navigation.clamp(waypoint);
+                    break;
+                case PREDATOR:
+                    waypoint = null;
+                    if (Strategium.rand.nextInt(100) > 50 || rc.isCurrentlyHoldingUnit()) {
+                        if (Strategium.enemyHQLocation != null) waypoint = Strategium.enemyHQLocation;
+                        else if (!Strategium.potentialEnemyHQLocations.isEmpty())
+                            waypoint = Strategium.potentialEnemyHQLocations.get(
+                                    Strategium.rand.nextInt(Strategium.potentialEnemyHQLocations.size()));
+                    }
+
+                    if (waypoint == null)
+                        waypoint = getTarget(Strategium.enemyBuildings.keySet());
+                    if (waypoint == null) waypoint = new MapLocation(
+                            Strategium.rand.nextInt(rc.getMapWidth()), Strategium.rand.nextInt(rc.getMapHeight()));
 
 
-            switch (patrolWaypointIndex) {
-                case 0:
-                    waypoint = Strategium.HQLocation.translate(patrolRange, patrolRange);
                     break;
-                case 1:
-                    waypoint = Strategium.HQLocation.translate(-patrolRange, patrolRange);
+                case SWARMER:
+                    waypoint = null;
+
+                    if (Strategium.enemyHQLocation != null) waypoint = Strategium.enemyHQLocation;
+                    else if (!Strategium.potentialEnemyHQLocations.isEmpty())
+                        waypoint = Strategium.potentialEnemyHQLocations.get(
+                                Strategium.rand.nextInt(Strategium.potentialEnemyHQLocations.size()));
+
+
+                    if (waypoint == null)
+                        waypoint = getTarget(Strategium.enemyBuildings.keySet());
+
+                    if (waypoint == null) waypoint = new MapLocation(
+                            Strategium.rand.nextInt(rc.getMapWidth()), Strategium.rand.nextInt(rc.getMapHeight()));
+
+
                     break;
-                case 2:
-                    waypoint = Strategium.HQLocation.translate(-patrolRange, -patrolRange);
-                    break;
-                default:
-                    waypoint = Strategium.HQLocation.translate(patrolRange, -patrolRange);
-                    break;
+                case TAXI:
+                    waypoint = null;
+
+                    if(rc.isCurrentlyHoldingUnit()){
+                        if (Strategium.enemyHQLocation != null) waypoint = Strategium.enemyHQLocation;
+                        else if (!Strategium.potentialEnemyHQLocations.isEmpty())
+                            waypoint = Strategium.potentialEnemyHQLocations.get(
+                                    Strategium.rand.nextInt(Strategium.potentialEnemyHQLocations.size()));
+
+
+                        if (waypoint == null)
+                            waypoint = getTarget(Strategium.enemyBuildings.keySet());
+
+                        if (waypoint == null) waypoint = new MapLocation(
+                                Strategium.rand.nextInt(rc.getMapWidth()), Strategium.rand.nextInt(rc.getMapHeight()));
+
+                    } else waypoint = Strategium.HQLocation;
             }
 
-            boolean changed = false;
-
-            do {
-                changed = false;
-                for (MapLocation gun : Strategium.enemyNetGuns.keySet())
-                    while (waypoint.isWithinDistanceSquared(
-                            gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) {
-                        switch (patrolWaypointIndex) {
-                            case 0:
-                                waypoint = waypoint.translate(0, -1);
-                                break;
-                            case 1:
-                                waypoint = waypoint.translate(1, 0);
-                                break;
-                            case 2:
-                                waypoint = waypoint.translate(0, 1);
-                                break;
-                            default:
-                                waypoint = waypoint.translate(-1, 0);
-                                break;
-                        }
-                        changed = true;
-                    }
-
-                for (MapLocation building : Strategium.enemyBuildings.keySet()) {
-                    if (building.equals(waypoint)) {
-                        switch (patrolWaypointIndex) {
-                            case 0:
-                                waypoint = waypoint.translate(0, -1);
-                                break;
-                            case 1:
-                                waypoint = waypoint.translate(1, 0);
-                                break;
-                            case 2:
-                                waypoint = waypoint.translate(0, 1);
-                                break;
-                            default:
-                                waypoint = waypoint.translate(-1, 0);
-                                break;
-                        }
-                        changed = true;
-                    }
-                }
-            } while (changed);
-            waypoint = Navigation.clamp(waypoint);
         }
 
         return Navigation.bugPath(waypoint);
@@ -194,25 +273,43 @@ public class Drone {
     }
 
     private static boolean climb() throws GameActionException {
-        for (Direction dir : dir8) if(rc.canDropUnit(dir)) if(Wall.isOnWall(dir)) {
-            rc.dropUnit(dir);
-            payload = Payload.POTENTIAL;
-            return true;
+        switch (state) {
+            case SENTRY:
+                for (Direction dir : dir8)
+                    if (rc.canDropUnit(dir)) if (Wall.isOnWall(dir)) {
+                        rc.dropUnit(dir);
+                        payload = Payload.POTENTIAL;
+                        return true;
+                    }
+                if (Navigation.frustration >= 100) {
+                    Navigation.frustration = 0;
+                    state = State.PREDATOR;
+                }
+                return Navigation.bugPath(Strategium.HQLocation);
+            case SWARMER:
+                state = State.TAXI;
+            case PREDATOR:
+            case TAXI:
+                for (Direction dir : dir8)
+                    if (Navigation.goodLandingSpot(rc.adjacentLocation(dir)))
+                        if (rc.canDropUnit(dir)) {
+                            rc.dropUnit(dir);
+                            payload = Payload.POTENTIAL;
+                            return true;
+                        }
+                return patrol();
         }
-        if(Navigation.frustration >= 100){
-            Navigation.frustration = 0;
-            state = State.PREDATOR;
-        }
-        return Navigation.bugPath(Strategium.HQLocation);
+        return false;
     }
 
     private static boolean remove() throws GameActionException {
-        for (Direction dir : dir8) if(rc.canDropUnit(dir))
-            if(Navigation.aerialDistance(Strategium.HQLocation, rc.adjacentLocation(dir)) > 3) {
-            rc.dropUnit(dir);
-            payload = Payload.POTENTIAL;
-            return true;
-        }
+        for (Direction dir : dir8)
+            if (rc.canDropUnit(dir))
+                if (Navigation.aerialDistance(Strategium.HQLocation, rc.adjacentLocation(dir)) > 3) {
+                    rc.dropUnit(dir);
+                    payload = Payload.POTENTIAL;
+                    return true;
+                }
 
         return patrol();
     }
