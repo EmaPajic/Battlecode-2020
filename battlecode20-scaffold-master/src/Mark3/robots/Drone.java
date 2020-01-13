@@ -8,8 +8,8 @@ import battlecode.common.*;
 import java.util.Iterator;
 import java.util.Set;
 
-import static Mark2.RobotPlayer.dir8;
-import static Mark2.RobotPlayer.rc;
+import static Mark3.RobotPlayer.dir8;
+import static Mark3.RobotPlayer.rc;
 
 public class Drone {
 
