@@ -46,7 +46,9 @@ public class Wall {
 
     public static boolean isLaunchPadBlocked() {
         int threshold = Strategium.elevation[launchPad.x][launchPad.y] + 3;
-        return Strategium.elevation[launchPad.x - 1][launchPad.y - 1] > threshold;
+        return //Strategium.elevation[launchPad.x - 1][launchPad.y - 1] > threshold ||
+                Strategium.elevation[launchPad.x - 1][launchPad.y] > threshold; //||
+                //Strategium.elevation[launchPad.x][launchPad.y - 2] > threshold;
     }
 
     public static boolean isOnWall(Direction direction) {

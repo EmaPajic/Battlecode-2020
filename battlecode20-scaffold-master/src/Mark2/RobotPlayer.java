@@ -265,7 +265,7 @@ public strictfp class RobotPlayer {
         Strategium.gatherInfo();
         if (numLandscapers == 1 && !(rc.getRoundNum() > 500 || rc.getRobotCount() > 8)) {
             return;
-        } else if (Strategium.shouldBuildLandscaper && (rc.getRoundNum() % 100 < 50 || numLandscapers < 10)) {
+        } else if (Strategium.shouldBuildLandscaper || numLandscapers < 10) {
             if (tryBuild(RobotType.LANDSCAPER, Direction.SOUTH)) {
                 ++numLandscapers;
             }
@@ -279,7 +279,7 @@ public strictfp class RobotPlayer {
                     ++numDrones;
                 }
             }
-        if (rc.getRoundNum() > 600 && !Strategium.shouldBuildLandscaper && (rc.getRoundNum() % 100 >= 50)) {
+        if (rc.getRoundNum() > 600 && !Strategium.shouldBuildLandscaper) {
             if (tryBuild(RobotType.DELIVERY_DRONE, Direction.WEST)) {
                 ++numDrones;
             }

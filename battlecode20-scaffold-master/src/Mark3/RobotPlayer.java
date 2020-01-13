@@ -263,9 +263,9 @@ public strictfp class RobotPlayer {
 
     static void runDesignSchool() throws GameActionException {
         Strategium.gatherInfo();
-        if (numLandscapers == 1 && !(rc.getRoundNum() > 500 || rc.getRobotCount() > 8)) {
+        if (numLandscapers == 1 && !(rc.getRoundNum() > 300)) {
             return;
-        } else if (Strategium.shouldBuildLandscaper && (rc.getRoundNum() % 100 < 50 || numLandscapers < 10)) {
+        } else if (Strategium.shouldBuildLandscaper) {
             if (tryBuild(RobotType.LANDSCAPER, Direction.SOUTH)) {
                 ++numLandscapers;
             }
@@ -273,15 +273,20 @@ public strictfp class RobotPlayer {
     }
 
     static void runFulfillmentCenter() throws GameActionException {
-        if (numDrones < 3)
-            for (Direction dir : directions) {
+        Strategium.gatherInfo();
+        if (numDrones < 5)
+            for (Direction dir : dir8) {
                 if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
                     ++numDrones;
+                    return;
                 }
             }
-        if (rc.getRoundNum() > 600 && !Strategium.shouldBuildLandscaper && (rc.getRoundNum() % 100 >= 50)) {
-            if (tryBuild(RobotType.DELIVERY_DRONE, Direction.WEST)) {
-                ++numDrones;
+        if ((rc.getRoundNum() > 600) && !Strategium.shouldBuildLandscaper) {
+            for (Direction dir : dir8) {
+                if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
+                    ++numDrones;
+                    return;
+                }
             }
         }
     }

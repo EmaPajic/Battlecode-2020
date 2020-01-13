@@ -95,13 +95,13 @@ public class Strategium {
             }
         }
 
-        System.out.println(HQLocation);
+
 
         if (HQLocation != null) {
-            shouldBuildLandscaper = robotAt(Strategium.HQLocation.translate(-1, -1)) != RobotType.LANDSCAPER;
-            if (robotAt(Strategium.HQLocation.translate(-2, -2)) == RobotType.LANDSCAPER)
+            shouldBuildLandscaper = robotAt(HQLocation.translate(-1, -1)) != RobotType.LANDSCAPER;
+            if (robotAt(HQLocation.translate(-2, -2)) == RobotType.LANDSCAPER)
                 shouldBuildLandscaper = false;
-            if (robotAt(Strategium.HQLocation.translate(-2, -1)) == RobotType.LANDSCAPER)
+            if (robotAt(HQLocation.translate(-2, -1)) == RobotType.LANDSCAPER)
                 shouldBuildLandscaper = false;
 
         }
@@ -430,30 +430,6 @@ public class Strategium {
                             shouldCircle = false;
                     }
 
-
-
-/*
-        shouldCircle = true;
-
-        int xMin = rc.getLocation().x - 4;
-        int yMin = rc.getLocation().y - 4;
-        int xMax = rc.getLocation().x + 4;
-        int yMax = rc.getLocation().y + 4;
-        int cntWall = 0;
-        int cntLandscapper = 0;
-        for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++) {
-            for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
-
-                MapLocation location = new MapLocation(i, j);
-                if (rc.canSenseLocation(location)) {
-                    if (Navigation.aerialDistance(hqLocation, location) == 2) {
-                        ++cntWall;
-                        if (rc.senseRobotAtLocation(location) != null) {
-                            if (rc.senseRobotAtLocation(location).getType() == RobotType.LANDSCAPER)
-                                ++cntLandscapper;
-                        }
-                    }
-*/
                 }
             }
 

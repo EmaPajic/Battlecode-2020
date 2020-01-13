@@ -302,8 +302,9 @@ public class Drone {
             case PREDATOR:
             case TAXI:
                 for (Direction dir : dir8)
+                    if (rc.canDropUnit(dir))
                     if (Navigation.goodLandingSpot(rc.adjacentLocation(dir)))
-                        if (rc.canDropUnit(dir)) {
+                         {
                             rc.dropUnit(dir);
                             payload = Payload.POTENTIAL;
                             return true;

@@ -1,5 +1,6 @@
 package Mark3.utils;
 
+import Mark3.RobotPlayer;
 import Mark3.robots.Drone;
 import battlecode.common.*;
 
@@ -73,6 +74,7 @@ public class Strategium {
 
     private static RobotType robotAt(MapLocation location) throws GameActionException {
         if (!rc.canSenseLocation(location)) return null;
+        System.out.println("JEPSE");
         RobotInfo robot = rc.senseRobotAtLocation(location);
         if (robot == null) return null;
         return robot.type;
@@ -95,16 +97,20 @@ public class Strategium {
             }
         }
 
-        System.out.println(HQLocation);
-
         if (HQLocation != null) {
-            shouldBuildLandscaper = robotAt(Strategium.HQLocation.translate(-1, -1)) != RobotType.LANDSCAPER;
-            if (robotAt(Strategium.HQLocation.translate(-2, -2)) == RobotType.LANDSCAPER)
-                shouldBuildLandscaper = false;
-            if (robotAt(Strategium.HQLocation.translate(-2, -1)) == RobotType.LANDSCAPER)
-                shouldBuildLandscaper = false;
+            int landscaperCnt = 0;
+            for(int i = 16; i-- >0;) if(RobotPlayer.rc.canSenseLocation(Wall.wall[i]))
+                if(robotAt(Wall.wall[i]) == RobotType.LANDSCAPER) landscaperCnt++;
 
+            shouldBuildLandscaper = landscaperCnt < 15;
+            System.out.println("LANCPED:" + Wall.launchPad + " " + robotAt(Wall.launchPad));
+            if(robotAt(Wall.launchPad) != null) shouldBuildLandscaper = false;
+
+        } else {
+            shouldBuildLandscaper = rc.getType() == RobotType.DESIGN_SCHOOL;
         }
+
+        System.out.println(robotAt(Wall.launchPad) + " " +shouldBuildLandscaper);
 
     }
 
@@ -118,6 +124,8 @@ public class Strategium {
                 if (rc.senseFlooding(target)) return false;
                 break;
             case DELIVERY_DRONE:
+                if(Navigation.aerialDistance(target, HQLocation) < 2 && Navigation.aerialDistance(HQLocation) >= 2)
+                    return false;
                 switch (Drone.state) {
                     case SWARMER:
                         return true;
@@ -134,9 +142,10 @@ public class Strategium {
                             }
                         return true;
                     default:
-                        for (MapLocation gun : enemyNetGuns.keySet())
+                        for (MapLocation gun : enemyNetGuns.keySet()){
                             if (target.isWithinDistanceSquared(
                                     gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) return false;
+                        }
                         return true;
                 }
         }
@@ -182,7 +191,11 @@ public class Strategium {
                     }
                 } else if (HQLocation != null) {
                     if (robot.type == RobotType.LANDSCAPER) {
+                        if (robot.location.equals(Wall.launchPad)){
+                            System.out.println("ZAGLAVIO SE " + robot + " " + Wall.isLaunchPadBlocked());
+                        }
                         if (robot.location.equals(Wall.launchPad) && Wall.isLaunchPadBlocked()) {
+
                             blockedUnit = robot;
                         }
                         if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestLandscaper) &&
