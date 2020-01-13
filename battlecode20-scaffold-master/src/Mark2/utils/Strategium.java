@@ -234,7 +234,7 @@ public class Strategium {
 
     }
 
-    private static void findWater() {
+    public static void findWater() {
         if (foundWater)
             for (int i = rc.getMapWidth(); i-- > 0; )
                 for (int j = rc.getMapHeight(); j-- > 0; ) {

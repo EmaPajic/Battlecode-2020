@@ -37,11 +37,11 @@ public class Drone {
     public static void run() throws GameActionException {
 
         Strategium.gatherInfo();
-        System.out.println(Clock.getBytecodeNum());
 
         patrolRange = 3 + rc.getRobotCount() / 8;
 
-        if (!rc.isReady()) return;
+        if (!rc.isReady()) return; else System.out.println("NOT READY");
+        System.out.println(payload);
 
         switch (payload) {
             case ENEMY:
@@ -96,11 +96,13 @@ public class Drone {
                 }
         }
 
+        System.out.println("DROWN:" + Strategium.nearestWater);
+
         if (Strategium.nearestWater != null) {
-            System.out.println(Strategium.nearestWater);
+
             if (Strategium.nearestWater.equals(rc.getLocation())) {
-                for (Direction dir : Navigation.moveAwayFrom(Strategium.HQLocation))
-                    if (rc.canMove(dir)) {
+                for (Direction dir : Navigation.moveAwayFrom(rc.getLocation()))
+                    if (Strategium.canSafelyMove(dir)) {
                         rc.move(dir);
                         return true;
                     }
@@ -113,6 +115,8 @@ public class Drone {
     }
 
     private static boolean patrol() throws GameActionException {
+
+        System.out.println("PATROL:" + waypoint);
 
 
         if (Strategium.HQLocation == null) return false;
@@ -195,7 +199,10 @@ public class Drone {
             payload = Payload.POTENTIAL;
             return true;
         }
-        if(Navigation.frustration >= 100) state = State.PREDATOR;
+        if(Navigation.frustration >= 100){
+            Navigation.frustration = 0;
+            state = State.PREDATOR;
+        }
         return Navigation.bugPath(Strategium.HQLocation);
     }
 

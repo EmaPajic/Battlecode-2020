@@ -2,6 +2,7 @@ package Mark2.utils;
 
 import battlecode.common.*;
 
+import javax.print.attribute.standard.Destination;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,8 @@ public class Navigation {
     private static MapLocation lastIntersection;
     private static boolean avoiding = false;
     private static Direction lastDirection;
+    private static Direction lastAvoidingDirection = Direction.SOUTHEAST;
+    private static MapLocation lastDestination;
 
     public static int frustration = 0;
 
@@ -27,6 +30,13 @@ public class Navigation {
 
     public static boolean bugPath(MapLocation destination) throws GameActionException {
         Direction dir = moveTowards(destination);
+        if(dir != moveTowards(lastDestination))
+            avoiding = false;
+
+        lastDestination = destination;
+
+        System.out.println(dir + " " + lastDirection + " " + frustration);
+
         if(!avoiding) {
             lastIntersection = rc.getLocation();
             lastDirection = dir;
@@ -38,14 +48,20 @@ public class Navigation {
             if(rc.canSenseLocation(obstacle)){
                 RobotInfo robot = rc.senseRobotAtLocation(obstacle);
                 if(robot != null) {
-                    if(robot.team == Strategium.myTeam && robot.ID > rc.getID() && !robot.type.isBuilding())
+                    if(robot.team == Strategium.myTeam && robot.ID > rc.getID() && !robot.type.isBuilding() &&
+                            frustration < 100) {
+                        frustration += 50;
                         return false;
+                    }
                 }
             }
 
         }
 
-        if(avoiding && dir == lastDirection) {
+        System.out.println(aerialDistance(destination) + " " + aerialDistance(lastIntersection, destination) + " " + lastIntersection);
+
+        if(avoiding && dir == lastDirection &&
+                aerialDistance(destination) <= aerialDistance(lastIntersection, destination)) {
             if(Strategium.canSafelyMove(dir)){
                 avoiding = false;
                 lastIntersection = rc.getLocation();
@@ -55,17 +71,20 @@ public class Navigation {
         }
 
         frustration++;
+        dir = lastAvoidingDirection;
 
         int i = 0;
         for(i = 0; Strategium.canSafelyMove(dir); dir = dir.rotateRight(), i++) {
             if (i == 8) {
                 avoiding = false;
+                lastAvoidingDirection = dir;
                 rc.move(dir);
                 return true;
             }
         }
         if(i > 0) {
             rc.move(dir.rotateLeft());
+            lastAvoidingDirection = dir.rotateLeft();
             return true;
         }
         for(; !Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++){
@@ -74,6 +93,7 @@ public class Navigation {
             }
         }
         avoiding = true;
+        lastAvoidingDirection = dir;
         rc.move(dir);
         return true;
     }

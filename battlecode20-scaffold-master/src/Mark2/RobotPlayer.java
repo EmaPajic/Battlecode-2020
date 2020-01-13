@@ -314,7 +314,9 @@ public strictfp class RobotPlayer {
         if (landscaperTurns == 0 && (rc.getLocation().x == hqLocation.x - 1)
                 && (rc.getLocation().y == hqLocation.y - 1)) {
             tryMove(Direction.WEST);
-        } else if ((landscaperTurns % 3 == 0) && rc.getDirtCarrying() < 1) {
+            return;
+        }
+        if ((landscaperTurns % 3 == 0) && rc.getDirtCarrying() < 1) {
             ArrayList<Direction> digDirs = new ArrayList<>();
             if (rc.getLocation().x == hqLocation.x - 2) {
                 digDirs.add(Direction.WEST);
