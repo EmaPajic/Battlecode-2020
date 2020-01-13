@@ -65,19 +65,6 @@ public strictfp class RobotPlayer {
         RobotPlayer.rc = rc;
         Strategium.init();
 
-        if (rc.getType() == RobotType.MINER) {
-            if (rc.getRobotCount() == 2) {
-                myFun = 1; // main search miner
-            } else if (rc.getRobotCount() == 4) {
-                myFun = 3; // build miner
-            } else {
-                myFun = 2; // 2nd search miner
-            }
-        } else if (rc.getType() == RobotType.LANDSCAPER) {
-            myFun = 1; // protect yourself
-        } else if (rc.getType() == RobotType.DELIVERY_DRONE) {
-            myFun = 1;
-        }
         if (hqLocation == null) {
             // search surroundings for hq
             RobotInfo[] robots = rc.senseNearbyRobots();
@@ -94,9 +81,20 @@ public strictfp class RobotPlayer {
                     System.out.println("Found HQ!");
                 }
             }
-            if (rc.getType() == RobotType.MINER) {
-                TwoMinerController.init();
+        }
+        if (rc.getType() == RobotType.MINER) {
+            if (Navigation.aerialDistance(fulfillmentCenterLocation) > 0) {
+                myFun = 1; // main search miner
+            } else {
+                myFun = 3; // build miner
             }
+        } else if (rc.getType() == RobotType.LANDSCAPER) {
+            myFun = 1; // protect yourself
+        } else if (rc.getType() == RobotType.DELIVERY_DRONE) {
+            myFun = 1;
+        }
+        if (rc.getType() == RobotType.MINER) {
+            TwoMinerController.init();
         }
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
@@ -153,9 +151,10 @@ public strictfp class RobotPlayer {
             }
         } else if (numMiners < 2 || (numMiners > 2 && numMiners < 9)) {
             for (Direction dir : directions)
-                if (tryBuild(RobotType.MINER, dir)) {
-                    ++numMiners;
-                }
+                if(dir != Direction.SOUTH)
+                    if (tryBuild(RobotType.MINER, dir)) {
+                        ++numMiners;
+                    }
         } else {
             runNetGun();
         }
@@ -164,6 +163,7 @@ public strictfp class RobotPlayer {
     static boolean builtFulfillmentCenter = false;
 
     static void runMiner() throws GameActionException {
+        System.out.println(myFun);
         if (myFun < 3)
             runSearchMiner();
         else
@@ -291,6 +291,68 @@ public strictfp class RobotPlayer {
         }
     }
 
+    static void runAttackLandscaper() throws GameActionException {
+        if (Mark2.utils.Strategium.enemyHQLocation != null) {
+            if (Mark2.utils.Navigation.aerialDistance(rc.getLocation(), Mark2.utils.Strategium.enemyHQLocation) == 1) {
+                if (rc.getDirtCarrying() >= 1) {
+                    Direction depositDirtDir = Mark2.utils.Navigation.moveTowards(Mark2.utils.Strategium.enemyHQLocation);
+                    if (rc.canDepositDirt(depositDirtDir)) {
+                        rc.depositDirt(depositDirtDir);
+                    }
+                }
+                else {
+                    for(Direction dir : dir8) {
+                        if (rc.canDigDirt(dir)) {
+                            rc.digDirt(dir);
+                        }
+                    }
+                }
+            }
+            else if (Mark2.utils.Navigation.aerialDistance(rc.getLocation(), Mark2.utils.Strategium.enemyHQLocation) == 2) {
+                Direction dirToHQ = Mark2.utils.Navigation.moveTowards(Mark2.utils.Strategium.enemyHQLocation);
+                MapLocation locToHQ = rc.getLocation().add(dirToHQ);
+                if (rc.senseElevation(locToHQ) > rc.senseElevation(rc.getLocation()) + 3) {
+                    if (rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit) {
+                        for(Direction dir : dir8) {
+                            if (rc.canDigDirt(dir)) {
+                                rc.digDirt(dir);
+                            }
+                        }
+                    }
+                    else {
+                        Direction depositDirtDir = Mark2.utils.Navigation.moveTowards(locToHQ.subtract(dirToHQ));
+                        if (rc.canDepositDirt(depositDirtDir)) {
+                            rc.depositDirt(depositDirtDir);
+                        }
+                    }
+                }
+                else {
+                    if (rc.canMove(dirToHQ) && rc.isReady()) {
+                        tryMove(dirToHQ);
+                    }
+                }
+            }
+            else {
+                Mark2.utils.Navigation.bugPath(Mark2.utils.Strategium.enemyHQLocation);
+            }
+        }
+        else {
+            int currentTargetIndex = 0;
+            MapLocation currentTarget = Mark2.utils.Strategium.potentialEnemyHQLocations.get(currentTargetIndex);
+            Mark2.utils.Navigation.bugPath(currentTarget);
+            if (rc.getLocation().distanceSquaredTo(currentTarget) < 5) {
+                RobotInfo[] robots = rc.senseNearbyRobots();
+                for (RobotInfo robot : robots) {
+                    if (robot.type == RobotType.HQ && robot.team == Mark2.utils.Strategium.opponentTeam) {
+                        Mark2.utils.Strategium.enemyHQLocation = robot.getLocation();
+                    }
+                }
+                ++currentTargetIndex;
+                currentTarget = Mark2.utils.Strategium.potentialEnemyHQLocations.get(currentTargetIndex % 3);
+            }
+        }
+    }
+
     static void runLateLandscaper() throws GameActionException {
         if (rc.getDirtCarrying() >= 1) {
             Direction depositDirtDir = getOptimalDepositDir();
@@ -327,6 +389,9 @@ public strictfp class RobotPlayer {
 
     static void runLandscaper() throws GameActionException {
         Strategium.gatherInfo();
+        if (Mark2.utils.Navigation.aerialDistance(rc.getLocation(), hqLocation) > 4) {
+            runAttackLandscaper();
+        }
         if (!Strategium.shouldCircle) {
             runLateLandscaper();
             return;
