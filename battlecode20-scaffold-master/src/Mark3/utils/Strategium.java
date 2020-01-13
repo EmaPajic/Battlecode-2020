@@ -174,7 +174,7 @@ public class Strategium {
                     if (HQLocation == null) {
                         HQLocation = robot.location;
                         Wall.init();
-                        if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
+                        /*if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
                             potentialEnemyHQLocations.add(
                                     new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
 
@@ -186,7 +186,7 @@ public class Strategium {
                                 HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
                             potentialEnemyHQLocations.add(
                                     new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
-                                            rc.getMapHeight() - HQLocation.y - 1));
+                                            rc.getMapHeight() - HQLocation.y - 1));*/
                     }
                 } else if (HQLocation != null) {
                     if (robot.type == RobotType.LANDSCAPER) {
