@@ -16,7 +16,7 @@ public strictfp class RobotPlayer {
     static MapLocation fulfillmentCenterLocation;
     static MapLocation netGunLocation1;
     static MapLocation netGunLocation2;
-    static MapLocation netGunLocation3;
+    //static MapLocation netGunLocation3;
     public static MapLocation vaporatorLocation1;
     public static MapLocation vaporatorLocation2;
     static int buildstage = 0; // tells miners what to build
@@ -68,10 +68,10 @@ public strictfp class RobotPlayer {
         if (rc.getType() == RobotType.MINER) {
             if (rc.getRobotCount() == 2) {
                 myFun = 1; // main search miner
-            } else if (rc.getRobotCount() == 3) {
-                myFun = 2; // 2nd search miner
-            } else {
+            } else if (rc.getRobotCount() == 4) {
                 myFun = 3; // build miner
+            } else {
+                myFun = 2; // 2nd search miner
             }
         } else if (rc.getType() == RobotType.LANDSCAPER) {
             myFun = 1; // protect yourself
@@ -86,11 +86,11 @@ public strictfp class RobotPlayer {
                     hqLocation = robot.location;
                     designSchoolLocation = new MapLocation(hqLocation.x - 1, hqLocation.y);
                     fulfillmentCenterLocation = new MapLocation(hqLocation.x, hqLocation.y - 1);
-                    vaporatorLocation1 = new MapLocation(hqLocation.x, hqLocation.y + 1);
-                    vaporatorLocation2 = new MapLocation(hqLocation.x + 1, hqLocation.y);
-                    netGunLocation1 = new MapLocation(hqLocation.x - 1, hqLocation.y + 1);
-                    netGunLocation2 = new MapLocation(hqLocation.x + 1, hqLocation.y + 1);
-                    netGunLocation3 = new MapLocation(hqLocation.x + 1, hqLocation.y - 1);
+                    netGunLocation1 = new MapLocation(hqLocation.x, hqLocation.y + 1);
+                    netGunLocation2 = new MapLocation(hqLocation.x + 1, hqLocation.y);
+                    vaporatorLocation1 = new MapLocation(hqLocation.x - 1, hqLocation.y + 1);
+                    vaporatorLocation2 = new MapLocation(hqLocation.x + 1, hqLocation.y + 1);
+                    //netGunLocation3 = new MapLocation(hqLocation.x + 1, hqLocation.y - 1);
                     System.out.println("Found HQ!");
                 }
             }
@@ -148,10 +148,10 @@ public strictfp class RobotPlayer {
 
     static void runHQ() throws GameActionException {
         if (numMiners == 2) {
-            if (tryBuild(RobotType.MINER, Direction.WEST)) {
+            if (tryBuild(RobotType.MINER, Direction.SOUTH)) {
                 ++numMiners;
             }
-        } else if (numMiners < 2) {
+        } else if (numMiners < 2 || (numMiners > 2 && numMiners < 9)) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.MINER, dir)) {
                     ++numMiners;
@@ -178,32 +178,29 @@ public strictfp class RobotPlayer {
     static void runBuildMiner() throws GameActionException {
         switch (buildstage) {
             case -1:
-                if (tryMove(Direction.WEST)) {
+                if (tryMove(Direction.SOUTH)) {
                     ++buildstage;
                 }
                 break;
             case 0:
-                build(RobotType.DESIGN_SCHOOL, designSchoolLocation);
-                break;
-            case 1:
-                build(RobotType.VAPORATOR, vaporatorLocation1);
-                break;
-            case 2:
-                build(RobotType.VAPORATOR, vaporatorLocation2);
-                break;
-            case 3:
                 build(RobotType.FULFILLMENT_CENTER, fulfillmentCenterLocation);
                 break;
-            case 4:
+            case 1:
+                build(RobotType.DESIGN_SCHOOL, designSchoolLocation);
+                break;
+            case 2:
+                build(RobotType.VAPORATOR, vaporatorLocation1);
+                break;
+            case 3:
                 build(RobotType.NET_GUN, netGunLocation1);
+                break;
+            case 4:
+                build(RobotType.VAPORATOR, vaporatorLocation2);
                 break;
             case 5:
                 build(RobotType.NET_GUN, netGunLocation2);
                 break;
             case 6:
-                build(RobotType.NET_GUN, netGunLocation3);
-                break;
-            case 7:
                 runSearchMiner();
                 break;
         }
@@ -213,23 +210,32 @@ public strictfp class RobotPlayer {
 
         MapLocation goToLoc = null;
         Direction buildDir = null;
-        switch (buildstage % 4) {
+        switch (buildstage) {
             case 0:
-                goToLoc = new MapLocation(loc.x - 1, loc.y);
-                buildDir = Direction.EAST;
-                break;
-            case 1:
-                goToLoc = new MapLocation(loc.x, loc.y + 1);
-                buildDir = Direction.SOUTH;
-                break;
-            case 2:
-                goToLoc = new MapLocation(loc.x + 1, loc.y);
-                buildDir = Direction.WEST;
-                break;
-            case 3:
                 goToLoc = new MapLocation(loc.x, loc.y - 1);
                 buildDir = Direction.NORTH;
                 break;
+            case 1:
+                goToLoc = new MapLocation(loc.x - 1, loc.y);
+                buildDir = Direction.EAST;
+                break;
+            case 2:
+                goToLoc = new MapLocation(loc.x - 1, loc.y);
+                buildDir = Direction.EAST;
+                break;
+            case 3:
+                goToLoc = new MapLocation(loc.x, loc.y + 1);
+                buildDir = Direction.SOUTH;
+                break;
+            case 4:
+                goToLoc = new MapLocation(loc.x, loc.y + 1);
+                buildDir = Direction.SOUTH;
+                break;
+            case 5:
+                goToLoc = new MapLocation(loc.x + 1, loc.y);
+                buildDir = Direction.WEST;
+                break;
+
         }
 
         Direction goToDir = Navigation.moveToBuild(goToLoc);
