@@ -80,8 +80,7 @@ public class Drone {
                 if (rc.adjacentLocation(Direction.NORTHEAST).equals(Strategium.HQLocation)) {
                     boolean canMove = false;
                     for (Direction dir : dir8) if(rc.canMove(dir)) canMove = true;
-                    if (!canMove)
-                        for (Direction dir : dir8) if(rc.canSenseLocation(rc.adjacentLocation(dir))) {
+                    if (!canMove) {
                             RobotInfo blocker = rc.senseRobotAtLocation(rc.adjacentLocation(Direction.SOUTHWEST));
                             if (blocker != null) if (blocker.type == RobotType.LANDSCAPER) {
                                 if(attack(blocker)) break;
@@ -288,7 +287,9 @@ public class Drone {
         switch (state) {
             case SENTRY:
                 for (Direction dir : dir8)
-                    if (rc.canDropUnit(dir)) if (Wall.isOnWall(dir)) {
+                    if (rc.canDropUnit(dir))
+                        if (Wall.isOnWall(dir) &&
+                                !rc.adjacentLocation(dir).equals(Strategium.HQLocation.translate(-2, -2))) {
                         rc.dropUnit(dir);
                         payload = Payload.POTENTIAL;
                         return true;

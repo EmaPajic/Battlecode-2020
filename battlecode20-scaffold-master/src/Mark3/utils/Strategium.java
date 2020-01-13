@@ -74,7 +74,6 @@ public class Strategium {
 
     private static RobotType robotAt(MapLocation location) throws GameActionException {
         if (!rc.canSenseLocation(location)) return null;
-        System.out.println("JEPSE");
         RobotInfo robot = rc.senseRobotAtLocation(location);
         if (robot == null) return null;
         return robot.type;
