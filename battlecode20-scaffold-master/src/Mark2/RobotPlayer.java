@@ -265,7 +265,7 @@ public strictfp class RobotPlayer {
         Strategium.gatherInfo();
         if (numLandscapers == 1 && !(rc.getRoundNum() > 500 || rc.getRobotCount() > 8)) {
             return;
-        } else if (Strategium.shouldBuildLandscaper) {
+        } else if (Strategium.shouldBuildLandscaper && (rc.getRoundNum() % 100 < 50 || numLandscapers < 10)) {
             if (tryBuild(RobotType.LANDSCAPER, Direction.SOUTH)) {
                 ++numLandscapers;
             }
@@ -273,14 +273,23 @@ public strictfp class RobotPlayer {
     }
 
     static void runFulfillmentCenter() throws GameActionException {
-        if (rc.getRoundNum() % 100 == 0)
-            for (Direction dir : directions)
-                tryBuild(RobotType.DELIVERY_DRONE, dir);
+        if (numDrones < 3 )
+            for (Direction dir : directions) {
+                if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
+                    ++numDrones;
+                }
+            }
+        if (rc.getRoundNum() > 600 && !Strategium.shouldBuildLandscaper && (rc.getRoundNum() % 100 >= 50)) {
+            if (tryBuild(RobotType.DELIVERY_DRONE, Direction.WEST)) {
+                ++numDrones;
+            }
+        }
     }
 
     static void runLateLandscaper() throws GameActionException {
         if (rc.getDirtCarrying() >= 1) {
             Direction depositDirtDir = getOptimalDepositDir();
+            System.out.println("Should build: " + Wall.shouldBuild(depositDirtDir));
             if (rc.canDepositDirt(depositDirtDir) && Wall.shouldBuild(depositDirtDir)) {
                 rc.depositDirt(depositDirtDir);
             }
@@ -376,7 +385,6 @@ public strictfp class RobotPlayer {
         } else if (rc.getLocation().y == hqLocation.y - 2) {
             goToLoc = rc.getLocation().add(Direction.WEST);
         }
-
         Direction goToDir = Navigation.moveToBuild(goToLoc);
         if (tryMove(goToDir)) {
             ++landscaperTurns;
@@ -395,19 +403,35 @@ public strictfp class RobotPlayer {
                 if (tryMove(goToDir)) {
                     ++landscaperTurns;
                 }
-            } else {
-                Direction digDir;
+            } else if(robot.getTeam() == Strategium.myTeam || rc.getDirtCarrying() == 0){
+                ArrayList<Direction> digDirs = new ArrayList<>();
                 if (rc.getLocation().x == hqLocation.x - 2) {
-                    digDir = Direction.WEST;
+                    digDirs.add(Direction.WEST);
+                    digDirs.add(Direction.NORTHWEST);
+                    digDirs.add(Direction.SOUTHWEST);
                 } else if (rc.getLocation().x == hqLocation.x + 2) {
-                    digDir = Direction.EAST;
+                    digDirs.add(Direction.EAST);
+                    digDirs.add(Direction.NORTHEAST);
+                    digDirs.add(Direction.SOUTHEAST);
                 } else if (rc.getLocation().y == hqLocation.y - 2) {
-                    digDir = Direction.SOUTH;
+                    digDirs.add(Direction.SOUTH);
+                    digDirs.add(Direction.SOUTHEAST);
+                    digDirs.add(Direction.SOUTHWEST);
                 } else {
-                    digDir = Direction.NORTH;
+                    digDirs.add(Direction.NORTH);
+                    digDirs.add(Direction.NORTHEAST);
+                    digDirs.add(Direction.NORTHWEST);
                 }
+                for(Direction digDir : digDirs)
                 if (rc.canDigDirt(digDir)) {
                     rc.digDirt(digDir);
+                }
+            }
+            else {
+                Direction depositDirtDir = getOptimalDepositDir();
+                if (rc.canDepositDirt(depositDirtDir) && Wall.shouldBuild(depositDirtDir)) {
+                    rc.depositDirt(depositDirtDir);
+                    return;
                 }
             }
         }
