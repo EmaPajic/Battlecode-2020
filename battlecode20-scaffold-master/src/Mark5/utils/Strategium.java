@@ -79,7 +79,7 @@ public class Strategium {
                 DroneSensor.init();
                 break;
             case LANDSCAPER:
-                //landscaperSense();
+                LandscaperSensor.init();
                 break;
             case DESIGN_SCHOOL:
             case FULFILLMENT_CENTER:

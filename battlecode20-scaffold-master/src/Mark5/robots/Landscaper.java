@@ -53,7 +53,7 @@ public class Landscaper {
     private static void defend(MapLocation location) throws GameActionException {
         if (rc.getLocation().isAdjacentTo(location)) {
 
-            for (Direction dir : dir8)
+            for (Direction dir : Direction.allDirections())
                 if (!rc.adjacentLocation(dir).equals(location))
                     if (Lattice.maxDeposit(rc.adjacentLocation(dir)) > 0 && !Lattice.isPit(rc.adjacentLocation(dir)))
                         if (rc.canDepositDirt(dir)) {
@@ -61,9 +61,9 @@ public class Landscaper {
                             return;
                         }
 
-            for (Direction dir : dir8)
+            for (Direction dir : Direction.allDirections())
                 if (!rc.adjacentLocation(dir).equals(location))
-                    if (Lattice.maxDeposit(rc.adjacentLocation(dir)) > 0 && Lattice.isPit(rc.adjacentLocation(dir)))
+                    if (Lattice.isPit(rc.adjacentLocation(dir)))
                         if (rc.canDepositDirt(dir)) {
                             rc.depositDirt(dir);
                             return;
@@ -76,7 +76,7 @@ public class Landscaper {
     private static void attack(MapLocation location) throws GameActionException {
         if (rc.getLocation().isAdjacentTo(location)) {
 
-            for (Direction dir : dir8)
+            for (Direction dir : Direction.allDirections())
                 if (!rc.adjacentLocation(dir).equals(location))
                     if (Lattice.isPit(rc.adjacentLocation(dir)))
                         if (rc.canDigDirt(dir)) {
@@ -84,7 +84,7 @@ public class Landscaper {
                             return;
                         }
 
-            for (Direction dir : dir8)
+            for (Direction dir : Direction.allDirections())
                 if (!rc.adjacentLocation(dir).equals(location))
                     if (rc.canDigDirt(dir)) {
                         rc.digDirt(dir);

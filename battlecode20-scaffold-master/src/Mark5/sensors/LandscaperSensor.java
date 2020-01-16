@@ -11,6 +11,10 @@ import static Mark5.utils.Strategium.*;
 
 public class LandscaperSensor {
 
+    public static void init() {
+        elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
+    }
+
     public static void sense() throws GameActionException {
 
         nearestBuriedFriendlyBuilding = null;
