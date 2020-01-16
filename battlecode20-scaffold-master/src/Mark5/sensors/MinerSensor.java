@@ -37,8 +37,29 @@ public class MinerSensor {
             if (robot.team == myTeam) {
 
                 if (robot.type == RobotType.HQ) {
-                    HQLocation = robot.location;
-                    Wall.init();
+
+                    if (HQLocation == null) {
+
+                        HQLocation = robot.location;
+
+                        if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
+                            Strategium.potentialEnemyHQLocations.add(
+                                    new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
+
+                        if (HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
+                            Strategium.potentialEnemyHQLocations.add(
+                                    new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1));
+
+                        if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1 &&
+                                HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
+                            Strategium.potentialEnemyHQLocations.add(
+                                    new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
+                                            rc.getMapHeight() - HQLocation.y - 1));
+
+                        Wall.init();
+
+                    }
+
                 }
                 if (robot.type.canRefine()) refineries.put(robot.location, robot);
 
@@ -53,6 +74,9 @@ public class MinerSensor {
             }
 
         }
+
+        Wall.checkBaseStatus();
+
 
         Iterator<Map.Entry<MapLocation, RobotInfo>> it = refineries.entrySet().iterator();
         while (it.hasNext()) {

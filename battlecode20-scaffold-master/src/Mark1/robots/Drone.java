@@ -28,7 +28,7 @@ public class Drone {
         Strategium.gatherInfo();
         System.out.println(Clock.getBytecodeNum());
 
-        patrolRange = 3 + rc.getRobotCount() / 8;
+        patrolRange = 3 + 2 / 8;
 
         if (!rc.isReady()) return;
 

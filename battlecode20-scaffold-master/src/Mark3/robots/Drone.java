@@ -53,7 +53,7 @@ public class Drone {
 
         Strategium.gatherInfo();
 
-        patrolRange = 3 + rc.getRobotCount() / 8;
+        patrolRange = 3 + 4;
         switch (state) {
             case SENTRY:
                 if ((Strategium.dronesMetWithLowerID - 4) * 5 > Strategium.numDronesMet) state = State.PREDATOR;

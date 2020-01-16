@@ -66,9 +66,9 @@ public strictfp class RobotPlayer {
         Strategium.init();
 
         if (rc.getType() == RobotType.MINER) {
-            if (rc.getRobotCount() == 2) {
+            if (2 == 2) {
                 myFun = 1; // main search miner
-            } else if (rc.getRobotCount() == 4) {
+            } else if (2 == 4) {
                 myFun = 3; // build miner
             } else {
                 myFun = 2; // 2nd search miner
@@ -263,7 +263,7 @@ public strictfp class RobotPlayer {
 
     static void runDesignSchool() throws GameActionException {
         Strategium.gatherInfo();
-        if (numLandscapers == 1 && !(rc.getRoundNum() > 500 || rc.getRobotCount() > 8)) {
+        if (numLandscapers == 1 && !(rc.getRoundNum() > 500 || 2 > 8)) {
             return;
         } else if (Strategium.shouldBuildLandscaper || numLandscapers < 10) {
             if (tryBuild(RobotType.LANDSCAPER, Direction.SOUTH)) {

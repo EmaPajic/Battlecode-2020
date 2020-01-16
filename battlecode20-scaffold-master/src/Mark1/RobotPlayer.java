@@ -48,10 +48,10 @@ public strictfp class RobotPlayer {
         RobotPlayer.rc = rc;
         Strategium.init();
         if (rc.getType() == RobotType.MINER) {
-            if (rc.getRobotCount() == 2) {
+            if (2 == 2) {
                 myFun = 1; // main search miner
             }
-            else if (rc.getRobotCount() == 3) {
+            else if (3 == 3) {
                 myFun = 2; // 2nd search miner
             }
             else {

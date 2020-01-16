@@ -87,19 +87,7 @@ public strictfp class RobotPlayer {
                 hqLocation = new MapLocation(rc.getMapWidth() - rc.getLocation().x - 1,
                         rc.getMapHeight() - rc.getLocation().y - 1);
             }
-            if (hqLocation.x != rc.getMapWidth() - hqLocation.x - 1)
-                Strategium.potentialEnemyHQLocations.add(
-                        new MapLocation(rc.getMapWidth() - hqLocation.x - 1, hqLocation.y));
 
-            if (hqLocation.y != rc.getMapHeight() - hqLocation.y - 1)
-                Strategium.potentialEnemyHQLocations.add(
-                        new MapLocation(hqLocation.x, rc.getMapHeight() - hqLocation.y - 1));
-
-            if (hqLocation.x != rc.getMapWidth() - hqLocation.x - 1 &&
-                    hqLocation.y != rc.getMapHeight() - hqLocation.y - 1)
-                Strategium.potentialEnemyHQLocations.add(
-                        new MapLocation(rc.getMapWidth() - hqLocation.x - 1,
-                                rc.getMapHeight() - hqLocation.y - 1));
         }
         if (rc.getType() == RobotType.MINER) {
             if (Navigation.aerialDistance(fulfillmentCenterLocation) > 0) {
