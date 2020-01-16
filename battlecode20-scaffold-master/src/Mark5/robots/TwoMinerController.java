@@ -1,15 +1,15 @@
-package Mark4.utils;
+package Mark5.robots;
 
-import Mark4.utils.Navigation;
-import Mark4.utils.Strategium;
+import Mark5.utils.Navigation;
+import Mark5.utils.Strategium;
 import battlecode.common.*;
 
 import java.awt.*;
 import java.util.*;
 
 
-import static Mark4.RobotPlayer.*;
-import static Mark4.RobotPlayer.tryMove;
+import static Mark5.RobotPlayer.*;
+import static Mark5.RobotPlayer.tryMove;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
