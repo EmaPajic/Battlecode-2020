@@ -59,11 +59,14 @@ public class Lattice {
      * @return the amount of dirt
      */
     public static int maxDeposit(MapLocation location) {
+        if(location.equals(Strategium.HQLocation)) return 0;
+        if(isPit(location)) return Integer.MAX_VALUE;
+        if(location.isAdjacentTo(Strategium.HQLocation)) return Integer.MAX_VALUE;
         int elevation = Strategium.elevation[location.x][location.y];
         int maxDeposit = 6;
         for (Direction dir : dir8) {
             MapLocation loc = location.add(dir);
-            if(rc.onTheMap(loc) && !(isPit(location)) && !loc.isAdjacentTo(Strategium.HQLocation) &&
+            if(rc.onTheMap(loc) && !isPit(loc) && !loc.isAdjacentTo(Strategium.HQLocation) &&
                     !loc.equals(Strategium.HQLocation))
                 if(Strategium.elevation[loc.x][loc.y] + 3 - elevation < maxDeposit)
                 maxDeposit = Strategium.elevation[loc.x][loc.y] + 3 - elevation;

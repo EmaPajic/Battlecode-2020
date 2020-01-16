@@ -421,4 +421,5 @@ public class Navigation {
         if(y < 0) y = 0;
         return  new MapLocation(x, y);
     }
+
 }

@@ -2,10 +2,9 @@ package Mark5.sensors;
 
 import Mark5.utils.Navigation;
 import Mark5.utils.Wall;
-import battlecode.common.GameActionException;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
+import battlecode.common.*;
 
+import static Mark5.RobotPlayer.dir8;
 import static Mark5.RobotPlayer.rc;
 
 import static Mark5.utils.Strategium.*;
@@ -14,91 +13,104 @@ public class LandscaperSensor {
 
     public static void sense() throws GameActionException {
 
-        shouldCircle = false;
+        nearestBuriedFriendlyBuilding = null;
+        nearestEnemyBuilding = null;
+        overlapLocations.clear();
+        enemyDrones.clear();
+        buriedFriendlyBuildings.clear();
 
         RobotInfo[] robots = rc.senseNearbyRobots();
 
         if (HQLocation == null) {
             for (RobotInfo robot : robots) {
                 if (robot.type == RobotType.HQ && robot.team == rc.getTeam()) {
-                    HQLocation = robot.location;
                     Wall.init();
                     break;
                 }
             }
         }
 
-        if (HQLocation != null) {
-            Wall.scanWall();
-            if (Navigation.aerialDistance(HQLocation) <= 2) {
-                if (rc.getLocation().equals(HQLocation.translate(-1, -1))) shouldCircle = true;
-                else if (!rc.getLocation().equals(HQLocation.translate(-1, -2))) {
-                    shouldCircle = robotAt(Wall.clockwise(rc.getLocation())) != RobotType.LANDSCAPER;
-                    System.out.println(shouldCircle);
-                    if (Math.abs(rc.senseElevation(Wall.clockwise(rc.getLocation())) -
-                            rc.senseElevation(rc.getLocation())) > 3) {
-                        if(Math.abs(rc.senseElevation(Wall.clockwise(Wall.clockwise(rc.getLocation()))) -
-                                rc.senseElevation(rc.getLocation())) > 3 ||
-                                Navigation.aerialDistance(rc.getLocation(),
-                                        Wall.clockwise(Wall.clockwise(rc.getLocation()))) > 1)
-                            shouldCircle = false;
-                    }
 
-                    System.out.println(shouldCircle);
-                    System.out.println(rc.senseElevation(Wall.clockwise(rc.getLocation())));
-                } else {
+        for (RobotInfo robot : rc.senseNearbyRobots()) {
 
-                    shouldCircle = true;//robotAt(Strategium.HQLocation.translate(-1, -1)) != RobotType.LANDSCAPER;
-                    if (robotAt(HQLocation.translate(-2, -2)) == RobotType.LANDSCAPER)
-                        shouldCircle = false;
-                    if (robotAt(HQLocation.translate(-2, -1)) == RobotType.LANDSCAPER)
-                        shouldCircle = false;
-                    if (Math.abs(rc.senseElevation(Wall.clockwise(rc.getLocation())) -
-                            rc.senseElevation(rc.getLocation())) > 3) {
-                        if(Math.abs(rc.senseElevation(Wall.clockwise(Wall.clockwise(rc.getLocation()))) -
-                                rc.senseElevation(rc.getLocation())) > 3 ||
-                                Navigation.aerialDistance(rc.getLocation(),
-                                        Wall.clockwise(Wall.clockwise(rc.getLocation()))) > 1)
-                            shouldCircle = false;
-                    }
+            if (robot.getTeam() == myTeam) {
 
+                switch (robot.type) {
+                    case HQ:
+                        if (HQLocation == null) {
+                            HQLocation = robot.location;
 
+                            if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
+                                potentialEnemyHQLocations.add(
+                                        new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
 
-/*
-        shouldCircle = true;
+                            if (HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
+                                potentialEnemyHQLocations.add(
+                                        new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1));
 
-        int xMin = rc.getLocation().x - 4;
-        int yMin = rc.getLocation().y - 4;
-        int xMax = rc.getLocation().x + 4;
-        int yMax = rc.getLocation().y + 4;
-        int cntWall = 0;
-        int cntLandscapper = 0;
-        for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++) {
-            for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
-
-                MapLocation location = new MapLocation(i, j);
-                if (rc.canSenseLocation(location)) {
-                    if (Navigation.aerialDistance(hqLocation, location) == 2) {
-                        ++cntWall;
-                        if (rc.senseRobotAtLocation(location) != null) {
-                            if (rc.senseRobotAtLocation(location).getType() == RobotType.LANDSCAPER)
-                                ++cntLandscapper;
+                            if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1 &&
+                                    HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
+                                potentialEnemyHQLocations.add(
+                                        new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
+                                                rc.getMapHeight() - HQLocation.y - 1));
                         }
-                    }
-*/
-                }
-            }
 
-            for (RobotInfo robot : rc.senseNearbyRobots()) {
-                if (robot.type != RobotType.LANDSCAPER) if (Wall.onWallAndBlocking(robots, robot.location))
-                    shouldCircle = true;
+                    case DESIGN_SCHOOL:
+                    case FULFILLMENT_CENTER:
+                    case VAPORATOR:
+                    case REFINERY:
+                    case NET_GUN:
+
+                        if (robot.dirtCarrying > 0) {
+                            if (Navigation.aerialDistance(robot) <
+                                    Navigation.aerialDistance(nearestBuriedFriendlyBuilding))
+                                nearestBuriedFriendlyBuilding = robot.location;
+                        }
+
+                        buriedFriendlyBuildings.add(robot);
+
+                        break;
+                }
+            } else {
+
+                switch (robot.type) {
+                    case HQ:
+                        if (enemyHQLocation == null) {
+                            enemyHQLocation = robot.location;
+                            potentialEnemyHQLocations.clear();
+                        }
+                    case DESIGN_SCHOOL:
+                    case FULFILLMENT_CENTER:
+                    case VAPORATOR:
+                    case REFINERY:
+                    case NET_GUN:
+                        if (!enemyBuildings.contains(robot.location)) enemyBuildings.add(robot.location);
+                        break;
+
+                    case DELIVERY_DRONE:
+                        enemyDrones.add(robot);
+                }
+
             }
 
         }
-//        if(cntLandscapper >= cntWall - 1)
-//            shouldCircle = false;
 
-        //shouldCircle = rc.getRobotCount() < 30;
+        for(RobotInfo friendly : buriedFriendlyBuildings)
+            {
+                for(MapLocation enemy : enemyBuildings) if(Navigation.aerialDistance(friendly.location, enemy) <= 2) {
+
+                    for(Direction dir : dir8){
+                        MapLocation location = friendly.location.add(dir);
+                        if(location.isAdjacentTo(enemy))
+                            overlapLocations.add(location);
+                    }
+                }
+            }
+
+        for (MapLocation enemy : enemyBuildings)
+            if (Navigation.aerialDistance(enemy) < Navigation.aerialDistance(nearestEnemyBuilding))
+                nearestEnemyBuilding = enemy;
+
 
     }
 

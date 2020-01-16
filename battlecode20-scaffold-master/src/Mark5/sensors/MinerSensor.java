@@ -19,7 +19,7 @@ import static Mark5.utils.Strategium.*;
 
 public class MinerSensor {
 
-    public static void init(){
+    public static void init() {
         soup = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         explored = new boolean[rc.getMapWidth()][rc.getMapHeight()];
     }
@@ -61,7 +61,7 @@ public class MinerSensor {
                     }
 
                 }
-                if (robot.type.canRefine()) refineries.put(robot.location, robot);
+                if (robot.type.canRefine()) if(!refineries.contains(robot.location)) refineries.add(robot.location);
 
             } else {
 
@@ -75,20 +75,12 @@ public class MinerSensor {
 
         }
 
-        Wall.checkBaseStatus();
+        //Wall.checkBaseStatus();
 
 
-        Iterator<Map.Entry<MapLocation, RobotInfo>> it = refineries.entrySet().iterator();
-        while (it.hasNext()) {
-            RobotInfo refinery = it.next().getValue();
-            if (rc.canSenseLocation(refinery.location))
-                if (!rc.canSenseRobot(refinery.ID)) {
-                    it.remove();
-                }
-        }
 
         nearestRefinery = null;
-        for (MapLocation refinery : refineries.keySet()) {
+        for (MapLocation refinery : refineries) {
             if (refinery == HQLocation && Strategium.vaporatorBuilt)
                 continue;
             if (Navigation.aerialDistance(nearestRefinery, rc.getLocation()) >
@@ -122,6 +114,8 @@ public class MinerSensor {
 
 
             }
+
+        potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
 
         if (knownSoup > 0 && nearestSoup == null) scanAllSoup();
 

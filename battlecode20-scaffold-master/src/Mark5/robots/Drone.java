@@ -6,6 +6,7 @@ import Mark5.utils.Wall;
 import battlecode.common.*;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import static Mark5.RobotPlayer.dir8;
@@ -39,10 +40,10 @@ public class Drone {
 
     private static Iterator<MapLocation> target = null;
 
-    private static MapLocation getTarget(Set<MapLocation> set) {
+    private static MapLocation getTarget(List<MapLocation> list) {
         if (target != null) if (target.hasNext()) return target.next();
-        if (!set.isEmpty()) {
-            target = set.iterator();
+        if (!list.isEmpty()) {
+            target = list.iterator();
             return target.next();
         }
         return null;
@@ -183,7 +184,7 @@ public class Drone {
 
                     do {
                         changed = false;
-                        for (MapLocation gun : Strategium.enemyNetGuns.keySet())
+                        for (MapLocation gun : Strategium.enemyNetGuns)
                             while (waypoint.isWithinDistanceSquared(
                                     gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) {
                                 switch (patrolWaypointIndex) {
@@ -203,7 +204,7 @@ public class Drone {
                                 changed = true;
                             }
 
-                        for (MapLocation building : Strategium.enemyBuildings.keySet()) {
+                        for (MapLocation building : Strategium.enemyBuildings) {
                             if (building.equals(waypoint)) {
                                 switch (patrolWaypointIndex) {
                                     case 0:
@@ -235,7 +236,7 @@ public class Drone {
                     }
 
                     if (waypoint == null)
-                        waypoint = getTarget(Strategium.enemyBuildings.keySet());
+                        waypoint = getTarget(Strategium.enemyBuildings);
                     if (waypoint == null) waypoint = new MapLocation(
                             Strategium.rand.nextInt(rc.getMapWidth()), Strategium.rand.nextInt(rc.getMapHeight()));
 
@@ -251,7 +252,7 @@ public class Drone {
 
 
                     if (waypoint == null)
-                        waypoint = getTarget(Strategium.enemyBuildings.keySet());
+                        waypoint = getTarget(Strategium.enemyBuildings);
 
                     if (waypoint == null) waypoint = new MapLocation(
                             Strategium.rand.nextInt(rc.getMapWidth()), Strategium.rand.nextInt(rc.getMapHeight()));
@@ -269,7 +270,7 @@ public class Drone {
 
 
                         if (waypoint == null)
-                            waypoint = getTarget(Strategium.enemyBuildings.keySet());
+                            waypoint = getTarget(Strategium.enemyBuildings);
 
                         if (waypoint == null) waypoint = new MapLocation(
                                 Strategium.rand.nextInt(rc.getMapWidth()), Strategium.rand.nextInt(rc.getMapHeight()));

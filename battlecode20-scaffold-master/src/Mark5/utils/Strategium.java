@@ -27,12 +27,14 @@ public class Strategium {
     public static Team myTeam;
     public static Team opponentTeam;
 
-    public static HashMap<MapLocation, RobotInfo> enemyBuildings = new HashMap<>();
-    public static HashMap<MapLocation, RobotInfo> enemyNetGuns = new HashMap<>();
-    public static HashMap<MapLocation, RobotInfo> refineries = new HashMap<>();
-    public static List<RobotInfo> enemyDrones = new ArrayList<>();
-    public static List<RobotInfo> enemyUnits = new ArrayList<>();
-    public static List<RobotInfo> alliedDrones = new ArrayList<>();
+    public static List<MapLocation> enemyBuildings = new LinkedList<>();
+    public static List<MapLocation> enemyNetGuns = new LinkedList<>();
+    public static List<MapLocation> refineries = new LinkedList<>();
+    public static List<RobotInfo> enemyDrones = new LinkedList<>();
+    public static List<RobotInfo> enemyUnits = new LinkedList<>();
+    public static List<RobotInfo> alliedDrones = new LinkedList<>();
+    public static List<RobotInfo> buriedFriendlyBuildings = new LinkedList<>();
+
     public static boolean[] robotsMet;
     public static int numDronesMet = 0;
     public static int dronesMetWithLowerID = 0;
@@ -58,6 +60,10 @@ public class Strategium {
 
     public static boolean shouldBuildLandscaper = false;
     public static boolean shouldCircle = true;
+
+    public static MapLocation nearestBuriedFriendlyBuilding = null;
+    public static MapLocation nearestEnemyBuilding = null;
+    public static List<MapLocation> overlapLocations = new LinkedList<>();
 
     public static Random rand;
 
@@ -114,7 +120,7 @@ public class Strategium {
                         return true;
                     case TAXI:
                         if (!water[target.x][target.y]) return true;
-                        for (MapLocation gun : enemyNetGuns.keySet())
+                        for (MapLocation gun : enemyNetGuns)
                             if (target.isWithinDistanceSquared(
                                     gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) {
                                 if (enemyHQLocation == null) return false;
@@ -125,7 +131,7 @@ public class Strategium {
                             }
                         return true;
                     default:
-                        for (MapLocation gun : enemyNetGuns.keySet()){
+                        for (MapLocation gun : enemyNetGuns){
                             if (target.isWithinDistanceSquared(
                                     gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) return false;
                         }
@@ -137,6 +143,50 @@ public class Strategium {
     }
 
     static private void sense() throws GameActionException {
+
+        potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
+
+        enemyBuildings.removeIf(building -> {
+            if (rc.canSenseLocation(building)) {
+                try {
+                    RobotInfo info = rc.senseRobotAtLocation(building);
+                    return (info.type != RobotType.VAPORATOR &&
+                            info.type != RobotType.REFINERY &&
+                            info.type != RobotType.DESIGN_SCHOOL &&
+                            info.type != RobotType.NET_GUN &&
+                            info.type != RobotType.FULFILLMENT_CENTER) ||
+                            info.team != opponentTeam;
+                } catch (GameActionException e) {
+                    e.printStackTrace();
+                }
+            }
+            return false;
+        });
+
+        enemyNetGuns.removeIf(gun -> {
+            if (rc.canSenseLocation(gun)) {
+                try {
+                    RobotInfo info = rc.senseRobotAtLocation(gun);
+                    return info.type != RobotType.NET_GUN || info.team != opponentTeam;
+                } catch (GameActionException e) {
+                    e.printStackTrace();
+                }
+            }
+            return false;
+        });
+
+        refineries.removeIf(refinery -> {
+            if (rc.canSenseLocation(refinery)) {
+                try {
+                    RobotInfo info = rc.senseRobotAtLocation(refinery);
+                    return info.type != RobotType.REFINERY || info.team != myTeam;
+                } catch (GameActionException e) {
+                    e.printStackTrace();
+                }
+            }
+            return false;
+        });
+
         switch (rc.getType()) {
             case MINER:
                 MinerSensor.sense();

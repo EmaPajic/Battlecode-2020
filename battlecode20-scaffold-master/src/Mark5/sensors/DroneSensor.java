@@ -61,7 +61,7 @@ public class DroneSensor {
                     }
                 } else if (HQLocation != null) {
                     if (robot.type == RobotType.LANDSCAPER) {
-                        if (robot.location.equals(Wall.launchPad)){
+                        if (robot.location.equals(Wall.launchPad)) {
                             System.out.println("ZAGLAVIO SE " + robot + " " + Wall.isLaunchPadBlocked());
                         }
                         if (robot.location.equals(Wall.launchPad) && Wall.isLaunchPadBlocked()) {
@@ -86,45 +86,45 @@ public class DroneSensor {
 
             } else {
 
-                if (robot.type == RobotType.HQ) {
-                    enemyHQLocation = robot.location;
-                    potentialEnemyHQLocations.clear();
-                    enemyNetGuns.put(robot.location, robot);
-                } else if (robot.type == RobotType.NET_GUN) enemyNetGuns.put(robot.location, robot);
-                else if (robot.type.isBuilding()) enemyBuildings.put(robot.location, robot);
-                else if (robot.type == RobotType.DELIVERY_DRONE) {
-                    enemyDrones.add(robot);
-                    if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyDrone))
-                        nearestEnemyDrone = robot;
-                } else {
-                    enemyUnits.add(robot);
-                    if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyUnit))
-                        nearestEnemyUnit = robot;
+                switch (robot.type) {
+
+                    case HQ:
+                        if (enemyHQLocation == null) {
+                            enemyHQLocation = robot.location;
+                            potentialEnemyHQLocations.clear();
+                            enemyNetGuns.add(robot.location);
+                            enemyBuildings.add(robot.location);
+                        }
+                    case NET_GUN:
+
+                        if (!enemyNetGuns.contains(robot.location)) enemyNetGuns.add(robot.location);
+
+                    case DESIGN_SCHOOL:
+                    case FULFILLMENT_CENTER:
+                    case VAPORATOR:
+                    case REFINERY:
+
+                        if (!enemyBuildings.contains(robot.location)) enemyBuildings.add(robot.location);
+                        break;
+
+                    case DELIVERY_DRONE:
+
+                        enemyDrones.add(robot);
+                        if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyDrone))
+                            nearestEnemyDrone = robot;
+                        break;
+
+                    default:
+                        enemyUnits.add(robot);
+                        if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyUnit))
+                            nearestEnemyUnit = robot;
+
                 }
 
             }
 
         }
 
-        potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
-
-        Iterator<Map.Entry<MapLocation, RobotInfo>> it = enemyBuildings.entrySet().iterator();
-        while (it.hasNext()) {
-            RobotInfo building = it.next().getValue();
-            if (rc.canSenseLocation(building.location))
-                if (!rc.canSenseRobot(building.ID)) {
-                    it.remove();
-                }
-        }
-
-        it = enemyNetGuns.entrySet().iterator();
-        while (it.hasNext()) {
-            RobotInfo netGun = it.next().getValue();
-            if (rc.canSenseLocation(netGun.location))
-                if (!rc.canSenseRobot(netGun.ID)) {
-                    it.remove();
-                }
-        }
 
         int xMin = rc.getLocation().x - 4;
         int yMin = rc.getLocation().y - 4;
