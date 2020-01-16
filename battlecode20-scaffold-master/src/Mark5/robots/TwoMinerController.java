@@ -1,252 +1,282 @@
 package Mark5.robots;
 
+<<<<<<< HEAD
+import Mark5.sensors.LandscaperSensor;
+=======
+>>>>>>> 1ef628bcee7c38fad41aa389312522c81b297539
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import battlecode.common.*;
 
-import java.util.ArrayList;
+import java.awt.*;
+import java.util.*;
+
 
 import static Mark5.RobotPlayer.*;
+import static Mark5.RobotPlayer.tryMove;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-public class TwoMinerController {
-    enum SearchStrategy {
-        GOES_AROUND, GOES_TO_MIDDLE;
-    }
 
-    enum Activity {
-        ROAMING, MINING;
+
+public class TwoMinerController {
+
+
+    static class LocationComparator implements Comparator<MapLocation> {
+        @Override
+        public int compare(MapLocation locA, MapLocation locB){
+            //noinspection ComparatorMethodParameterNotUsed
+            return Navigation.aerialDistance(hqLocation, locA) > Navigation.aerialDistance(hqLocation, locB) ? 1 : -1;
+        }
     }
 
     static ArrayList<MapLocation> searchRoute;
     static ArrayList<MapLocation> searchRouteVisited;
-    static ArrayList<MapLocation> searchAroundRoute;
-    static ArrayList<MapLocation> searchMiddleRoute;
-    static Activity currentActivity;
-    static int currentTargetIndex;
+
     static MapLocation currentTarget;
-    static SearchStrategy mySearchStrategy;
-    static MapLocation MAP_CENTER;
-    static MapLocation NORTHWEST;
-    static MapLocation NORTHEAST;
-    static MapLocation SOUTHWEST;
-    static MapLocation SOUTHEAST;
-    static int[] adjecencyCount = {0, 0, 0, 0, 0, 0, 0, 0};
-    static int[] adjecencyID = {-1, -1, -1, -1, -1, -1, -1, -1};
 
 
-    static void findRoute() {
+    static boolean currentlyRefining;
+    static int[] adjacencyCount = {0, 0, 0, 0, 0, 0, 0, 0};
+    static int[] adjacencyID = {-1, -1, -1, -1, -1, -1, -1, -1};
 
-        int xCurrBordMax = rc.getLocation().x + 5;
-        int xCurrBordMin = rc.getLocation().x - 5;
-        int yCurrBordMax = rc.getLocation().y + 5;
-        int yCurrBordMin = rc.getLocation().y - 5;
 
-        for (int currX = max(0, xCurrBordMin); currX <= min(xCurrBordMax, rc.getMapWidth() - 1); currX++) {
+    static void findRoute()  {
+        for (int currX = 4; currX <= rc.getMapWidth() - 6; currX++) {
             if (currX % 5 == 0) {
-                for (int currY = max(0, yCurrBordMin); currY <= min(yCurrBordMax, rc.getMapHeight()); currY++) {
+                for (int currY = 4; currY <= rc.getMapHeight() - 6; currY++) {
                     if (currY % 5 == 0) {
                         searchRoute.add(new MapLocation(currX, currY));
-                    }
 
+                    }
                 }
             }
         }
     }
-    /*
-    static void chooseSearchRoute() {
-        MAP_CENTER = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
-        NORTHWEST = new MapLocation(5, rc.getMapHeight() - 5);
-        SOUTHWEST = new MapLocation(5, 5);
-        SOUTHEAST = new MapLocation(rc.getMapWidth() - 5, 5);
-        NORTHEAST = new MapLocation(rc.getMapWidth() - 5, rc.getMapHeight() -5);
-        MapLocation[] cornerPoints = {NORTHWEST, NORTHEAST, SOUTHWEST, SOUTHEAST};
 
-        // Populate search middle route
-        searchMiddleRoute = new ArrayList<>();
-        searchMiddleRoute.add(MAP_CENTER);
 
-        // Populate search around route
-        searchAroundRoute = new ArrayList<>();
-        MapLocation firstLocation = new MapLocation(1000, 1000);
-        for(MapLocation location : cornerPoints) {
-            if(location.distanceSquaredTo(hqLocation) < firstLocation.distanceSquaredTo(hqLocation)) {
-                firstLocation = location;
-            }
-        }
-        searchAroundRoute.add(firstLocation);
-        for(int count = 1; count <= 3; ++count) {
-            MapLocation nextBestLocation = new MapLocation(1000, 1000);
-            for(MapLocation location: cornerPoints) {
-                if (!searchAroundRoute.contains(location)) {
-                    if (location.distanceSquaredTo(searchAroundRoute.get(searchAroundRoute.size() - 1)) <
-                            nextBestLocation.distanceSquaredTo(searchAroundRoute.get(searchAroundRoute.size() - 1))) {
-                        nextBestLocation = location;
-                    }
-                }
-            }
-            searchAroundRoute.add(nextBestLocation);
-        }
 
-        searchRoute = new ArrayList<>();
-        if(mySearchStrategy == SearchStrategy.GOES_TO_MIDDLE) {
-            searchRoute.addAll(searchMiddleRoute);
-            searchRoute.addAll(searchAroundRoute);
-        } else {
-            searchRoute.addAll(searchAroundRoute);
-            searchRoute.addAll(searchMiddleRoute);
-        }
-    }*/
 
     public static void init() {
-        if (rc.getRoundNum() % 2 == 0) {
-            mySearchStrategy = SearchStrategy.GOES_AROUND;
-        } else
-            mySearchStrategy = SearchStrategy.GOES_TO_MIDDLE;
         searchRoute = new ArrayList<>();
-        //chooseSearchRoute(rc.getLocation());
+        searchRouteVisited = new ArrayList<>();
+        currentlyRefining = false;
+        //currentTarget = rc.getLocation();
         findRoute();
-        currentActivity = Activity.ROAMING;
-        currentTargetIndex = 0;
-        currentTarget = searchRoute.get(currentTargetIndex);
+        if(searchRoute.contains(hqLocation)){
+            searchRoute.remove(hqLocation);
+            searchRouteVisited.add(hqLocation);
+        }
+        Collections.sort(searchRoute, new LocationComparator());
+        currentTarget = searchRoute.get(0); // get the first location from sorted locations which are closest to HQ
+
+
+
     }
 
-    public static void control() throws GameActionException {
-        System.out.println("Adj count: " + adjecencyCount);
-        // Avoid collisions
-        if (!searchRoute.isEmpty() && currentTarget == null || Navigation.frustration > 100) {
 
-            int minDist = Navigation.aerialDistance(rc.getLocation(), currentTarget);
-            //currentTarget = searchRoute[0];
-            for (MapLocation loc : searchRoute) {
-                int tmpMinDist = Navigation.aerialDistance(rc.getLocation(), loc);
-                if (minDist < tmpMinDist) {
-                    currentTarget = loc;
-                }
-            }
-            searchRouteVisited.add(currentTarget);
-            searchRoute.remove(currentTarget);
-            if (searchRouteVisited.contains(currentTarget)) {
-                currentTarget = searchRouteVisited.get(searchRouteVisited.size() - 1);
-            } // should add currentTarget = null when water or higher terrain is found, so that it tries to get back and go to the other point
-        }
-        if (currentTarget != rc.getLocation()) {
-            for (int i = 0; i < 8; ++i) {
-                Direction dir = dir8[i];
-                if (rc.canSenseLocation(rc.getLocation().add(dir))) {
-                    RobotInfo info = rc.senseRobotAtLocation(rc.getLocation().add(dir));
-                    if (info != null) {
-                        if (info.getID() == adjecencyID[i]) {
-                            ++adjecencyCount[i];
-                        } else {
-                            adjecencyCount[i] = 1;
-                            adjecencyID[i] = info.getID();
-                        }
+    public static void checkRobotCollision() throws GameActionException{
+        for (int dirIndex = 0; dirIndex < 8; ++dirIndex) {
+            Direction dir = dir8[dirIndex];
+            if (rc.canSenseLocation(rc.getLocation().add(dir))) {
+                RobotInfo info = rc.senseRobotAtLocation(rc.getLocation().add(dir));
+                if (info != null) {
+                    if (info.getID() == adjacencyID[dirIndex]) {
+                        ++adjacencyCount[dirIndex];
                     } else {
-                        adjecencyCount[i] = 0;
-                        adjecencyID[i] = -1;
+                        adjacencyCount[dirIndex] = 1;
+                        adjacencyID[dirIndex] = info.getID();
                     }
+                } else {
+                    adjacencyCount[dirIndex] = 0;
+                    adjacencyID[dirIndex] = -1;
                 }
             }
-            for (int i = 0; i < 8; ++i) {
-                if (adjecencyCount[i] > 50) {
-                    for (Direction awayDir : dir8) {
-                        if (tryMove(awayDir)) {
-                            adjecencyCount[i] = 0;
-                            return;
-                        }
-                    }
-                }
-            }
-
-
-            // Build DesignCenter near enemy
-            for (MapLocation enemyLocation : Strategium.potentialEnemyHQLocations) {
-                System.out.println("Pot" + Strategium.potentialEnemyHQLocations);
-                if (rc.canSenseLocation(enemyLocation)) {
-                    RobotInfo info = rc.senseRobotAtLocation(enemyLocation);
-                    if (info != null)
-                        if (info.getTeam() == Strategium.opponentTeam && info.getType() == RobotType.HQ) {
-                            if (Navigation.aerialDistance(enemyLocation) > 3) {
-                                Navigation.bugPath(enemyLocation);
-                            } else {
-                                for (Direction dir : dir8) {
-                                    if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, dir) &&
-                                            Navigation.aerialDistance(rc.getLocation().add(dir), enemyLocation) <= 1) {
-                                        tryBuild(RobotType.DESIGN_SCHOOL, dir);
-                                    }
-                                }
-                            }
-                        }
-                }
-            }
-            if (rc.canSenseLocation(hqLocation)) {
-                if (rc.canSenseLocation(vaporatorLocation2)) {
-                    RobotInfo maybeVaporator = rc.senseRobotAtLocation(vaporatorLocation2);
-                    if (maybeVaporator != null) {
-                        if (maybeVaporator.getType() == RobotType.VAPORATOR) {
-                            Strategium.vaporatorBuilt = true;
-                            Strategium.nearestRefinery = null;
-                        }
-                    }
-                }
-            }
-            if (Strategium.vaporatorBuilt && Navigation.aerialDistance(hqLocation) < 4) {
-                Navigation.bugPath(currentTarget);
-                if (rc.getLocation().distanceSquaredTo(currentTarget) < 5) {
-                    currentTargetIndex = (currentTargetIndex + 1) % searchRoute.size();
-                    currentTarget = searchRoute.get(currentTargetIndex);
-                }
-            }
-            if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
-
-                for (Direction dir : dir8)
-                    if (rc.canMineSoup(dir)) {
-                        if (Navigation.aerialDistance(Strategium.nearestRefinery) > 7 &&
-                                Navigation.aerialDistance(hqLocation) > 4) {
-                            int xMin = rc.getLocation().x - 3;
-                            int yMin = rc.getLocation().y - 3;
-                            int xMax = rc.getLocation().x + 3;
-                            int yMax = rc.getLocation().y + 3;
-                            int totalSoup = 0;
-                            for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++) {
-                                for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
-
-                                    MapLocation location = new MapLocation(i, j);
-                                    if (rc.canSenseLocation(location))
-                                        totalSoup += rc.senseSoup(location);
-                                }
-                            }
-                            if (totalSoup > 200) {
-                                for (Direction dir2 : dir8) {
-                                    if (tryBuild(RobotType.REFINERY, dir2))
-                                        return;
-                                }
-                            }
-                        }
-                        if (tryMine(dir))
-                            return;
-                    }
-                if (Strategium.nearestSoup != null)
-                    if (Navigation.bugPath(Strategium.nearestSoup)) return;
-                Navigation.bugPath(currentTarget);
-                if (rc.getLocation().distanceSquaredTo(currentTarget) < 5) {
-                    currentTargetIndex = (currentTargetIndex + 1) % searchRoute.size();
-                    currentTarget = searchRoute.get(currentTargetIndex);
-                }
-
-            } else {
-
-                for (Direction dir : dir8)
-                    if (tryRefine(dir)) {
+        }
+        for (int ind = 0; ind < 8; ++ind) {
+            if (adjacencyCount[ind] > 50) {
+                for (Direction awayDir : dir8) {
+                    if (tryMove(awayDir)) {
+                        adjacencyCount[ind] = 0;
                         return;
                     }
-                Navigation.bugPath(Strategium.nearestRefinery);
-
+                }
             }
-        } else {
-            findRoute();
+        }
+    }
+
+    public static void updateTarget() throws GameActionException{
+        if(searchRoute.isEmpty()){
+
+        }else{
+            Navigation.frustration = 0;
+            searchRoute.remove(currentTarget);
+            searchRouteVisited.add(currentTarget);
+            currentTarget = searchRoute.get(0); // get the first elem
+        }
+    }
+
+
+    public static void buildDesignCenterNearEnemy() throws GameActionException {
+        // Build DesignCenter near enemy
+        for (MapLocation enemyLocation : Strategium.potentialEnemyHQLocations) {
+            //System.out.println("Pot" + Strategium.potentialEnemyHQLocations);
+            if (rc.canSenseLocation(enemyLocation)) {
+                RobotInfo info = rc.senseRobotAtLocation(enemyLocation);
+                if (info != null)
+                    if (info.getTeam() == Strategium.opponentTeam && info.getType() == RobotType.HQ) {
+                        if (Navigation.aerialDistance(enemyLocation) > 3) {
+                            Navigation.bugPath(enemyLocation);
+                        } else {
+                            for (Direction dir : dir8) {
+                                if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, dir) &&
+                                        Navigation.aerialDistance(rc.getLocation().add(dir), enemyLocation) <= 1) {
+                                    tryBuild(RobotType.DESIGN_SCHOOL, dir);
+                                }
+                            }
+                        }
+                    }
+            }
+        }
+    }
+    public static void refineryRentability() throws GameActionException {
+        if (Navigation.aerialDistance(rc.getLocation(), Strategium.nearestRefinery) > 7 &&
+                Navigation.aerialDistance(hqLocation, rc.getLocation()) > 4) {
+
+//            System.out.println("Daleko si");
+            int xMin = rc.getLocation().x - 3;
+            int yMin = rc.getLocation().y - 3;
+            int xMax = rc.getLocation().x + 3;
+            int yMax = rc.getLocation().y + 3;
+            int totalSoup = 0;
+            for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++) {
+                for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
+                    MapLocation loc = new MapLocation(i,j);
+                    if(rc.canSenseLocation(loc))
+                        totalSoup += rc.senseSoup(loc);
+                }
+            }
+            System.out.println("Totalna supa"+totalSoup);
+            if (totalSoup > 200) {
+                for (Direction dir : dir8) {
+                    boolean refineryBuilt = tryBuild(RobotType.REFINERY, dir);
+//                    System.out.println("Moguce napraviti rafineriju "+ refineryBuilt);
+                    if (refineryBuilt) {
+                        //System.out.println("napravio rafineriju");
+                        return;
+                    }
+                }
+            }
+        }
+
+
+
+
+    }
+    public static boolean mineAndRefine() throws GameActionException{
+        if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
+            if (Strategium.nearestSoup != null) {
+                //System.out.println("Supa nadjena");
+                if(Navigation.aerialDistance(Strategium.nearestSoup, rc.getLocation()) > 1){
+                    Navigation.bugPath(Strategium.nearestSoup);
+                }
+                refineryRentability();
+                tryMine(rc.getLocation().directionTo(Strategium.nearestSoup));
+
+                return true;
+            }
+        } else{
+            if(Navigation.aerialDistance(Strategium.nearestRefinery, rc.getLocation()) > 1){
+                Navigation.bugPath(Strategium.nearestRefinery);
+            }
+
+
+
+            tryRefine(rc.getLocation().directionTo(Strategium.nearestRefinery));
+
+
+            return true;
+        }
+        return false;
+    }
+    public static void control() throws GameActionException {
+        //System.out.println("Adj count: " + adjacencyCount);
+        // Avoid collisions
+        rc.setIndicatorLine(rc.getLocation(), currentTarget, 1, 0, 0);
+        System.out.println("Current target " + currentTarget);
+        if (!rc.canSenseLocation(currentTarget) && Navigation.frustration < 50) {
+
+            if(mineAndRefine()) return;
+            else {
+                Navigation.bugPath(currentTarget);
+            }
+//              }
+//              else if(rc.getSoupCarrying() > RobotType.MINER.soupLimit || currentlyRefining){
+//                  if(Navigation.aerialDistance(Strategium.nearestRefinery, rc.getLocation()) > 1){
+//                      Navigation.bugPath(Strategium.nearestRefinery);
+//                      return;
+//                  } else{
+//                      currentlyRefining = true;
+//                      tryRefine(rc.getLocation().directionTo(Strategium.nearestRefinery));
+//                      return;
+//                  }
+//              } else if(rc.getSoupCarrying() == 0 && currentlyRefining == true){
+//                  currentlyRefining = false;
+//              }
+
+//            checkRobotCollision();
+//            buildDesignCenterNearEnemy();
+//
+//            if (rc.canSenseLocation(hqLocation)) {
+//                if (rc.canSenseLocation(vaporatorLocation2)) {
+//                    RobotInfo maybeVaporator = rc.senseRobotAtLocation(vaporatorLocation2);
+//                    if (maybeVaporator != null) {
+//                        if (maybeVaporator.getType() == RobotType.VAPORATOR) {
+//                            Strategium.vaporatorBuilt = true;
+//                            Strategium.nearestRefinery = null;
+//                        }
+//                    }
+//                }
+//            }
+//            // sta ovaj deo koda radi?
+////            if (Strategium.vaporatorBuilt && Navigation.aerialDistance(hqLocation) < 4) {
+////                Navigation.bugPath(currentTarget);
+////                if (rc.getLocation().distanceSquaredTo(currentTarget) < 5) {
+////                    currentTargetIndex = (currentTargetIndex + 1) % searchRoute.size();
+////                    currentTarget = searchRoute.get(currentTargetIndex);
+////                }
+////            }
+//            if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
+//
+//                            }
+//                        }
+//                        if (tryMine(dir)) {
+//                            return;
+//                        }
+//                    }
+//                if (Strategium.nearestSoup != null)
+//                    if (Navigation.bugPath(Strategium.nearestSoup)) return;
+
+//                if (rc.getLocation().distanceSquaredTo(currentTarget) < 5) {
+//                    currentTargetIndex = (currentTargetIndex + 1) % searchRoute.size();
+//                    currentTarget = searchRoute.get(currentTargetIndex);
+//                }
+
+//            } else {
+//                // when finished with refining go back to pos where you were mining
+//                Navigation.bugPath(Strategium.nearestRefinery);
+//                if (Navigation.aerialDistance(Strategium.nearestRefinery, rc.getLocation()) == 1) {
+//                    tryRefine(rc.getLocation().directionTo(Strategium.nearestRefinery));
+//                    currentlyRefining = true;
+//                    return;
+//
+//                }
+//            }
+
+
+        }else {
+            updateTarget();
         }
     }
 }
+
