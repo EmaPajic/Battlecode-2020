@@ -1,15 +1,16 @@
-package Mark4.utils;
+package Mark5.robots;
 
-import Mark4.utils.Navigation;
-import Mark4.utils.Strategium;
+import Mark5.sensors.LandscaperSensor;
+import Mark5.utils.Navigation;
+import Mark5.utils.Strategium;
 import battlecode.common.*;
 
 import java.awt.*;
 import java.util.*;
 
 
-import static Mark4.RobotPlayer.*;
-import static Mark4.RobotPlayer.tryMove;
+import static Mark5.RobotPlayer.*;
+import static Mark5.RobotPlayer.tryMove;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -63,10 +64,9 @@ public class TwoMinerController {
             searchRoute.remove(hqLocation);
             searchRouteVisited.add(hqLocation);
         }
-//        System.out.println(searchRoute);
         Collections.sort(searchRoute, new LocationComparator());
         currentTarget = searchRoute.get(0); // get the first location from sorted locations which are closest to HQ
-//        System.out.println(searchRoute);
+
 
 
     }
@@ -136,53 +136,77 @@ public class TwoMinerController {
             }
         }
     }
-    public static void tryToFindSoup() throws GameActionException {
-        for (Direction dir : dir8) {
-            if (rc.canMineSoup(dir)) {
-                if (Navigation.aerialDistance(Strategium.nearestRefinery) > 7 &&
-                        Navigation.aerialDistance(hqLocation) > 4) {
-                    int xMin = rc.getLocation().x - 5;
-                    int yMin = rc.getLocation().y - 5;
-                    int xMax = rc.getLocation().x + 5;
-                    int yMax = rc.getLocation().y + 5;
-                    int totalSoup = 0;
-                    for (int i = max(0, xMin); i <= xMax; i++) {
-                        for (int j = max(0, yMin); j <= yMax; j++) {
+    public static void refineryRentability() throws GameActionException {
+        if (Navigation.aerialDistance(rc.getLocation(), Strategium.nearestRefinery) > 7 &&
+                Navigation.aerialDistance(hqLocation, rc.getLocation()) > 4) {
 
-                            MapLocation location = new MapLocation(i, j);
-                            if (rc.canSenseLocation(location))
-                                totalSoup += rc.senseSoup(location);
-                        }
-                    }
-                    if (totalSoup > 200) {
-                        for (Direction dir2 : dir8) {
-                            if (tryBuild(RobotType.REFINERY, dir2))
-                                return;
-                        }
+//            System.out.println("Daleko si");
+            int xMin = rc.getLocation().x - 3;
+            int yMin = rc.getLocation().y - 3;
+            int xMax = rc.getLocation().x + 3;
+            int yMax = rc.getLocation().y + 3;
+            int totalSoup = 0;
+            for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++) {
+                for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
+                    MapLocation loc = new MapLocation(i,j);
+                    if(rc.canSenseLocation(loc))
+                        totalSoup += rc.senseSoup(loc);
+                }
+            }
+            System.out.println("Totalna supa"+totalSoup);
+            if (totalSoup > 200) {
+                for (Direction dir : dir8) {
+                    boolean refineryBuilt = tryBuild(RobotType.REFINERY, dir);
+//                    System.out.println("Moguce napraviti rafineriju "+ refineryBuilt);
+                    if (refineryBuilt) {
+                        //System.out.println("napravio rafineriju");
+                        return;
                     }
                 }
             }
-            tryMine(dir);
-
         }
 
-    }
 
+
+
+    }
+    public static boolean mineAndRefine() throws GameActionException{
+        if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
+            if (Strategium.nearestSoup != null) {
+                //System.out.println("Supa nadjena");
+                if(Navigation.aerialDistance(Strategium.nearestSoup, rc.getLocation()) > 1){
+                    Navigation.bugPath(Strategium.nearestSoup);
+                }
+                refineryRentability();
+                tryMine(rc.getLocation().directionTo(Strategium.nearestSoup));
+
+                return true;
+            }
+        } else{
+            if(Navigation.aerialDistance(Strategium.nearestRefinery, rc.getLocation()) > 1){
+                Navigation.bugPath(Strategium.nearestRefinery);
+            }
+
+
+
+            tryRefine(rc.getLocation().directionTo(Strategium.nearestRefinery));
+
+
+            return true;
+        }
+        return false;
+    }
     public static void control() throws GameActionException {
         //System.out.println("Adj count: " + adjacencyCount);
         // Avoid collisions
+        rc.setIndicatorLine(rc.getLocation(), currentTarget, 1, 0, 0);
         System.out.println("Current target " + currentTarget);
-        if(!rc.canSenseLocation(currentTarget) && Navigation.frustration < 50) {
-//              if(rc.getSoupCarrying() < RobotType.MINER.soupLimit){
-//                  if (Strategium.nearestSoup == null) {
-//                      tryToFindSoup();
-//                      Navigation.bugPath(currentTarget);
-//                      return;
-//                  }else {
-//                    Navigation.bugPath(Strategium.nearestSoup);
-//                    return;
-//                  }
-//
+        if (!rc.canSenseLocation(currentTarget) && Navigation.frustration < 50) {
+
+            if(mineAndRefine()) return;
+            else {
+                Navigation.bugPath(currentTarget);
+            }
 //              }
 //              else if(rc.getSoupCarrying() > RobotType.MINER.soupLimit || currentlyRefining){
 //                  if(Navigation.aerialDistance(Strategium.nearestRefinery, rc.getLocation()) > 1){
@@ -196,7 +220,7 @@ public class TwoMinerController {
 //              } else if(rc.getSoupCarrying() == 0 && currentlyRefining == true){
 //                  currentlyRefining = false;
 //              }
-            Navigation.bugPath(currentTarget);
+
 //            checkRobotCollision();
 //            buildDesignCenterNearEnemy();
 //
@@ -247,9 +271,9 @@ public class TwoMinerController {
 //            }
 
 
-
-        } else {
+        }else {
             updateTarget();
         }
     }
 }
+
