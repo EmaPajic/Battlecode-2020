@@ -1,6 +1,9 @@
 package Mark5.robots;
 
+<<<<<<< HEAD
 import Mark5.sensors.LandscaperSensor;
+=======
+>>>>>>> 1ef628bcee7c38fad41aa389312522c81b297539
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import battlecode.common.*;
