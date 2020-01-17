@@ -107,6 +107,7 @@ public class Strategium {
     public static boolean canSafelyMove(Direction dir) throws GameActionException {
         if (!rc.canMove(dir)) return false;
         MapLocation target = rc.adjacentLocation(dir);
+        if(rc.sensePollution(target) >= 9600) return false;
         switch (rc.getType()) {
             case MINER:
             case LANDSCAPER:
