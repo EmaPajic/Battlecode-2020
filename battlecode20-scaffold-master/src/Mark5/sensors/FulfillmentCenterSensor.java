@@ -28,7 +28,7 @@ public class FulfillmentCenterSensor {
             for (int i = 0; i < 8; ++i) {
                 RobotInfo robot = rc.senseRobotAtLocation(
                         rc.getLocation().add(RobotPlayer.dir8[i]));
-                if (robot != null) if (!robot.type.isBuilding()) {
+                if (robot != null) if (!robot.type.isBuilding() && robot.getType() != RobotType.DELIVERY_DRONE) {
                     if(adjacentRobotTurnID[i] == robot.getID()) {
                         ++adjacentRobotTurnCount[i];
                     }
