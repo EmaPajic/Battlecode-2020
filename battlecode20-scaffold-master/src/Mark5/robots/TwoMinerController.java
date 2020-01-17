@@ -1,5 +1,7 @@
 package Mark5.robots;
 
+import Mark5.sensors.MinerSensor;
+import Mark5.utils.Lattice;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import battlecode.common.*;
@@ -10,9 +12,7 @@ import java.util.*;
 
 import static Mark5.RobotPlayer.*;
 import static Mark5.RobotPlayer.tryMove;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-
+import static java.lang.Math.*;
 
 public class TwoMinerController {
 
@@ -34,7 +34,7 @@ public class TwoMinerController {
     static ArrayList<MapLocation> searchRouteVisited;
 
     static MapLocation currentTarget;
-
+    static public ArrayList<RobotType> staticRobots;
 
     static boolean currentlyRefining;
     static int[] adjacencyCount = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -56,6 +56,7 @@ public class TwoMinerController {
 
 
     public static void init() {
+        staticRobots = new ArrayList<>(Arrays.asList(RobotType.VAPORATOR, RobotType.DESIGN_SCHOOL,  RobotType.FULFILLMENT_CENTER, RobotType.HQ, RobotType.NET_GUN, RobotType.REFINERY));
         searchRoute = new ArrayList<>();
         searchRouteVisited = new ArrayList<>();
         currentlyRefining = false;
@@ -160,7 +161,7 @@ public class TwoMinerController {
                         totalSoup += rc.senseSoup(loc);
                 }
             }
-            System.out.println("Totalna supa" + totalSoup);
+
             if (totalSoup > 200) {
                 for (Direction dir : dir8) {
                     boolean refineryBuilt = tryBuild(RobotType.REFINERY, dir);
@@ -205,13 +206,72 @@ public class TwoMinerController {
     public static void control() throws GameActionException {
         //System.out.println("Adj count: " + adjacencyCount);
         // Avoid collisions
-        rc.setIndicatorLine(rc.getLocation(), currentTarget, 1, 0, 0);
-        System.out.println("Current target " + currentTarget);
+        Strategium.gatherInfo();
+//        rc.setIndicatorLine(rc.getLocation(), currentTarget, 1, 0, 0);
+//        System.out.println("Current target " + currentTarget);
         if (!rc.canSenseLocation(currentTarget) && Navigation.frustration < 50) {
 
             if (mineAndRefine()) return;
             else {
+                RobotInfo[] robots = rc.senseNearbyRobots();
+                RobotType makeRobotType = null;
+                for(RobotInfo robot : robots) {
+                    if (robot.team == Strategium.myTeam) {
+                        if (staticRobots.contains(robot.type) && robot.getDirtCarrying() > 0) {
+                            makeRobotType = RobotType.DESIGN_SCHOOL;
+                        }
+
+                        // if its not in visible radius make altern design school and fulfilment center if soup > 1000
+                        // if soup < 1000 make vaporator
+                        // if enemy drone spoted or enemy fulfilment center make net gun
+                        // if you spot endangered building make design school - OK
+                        // if you see miner or landscaper make fulfilment center - 0K
+                        // if enemy building and is not fulfilment center make design school - OK
+
+
+                    } else {
+                        if (robot.type != RobotType.FULFILLMENT_CENTER) {
+                            makeRobotType = RobotType.DESIGN_SCHOOL;
+                        } else if (robot.type == RobotType.FULFILLMENT_CENTER || robot.type == RobotType.DELIVERY_DRONE) {
+                            makeRobotType = RobotType.NET_GUN;
+                        } else if (robot.type == RobotType.LANDSCAPER || robot.type == RobotType.MINER) {
+                            makeRobotType = RobotType.FULFILLMENT_CENTER;
+                        } else if (rc.getTeamSoup() < 1000) {
+                            makeRobotType = RobotType.VAPORATOR;
+                        } else if (rc.getTeamSoup() >= 1000) {
+                            makeRobotType = RobotType.DESIGN_SCHOOL;
+
+                        }
+
+                    }
+                    if (makeRobotType != null) {
+                        if (staticRobots.contains(makeRobotType)) {
+                            boolean noSameTwoBuildings = true;
+                            for (RobotInfo robot2 : robots) {
+                                if (robot2.team == Strategium.myTeam && robot2.type == makeRobotType) {
+                                    noSameTwoBuildings = false;
+                                }
+                            }
+                            if (noSameTwoBuildings) {
+                                for (Direction dir : dir8) {
+                                    if (Lattice.isBuildingSite(rc.getLocation().add(dir))) {
+                                        tryBuild(makeRobotType, dir);
+                                        return;
+                                    }
+                                }
+                            }
+                        } else {
+                            for (Direction dir : dir8) {
+                                if (Lattice.isBuildingSite(rc.getLocation().add(dir))) {
+                                    tryBuild(makeRobotType, dir);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
                 Navigation.bugPath(currentTarget);
+                return;
             }
 //              }
 //              else if(rc.getSoupCarrying() > RobotType.MINER.soupLimit || currentlyRefining){
@@ -279,6 +339,7 @@ public class TwoMinerController {
 
         } else {
             updateTarget();
+            return;
         }
     }
 }
