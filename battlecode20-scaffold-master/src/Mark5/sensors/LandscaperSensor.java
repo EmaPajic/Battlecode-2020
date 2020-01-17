@@ -8,11 +8,15 @@ import static Mark5.RobotPlayer.dir8;
 import static Mark5.RobotPlayer.rc;
 
 import static Mark5.utils.Strategium.*;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public class LandscaperSensor {
 
     public static void init() {
         elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
+        occupied = new boolean[rc.getMapWidth()][rc.getMapHeight()];
+        water = new boolean[rc.getMapWidth()][rc.getMapHeight()];
     }
 
     public static void sense() throws GameActionException {
@@ -23,19 +27,26 @@ public class LandscaperSensor {
         enemyDrones.clear();
         buriedFriendlyBuildings.clear();
 
-        RobotInfo[] robots = rc.senseNearbyRobots();
+        int xMin = rc.getLocation().x - 4;
+        int yMin = rc.getLocation().y - 4;
+        int xMax = rc.getLocation().x + 4;
+        int yMax = rc.getLocation().y + 4;
+        for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++)
+            for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
 
-        if (HQLocation == null) {
-            for (RobotInfo robot : robots) {
-                if (robot.type == RobotType.HQ && robot.team == rc.getTeam()) {
-                    Wall.init();
-                    break;
+                MapLocation location = new MapLocation(i, j);
+                if (rc.canSenseLocation(location)) {
+                    elevation[i][j] = rc.senseElevation(location);
+                    water[i][j] = rc.senseFlooding(location);
+                    occupied[i][j] = false;
                 }
             }
-        }
+
+        RobotInfo[] robots = rc.senseNearbyRobots();
 
 
-        for (RobotInfo robot : rc.senseNearbyRobots()) {
+        for (RobotInfo robot : robots) {
+            occupied[robot.location.x][robot.location.y] = true;
 
             if (robot.getTeam() == myTeam) {
 
@@ -114,6 +125,9 @@ public class LandscaperSensor {
         for (MapLocation enemy : enemyBuildings)
             if (Navigation.aerialDistance(enemy) < Navigation.aerialDistance(nearestEnemyBuilding))
                 nearestEnemyBuilding = enemy;
+
+
+
 
 
     }

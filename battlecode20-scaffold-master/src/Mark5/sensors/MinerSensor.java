@@ -21,18 +21,53 @@ public class MinerSensor {
 
     public static void init() {
         soup = new boolean[rc.getMapWidth()][rc.getMapHeight()];
-        explored = new boolean[rc.getMapWidth()][rc.getMapHeight()];
+        //explored = new boolean[rc.getMapWidth()][rc.getMapHeight()];
+        elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
+        occupied = new boolean[rc.getMapWidth()][rc.getMapHeight()];
+        water = new boolean[rc.getMapWidth()][rc.getMapHeight()];
     }
 
     public static void sense() throws GameActionException {
 
         enemyDrones.clear();
         nearestEnemyDrone = null;
+
+        int xMin = rc.getLocation().x - 5;
+        int yMin = rc.getLocation().y - 5;
+        int xMax = rc.getLocation().x + 5;
+        int yMax = rc.getLocation().y + 5;
+        for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++)
+            for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
+
+                MapLocation location = new MapLocation(i, j);
+                if (rc.canSenseLocation(location)) {
+                    elevation[i][j] = rc.senseElevation(location);
+                    water[i][j] = rc.senseFlooding(location);
+                    occupied[i][j] = false;
+                    if (rc.senseSoup(location) > 0) {
+                        //explored[i][j] = true;
+                        if (!soup[i][j]) {
+                            knownSoup++;
+                            soup[i][j] = true;
+                            if (Navigation.aerialDistance(rc.getLocation(), i, j) <
+                                    Navigation.aerialDistance(rc.getLocation(), nearestSoup))
+                                nearestSoup = new MapLocation(i, j);
+                        }
+
+                    } else if (soup[i][j]) {
+                        soup[i][j] = false;
+                        knownSoup--;
+                        if (nearestSoup.x == i && nearestSoup.y == j) nearestSoup = null;
+                    }
+
+                }
+
+            }
+
         RobotInfo[] robots = rc.senseNearbyRobots();
 
-        if (HQLocation != null) onWallAndBlocking = Wall.onWallAndBlocking(robots, rc.getLocation());
-
         for (RobotInfo robot : robots) {
+            occupied[robot.location.x][robot.location.y] = true;
 
             if (robot.team == myTeam) {
 
@@ -87,33 +122,6 @@ public class MinerSensor {
                     Navigation.aerialDistance(refinery, rc.getLocation()))
                 nearestRefinery = refinery;
         }
-        int xMin = rc.getLocation().x - 5;
-        int yMin = rc.getLocation().y - 5;
-        int xMax = rc.getLocation().x + 5;
-        int yMax = rc.getLocation().y + 5;
-        for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++)
-            for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
-
-                MapLocation location = new MapLocation(i, j);
-                if (rc.canSenseLocation(location))
-                    if (rc.senseSoup(location) > 0) {
-                        explored[i][j] = true;
-                        if (!soup[i][j]) {
-                            knownSoup++;
-                            soup[i][j] = true;
-                            if (Navigation.aerialDistance(rc.getLocation(), i, j) <
-                                    Navigation.aerialDistance(rc.getLocation(), nearestSoup))
-                                nearestSoup = new MapLocation(i, j);
-                        }
-
-                    } else if (soup[i][j]) {
-                        soup[i][j] = false;
-                        knownSoup--;
-                        if (nearestSoup.x == i && nearestSoup.y == j) nearestSoup = null;
-                    }
-
-
-            }
 
         potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
 

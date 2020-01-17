@@ -54,6 +54,7 @@ public class Strategium {
     public static int[][] elevation = null;
     public static boolean[][] water = null;
     public static boolean[][] explored = null;
+    public static boolean[][] occupied = null;
     public static int knownSoup = 0;
     public static boolean foundWater = false;
     public static boolean vaporatorBuilt = false;

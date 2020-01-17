@@ -20,6 +20,7 @@ public class DroneSensor {
         elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
         explored = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         robotsMet = new boolean[GameConstants.MAX_ROBOT_ID];
+        occupied = new boolean[rc.getMapWidth()][rc.getMapHeight()];
 
     }
 
@@ -34,10 +35,39 @@ public class DroneSensor {
         blockingUnit = null;
         nearestLandscaper = null;
 
+        int xMin = rc.getLocation().x - 4;
+        int yMin = rc.getLocation().y - 4;
+        int xMax = rc.getLocation().x + 4;
+        int yMax = rc.getLocation().y + 4;
+        for (int i = xMin; i <= xMax; i++)
+            for (int j = yMin; j <= yMax; j++) {
+
+                MapLocation location = new MapLocation(i, j);
+                if (rc.canSenseLocation(location)) {
+                    explored[i][j] = true;
+                    elevation[i][j] = rc.senseElevation(location);
+                    occupied[i][j] = false;
+                    if (rc.senseFlooding(location)) {
+                        if (!water[i][j]) {
+                            water[i][j] = true;
+                            foundWater = true;
+                        }
+                    } else {
+
+                        water[i][j] = false;
+                        if (location.equals(nearestWater))
+                            nearestWater = null;
+
+                    }
+                }
+            }
+
 
         RobotInfo[] robots = rc.senseNearbyRobots();
 
         for (RobotInfo robot : robots) {
+
+            occupied[robot.location.x][robot.location.y] = true;
 
             if (robot.team == myTeam) {
 
@@ -126,31 +156,7 @@ public class DroneSensor {
         }
 
 
-        int xMin = rc.getLocation().x - 4;
-        int yMin = rc.getLocation().y - 4;
-        int xMax = rc.getLocation().x + 4;
-        int yMax = rc.getLocation().y + 4;
-        for (int i = xMin; i <= xMax; i++)
-            for (int j = yMin; j <= yMax; j++) {
 
-                MapLocation location = new MapLocation(i, j);
-                if (rc.canSenseLocation(location)) {
-                    explored[i][j] = true;
-                    elevation[i][j] = rc.senseElevation(location);
-                    if (rc.senseFlooding(location)) {
-                        if (!water[i][j]) {
-                            water[i][j] = true;
-                            foundWater = true;
-                        }
-                    } else {
-
-                        water[i][j] = false;
-                        if (location.equals(nearestWater))
-                            nearestWater = null;
-
-                    }
-                }
-            }
 
         if (!rc.isReady() && nearestWater == null) findWater();
 
