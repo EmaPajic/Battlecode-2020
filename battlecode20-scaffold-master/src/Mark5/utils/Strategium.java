@@ -1,9 +1,8 @@
 package Mark5.utils;
 
-import Mark5.RobotPlayer;
 import Mark5.robots.Drone;
 import Mark5.sensors.DroneSensor;
-import Mark5.sensors.IndustrySensor;
+import Mark5.sensors.FulfillmentCenterSensor;
 import Mark5.sensors.LandscaperSensor;
 import Mark5.sensors.MinerSensor;
 import battlecode.common.*;
@@ -22,6 +21,7 @@ public class Strategium {
     public static MapLocation HQLocation = null;
     public static MapLocation enemyHQLocation = null;
     public static List<MapLocation> potentialEnemyHQLocations = new ArrayList<>();
+    public static MapLocation currentEnemyHQTarget = null;
     public static boolean onWallAndBlocking = false;
 
     public static Team myTeam;
@@ -201,7 +201,7 @@ public class Strategium {
                 break;
             case DESIGN_SCHOOL:
             case FULFILLMENT_CENTER:
-                IndustrySensor.sense();
+                FulfillmentCenterSensor.sense();
                 break;
         }
     }
@@ -233,21 +233,7 @@ public class Strategium {
                 case 73:
                     if (HQLocation != null) break;
                     HQLocation = new MapLocation(message[0], message[1]);
-
-                    if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
-                        potentialEnemyHQLocations.add(
-                                new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
-
-                    if (HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                        potentialEnemyHQLocations.add(
-                                new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1));
-
-                    if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1 &&
-                            HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                        potentialEnemyHQLocations.add(
-                                new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
-                                        rc.getMapHeight() - HQLocation.y - 1));
-
+                    updatePotentialEnemyHQLocations();
                     break;
                 default:
                     break;
@@ -256,5 +242,41 @@ public class Strategium {
             transactions.remove(0);
         }
 
+    }
+
+    static public void updatePotentialEnemyHQLocations() {
+        if (HQLocation == null)
+            return;
+        if (Math.abs(rc.getMapWidth() / 2 - rc.getLocation().x) >
+                Math.abs(rc.getMapHeight() / 2 - rc.getLocation().y)) {
+            if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
+                potentialEnemyHQLocations.add(
+                        new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
+
+            if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1 &&
+                    HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
+                potentialEnemyHQLocations.add(
+                        new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
+                                rc.getMapHeight() - HQLocation.y - 1));
+
+            if (HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
+                potentialEnemyHQLocations.add(
+                        new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1));
+        }
+        else {
+            if (HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
+                potentialEnemyHQLocations.add(
+                        new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1));
+
+            if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1 &&
+                    HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
+                potentialEnemyHQLocations.add(
+                        new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
+                                rc.getMapHeight() - HQLocation.y - 1));
+
+            if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
+                potentialEnemyHQLocations.add(
+                        new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
+        }
     }
 }
