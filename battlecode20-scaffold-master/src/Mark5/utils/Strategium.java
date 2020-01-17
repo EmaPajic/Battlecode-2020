@@ -151,6 +151,7 @@ public class Strategium {
             if (rc.canSenseLocation(building)) {
                 try {
                     RobotInfo info = rc.senseRobotAtLocation(building);
+                    if(info == null) return true;
                     return (info.type != RobotType.VAPORATOR &&
                             info.type != RobotType.REFINERY &&
                             info.type != RobotType.DESIGN_SCHOOL &&
@@ -168,6 +169,7 @@ public class Strategium {
             if (rc.canSenseLocation(gun)) {
                 try {
                     RobotInfo info = rc.senseRobotAtLocation(gun);
+                    if (info == null) return true;
                     return info.type != RobotType.NET_GUN || info.team != opponentTeam;
                 } catch (GameActionException e) {
                     e.printStackTrace();
@@ -180,6 +182,7 @@ public class Strategium {
             if (rc.canSenseLocation(refinery)) {
                 try {
                     RobotInfo info = rc.senseRobotAtLocation(refinery);
+                    if(info == null) return true;
                     return info.type != RobotType.REFINERY || info.team != myTeam;
                 } catch (GameActionException e) {
                     e.printStackTrace();
