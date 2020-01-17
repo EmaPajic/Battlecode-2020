@@ -1,6 +1,7 @@
 package Mark5.sensors;
 
 import Mark5.utils.Navigation;
+import Mark5.utils.Strategium;
 import Mark5.utils.Wall;
 import battlecode.common.*;
 
@@ -75,19 +76,7 @@ public class DroneSensor {
                     if (HQLocation == null) {
                         HQLocation = robot.location;
                         Wall.init();
-                        if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
-                            potentialEnemyHQLocations.add(
-                                    new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
-
-                        if (HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                            potentialEnemyHQLocations.add(
-                                    new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1));
-
-                        if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1 &&
-                                HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                            potentialEnemyHQLocations.add(
-                                    new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
-                                            rc.getMapHeight() - HQLocation.y - 1));
+                        Strategium.updatePotentialEnemyHQLocations();
                     }
                 } else if (HQLocation != null) {
                     if (robot.type == RobotType.LANDSCAPER) {

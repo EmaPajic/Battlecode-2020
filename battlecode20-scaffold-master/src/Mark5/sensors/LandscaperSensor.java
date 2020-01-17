@@ -1,6 +1,8 @@
 package Mark5.sensors;
 
+import Mark5.utils.Lattice;
 import Mark5.utils.Navigation;
+import Mark5.utils.Strategium;
 import Mark5.utils.Wall;
 import battlecode.common.*;
 
@@ -23,6 +25,7 @@ public class LandscaperSensor {
 
         nearestBuriedFriendlyBuilding = null;
         nearestEnemyBuilding = null;
+        nearestWater = null;
         overlapLocations.clear();
         enemyDrones.clear();
         buriedFriendlyBuildings.clear();
@@ -39,6 +42,12 @@ public class LandscaperSensor {
                     elevation[i][j] = rc.senseElevation(location);
                     water[i][j] = rc.senseFlooding(location);
                     occupied[i][j] = false;
+                    if(rc.senseFlooding(location)){
+                        if(Navigation.aerialDistance(nearestWater) > Navigation.aerialDistance(location) ||
+                                (Navigation.aerialDistance(nearestWater) == Navigation.aerialDistance(location) &&
+                                        elevation[nearestWater.x][nearestWater.y] < elevation[location.x][location.y]))
+                            nearestWater = location;
+                    }
                 }
             }
 
@@ -55,19 +64,7 @@ public class LandscaperSensor {
                         if (HQLocation == null) {
                             HQLocation = robot.location;
 
-                            if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
-                                potentialEnemyHQLocations.add(
-                                        new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
-
-                            if (HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                                potentialEnemyHQLocations.add(
-                                        new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1));
-
-                            if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1 &&
-                                    HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                                potentialEnemyHQLocations.add(
-                                        new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
-                                                rc.getMapHeight() - HQLocation.y - 1));
+                            Strategium.updatePotentialEnemyHQLocations();
                         }
 
                     case DESIGN_SCHOOL:
@@ -76,7 +73,7 @@ public class LandscaperSensor {
                     case REFINERY:
                     case NET_GUN:
 
-                        if (robot.dirtCarrying > 0) {
+                        if (robot.dirtCarrying > 0 && !Lattice.isAdjacentToWater(robot.location)) {
                             if (Navigation.aerialDistance(robot) <
                                     Navigation.aerialDistance(nearestBuriedFriendlyBuilding))
                                 nearestBuriedFriendlyBuilding = robot.location;

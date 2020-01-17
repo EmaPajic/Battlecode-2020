@@ -22,7 +22,12 @@ public class TwoMinerController {
         @Override
         public int compare(MapLocation locA, MapLocation locB){
             //noinspection ComparatorMethodParameterNotUsed
-            return Navigation.aerialDistance(hqLocation, locA) > Navigation.aerialDistance(hqLocation, locB) ? 1 : -1;
+            if(Navigation.aerialDistance(hqLocation, locA) > Navigation.aerialDistance(hqLocation, locB))
+                return 1;
+            else if (Navigation.aerialDistance(hqLocation, locA) < Navigation.aerialDistance(hqLocation, locB))
+                return -1;
+            else
+                return 0;
         }
     }
 
@@ -112,7 +117,15 @@ public class TwoMinerController {
         }
     }
 
+    public static void updateEnemyHQTarget() throws GameActionException {
+        if (Strategium.potentialEnemyHQLocations.isEmpty()) {
 
+        }
+        else {
+            Strategium.potentialEnemyHQLocations.remove(Strategium.currentEnemyHQTarget);
+            Strategium.currentEnemyHQTarget = Strategium.potentialEnemyHQLocations.get(0);
+        }
+    }
     public static void buildDesignCenterNearEnemy() throws GameActionException {
         // Build DesignCenter near enemy
         for (MapLocation enemyLocation : Strategium.potentialEnemyHQLocations) {
