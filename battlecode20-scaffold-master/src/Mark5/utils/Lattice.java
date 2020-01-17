@@ -15,7 +15,8 @@ public class Lattice {
      * @return true if it is a pit, false otherwise
      */
     public static boolean isPit(MapLocation location) {
-        return location.x % 2 == 0 && location.y % 2 == 0;
+        return location.x % 2 == 0 && location.y % 2 == 0 || Strategium.elevation[location.x][location.y] < -100
+                && !location.equals(Strategium.HQLocation);
     }
 
     /**
@@ -24,7 +25,8 @@ public class Lattice {
      * @return true if it is a path, false otherwise
      */
     public static boolean isPath(MapLocation location) {
-        return (location.x + location.y) % 2 == 1;
+
+        return (location.x + location.y) % 2 == 1 && !location.equals(Strategium.HQLocation);
     }
 
     /**
@@ -48,7 +50,8 @@ public class Lattice {
             MapLocation loc = location.add(dir);
             if(rc.onTheMap(loc) && !(isPit(location)) && !loc.isAdjacentTo(Strategium.HQLocation) &&
                     !loc.equals(Strategium.HQLocation))
-                if(Math.abs(Strategium.elevation[loc.x][loc.y] - elevation) > 3) return false;
+                if(Math.abs(Strategium.elevation[loc.x][loc.y] - elevation) > 3 &&
+                        !isAdjacentToWater(loc)) return false;
         }
         return true;
     }
@@ -68,10 +71,94 @@ public class Lattice {
             MapLocation loc = location.add(dir);
             if(rc.onTheMap(loc) && !isPit(loc) && !loc.isAdjacentTo(Strategium.HQLocation) &&
                     !loc.equals(Strategium.HQLocation))
-                if(Strategium.elevation[loc.x][loc.y] + 3 - elevation < maxDeposit)
+                if(Strategium.elevation[loc.x][loc.y] + 3 - elevation < maxDeposit && !Strategium.water[loc.x][loc.y])
                 maxDeposit = Strategium.elevation[loc.x][loc.y] + 3 - elevation;
         }
         return maxDeposit;
+    }
+
+    /**
+     * Returns the best direction to take dirt from
+     * @return the direction. If there is no suitable direction, returns null.
+     */
+    public static Direction bestDigDirection() {
+        for(Direction dir : Direction.allDirections()) {
+            MapLocation location = rc.adjacentLocation(dir);
+            if(!rc.onTheMap(location)) continue;
+            if(isAdjacentToWater(location)) continue;
+            if(maxDeposit(location) < 0) return dir;
+        }
+        for(Direction dir : Direction.allDirections()) {
+            MapLocation location = rc.adjacentLocation(dir);
+            if(!rc.onTheMap(location)) continue;
+            if(isAdjacentToWater(location)) continue;
+            if(isPit(location)) return dir;
+        }
+        for(Direction dir : Direction.allDirections()) {
+            MapLocation location = rc.adjacentLocation(dir);
+            if(!rc.onTheMap(location)) continue;
+            if(isPit(location)) return dir;
+        }
+        return null;
+    }
+
+    /**
+     * Checks if a location is adjacent to water
+     * @param location the location to check for
+     * @return true if it is adjacent to water, false otherwise
+     */
+    public static boolean isAdjacentToWater(MapLocation location){
+        for(Direction dir : Direction.allDirections()){
+            MapLocation loc = location.add(dir);
+            if(rc.onTheMap(loc))
+            if(Strategium.water[loc.x][loc.y]) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Calculates the best direction to deposit dirt
+     * @return the direction
+     */
+    public static Direction bestDepositDirection(){
+        int minElevation = Integer.MAX_VALUE;
+        Direction bestDir = null;
+        for(Direction dir : Direction.allDirections()){
+            MapLocation loc = rc.adjacentLocation(dir);
+            if(!rc.onTheMap(loc)) continue;
+            if(isAdjacentToWater(loc) && !Strategium.water[loc.x][loc.y])
+            if(minElevation > Strategium.elevation[loc.x][loc.y]){
+                bestDir = dir;
+                minElevation = Strategium.elevation[loc.x][loc.y];
+            }
+        }
+        if(bestDir!=null) return bestDir;
+        for(Direction dir : Direction.allDirections()){
+            MapLocation loc = rc.adjacentLocation(dir);
+            if(!rc.onTheMap(loc)) continue;
+            if(!Strategium.occupied[loc.x][loc.y])
+            if(isBuildingSite(loc) && maxDeposit(loc) > 0 && minElevation > Strategium.elevation[loc.x][loc.y]){
+                bestDir = dir;
+                minElevation = Strategium.elevation[loc.x][loc.y];
+            }
+        }
+        if(bestDir!=null) return bestDir;
+        for(Direction dir : Direction.allDirections()){
+            MapLocation loc = rc.adjacentLocation(dir);
+            if(!rc.onTheMap(loc)) continue;
+            if(isPath(loc) && maxDeposit(loc) > 0 && minElevation > Strategium.elevation[loc.x][loc.y]){
+                bestDir = dir;
+                minElevation = Strategium.elevation[loc.x][loc.y];
+            }
+        }
+        if(bestDir!=null) return bestDir;
+        for(Direction dir : Direction.allDirections()){
+            MapLocation loc = rc.adjacentLocation(dir);
+            if(!rc.onTheMap(loc)) continue;
+            if(isPit(loc)) return dir;
+        }
+        return Direction.CENTER;
+
     }
 
 }
