@@ -77,19 +77,7 @@ public class MinerSensor {
 
                         HQLocation = robot.location;
 
-                        if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
-                            Strategium.potentialEnemyHQLocations.add(
-                                    new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
-
-                        if (HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                            Strategium.potentialEnemyHQLocations.add(
-                                    new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1));
-
-                        if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1 &&
-                                HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                            Strategium.potentialEnemyHQLocations.add(
-                                    new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
-                                            rc.getMapHeight() - HQLocation.y - 1));
+                        Strategium.updatePotentialEnemyHQLocations();
 
                         Wall.init();
 

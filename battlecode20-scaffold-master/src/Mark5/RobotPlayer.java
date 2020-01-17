@@ -5,6 +5,7 @@ import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import Mark5.robots.FulfillmentCenter;
 import Mark5.robots.TwoMinerController;
+import Mark5.robots.RushMiner;
 import Mark5.utils.Wall;
 import battlecode.common.*;
 
@@ -66,6 +67,10 @@ public strictfp class RobotPlayer {
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
         RobotPlayer.rc = rc;
+        if (rc.getType() == RobotType.MINER)
+            if (rc.getRoundNum() == 2) {
+                myFun = 4;
+            }
         Strategium.init();
 
         if (hqLocation == null) {
@@ -91,9 +96,9 @@ public strictfp class RobotPlayer {
 
         }
         if (rc.getType() == RobotType.MINER) {
-            if (Navigation.aerialDistance(fulfillmentCenterLocation) > 0) {
+            if (myFun != 4 && Navigation.aerialDistance(fulfillmentCenterLocation) > 0) {
                 myFun = 1; // main search miner
-            } else {
+            } else if (myFun != 4){
                 myFun = 3; // build miner
             }
         } else if (rc.getType() == RobotType.LANDSCAPER) {
@@ -172,6 +177,9 @@ public strictfp class RobotPlayer {
 
     static void runMiner() throws GameActionException {
         System.out.println(myFun);
+        if (myFun == 4) {
+            RushMiner.run();
+        }
         if (myFun < 3)
             runSearchMiner();
         else

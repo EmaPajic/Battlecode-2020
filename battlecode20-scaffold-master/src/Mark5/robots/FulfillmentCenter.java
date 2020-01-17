@@ -17,20 +17,17 @@ public class FulfillmentCenter {
 
     public static int numDrones = 0;
 
-    public static boolean builtTaxi = false;
-
     public static void run() throws GameActionException {
         Strategium.gatherInfo();
         switch(droneBuildingImportance) {
             case TAXI_NEEDED:
-                if(!builtTaxi)
-                    for (Direction dir : dir8) {
-                        if(tryBuild(RobotType.DELIVERY_DRONE, dir)) {
-                            ++numDrones;
-                            droneBuildingImportance = DroneBuildingImportance.PERIODIC_BUILDING;
-                            return;
-                        }
+                for (Direction dir : dir8) {
+                    if(tryBuild(RobotType.DELIVERY_DRONE, dir)) {
+                        ++numDrones;
+                        droneBuildingImportance = DroneBuildingImportance.PERIODIC_BUILDING;
+                        return;
                     }
+                }
                 break;
             case PERIODIC_BUILDING:
                 if (numDrones < 5)
