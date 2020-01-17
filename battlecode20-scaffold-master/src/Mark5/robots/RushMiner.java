@@ -19,14 +19,11 @@ public class RushMiner {
         Strategium.gatherInfo();
         if (Strategium.enemyHQLocation != null) {
             Strategium.currentEnemyHQTarget = Strategium.enemyHQLocation;
-            rushToEnemyHQ();
         }
-        else {
-            if (Strategium.currentEnemyHQTarget == null) {
+        else if (Strategium.currentEnemyHQTarget == null) {
                 Strategium.currentEnemyHQTarget = Strategium.potentialEnemyHQLocations.get(0);
             }
-            rushToEnemyHQ();
-        }
+        rushToEnemyHQ();
     }
 
     public static void rushToEnemyHQ() throws GameActionException{
@@ -45,14 +42,13 @@ public class RushMiner {
         }
 
         Direction goToDir = Navigation.moveTowards(Strategium.currentEnemyHQTarget);
-        MapLocation goToLoc = rc.getLocation().add(goToDir);
-        if (rc.senseFlooding(goToLoc) || Math.abs(rc.senseElevation(goToLoc) - rc.senseElevation(rc.getLocation())) > 3) {
+        rc.setIndicatorLine(rc.getLocation(), Strategium.currentEnemyHQTarget, 255, 255, 255);
+        MapLocation goToLoc = rc.adjacentLocation(goToDir);
+        if (rc.senseFlooding(goToLoc) ||
+                Math.abs(rc.senseElevation(goToLoc) - rc.senseElevation(rc.getLocation())) > 3) {
             //build fulfillment center and wait for drone
             //
-            if (builtFulfillment) {
-                return;
-            }
-            else {
+            if (!builtFulfillment) {
                 //build
                 for (Direction buildDir : dir8)
                     if (Lattice.isBuildingSite(rc.getLocation().add(buildDir)) &&
@@ -60,10 +56,16 @@ public class RushMiner {
                         rc.buildRobot(RobotType.FULFILLMENT_CENTER, buildDir);
                         builtFulfillment = true;
                     }
+                for (Direction buildDir : dir8)
+                    if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, buildDir)) {
+                        rc.buildRobot(RobotType.FULFILLMENT_CENTER, buildDir);
+                        builtFulfillment = true;
+                    }
+
             }
         }
         else {
-            if (rc.canMove(goToDir) && rc.isReady()) {
+            if (Strategium.canSafelyMove(goToDir) && rc.isReady()) {
                 rc.move(goToDir);
             }
         }

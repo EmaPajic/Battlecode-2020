@@ -176,6 +176,7 @@ public strictfp class RobotPlayer {
         System.out.println(myFun);
         if (myFun == 4) {
             RushMiner.run();
+            return;
         }
         if (myFun < 3)
             runSearchMiner();
