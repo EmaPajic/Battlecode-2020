@@ -1,11 +1,8 @@
 package Mark5;
 
-import Mark5.robots.Drone;
+import Mark5.robots.*;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
-import Mark5.robots.FulfillmentCenter;
-import Mark5.robots.TwoMinerController;
-import Mark5.robots.RushMiner;
 import Mark5.utils.Wall;
 import battlecode.common.*;
 
@@ -137,7 +134,7 @@ public strictfp class RobotPlayer {
                         runFulfillmentCenter();
                         break;
                     case LANDSCAPER:
-                        runLandscaper();
+                        Landscaper.run();
                         break;
                     case DELIVERY_DRONE:
                         runDeliveryDrone();

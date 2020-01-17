@@ -80,17 +80,8 @@ public class DroneSensor {
                     }
                 } else if (HQLocation != null) {
                     if (robot.type == RobotType.LANDSCAPER) {
-                        if (robot.location.equals(Wall.launchPad)) {
-                            System.out.println("ZAGLAVIO SE " + robot + " " + Wall.isLaunchPadBlocked());
-                        }
-                        if (robot.location.equals(Wall.launchPad) && Wall.isLaunchPadBlocked()) {
-
-                            blockedUnit = robot;
-                        }
                         if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestLandscaper) &&
                                 Navigation.aerialDistance(robot.location, HQLocation) <= 2) nearestLandscaper = robot;
-                    } else if (robot.type == RobotType.MINER) {
-                        if (Wall.stuckOnWall(robot.location)) blockingUnit = robot;
                     }
                 }
                 if (robot.type == RobotType.DELIVERY_DRONE) {
