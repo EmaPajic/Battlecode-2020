@@ -146,7 +146,6 @@ public class Strategium {
 
     static private void sense() throws GameActionException {
 
-        potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
 
         enemyBuildings.removeIf(building -> {
             if (rc.canSenseLocation(building)) {
@@ -204,6 +203,11 @@ public class Strategium {
                 FulfillmentCenterSensor.sense();
                 break;
         }
+
+        if(enemyHQLocation != null) currentEnemyHQTarget = enemyHQLocation;
+        else if(!potentialEnemyHQLocations.isEmpty()) currentEnemyHQTarget = potentialEnemyHQLocations.get(0);
+        potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
+
     }
 
     static void gatherInfo(int bytecodesReq) throws GameActionException {

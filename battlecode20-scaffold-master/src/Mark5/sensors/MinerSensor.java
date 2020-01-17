@@ -84,22 +84,29 @@ public class MinerSensor {
                     }
 
                 }
-                if (robot.type.canRefine()) if(!refineries.contains(robot.location)) refineries.add(robot.location);
+                if (robot.type.canRefine()) if (!refineries.contains(robot.location)) refineries.add(robot.location);
 
             } else {
+                switch (robot.type) {
 
-                if (robot.type == RobotType.DELIVERY_DRONE) {
-                    enemyDrones.add(robot);
-                    if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyDrone))
-                        nearestEnemyDrone = robot;
+                    case DELIVERY_DRONE:
+                        enemyDrones.add(robot);
+                        if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyDrone))
+                            nearestEnemyDrone = robot;
+                        break;
+                    case HQ:
+                        potentialEnemyHQLocations.clear();
+                        enemyHQLocation = robot.location;
+                        currentEnemyHQTarget = enemyHQLocation;
+                        break;
                 }
+
 
             }
 
         }
 
         //Wall.checkBaseStatus();
-
 
 
         nearestRefinery = null;

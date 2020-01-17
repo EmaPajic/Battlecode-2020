@@ -14,15 +14,14 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 
-
 public class TwoMinerController {
 
 
     static class LocationComparator implements Comparator<MapLocation> {
         @Override
-        public int compare(MapLocation locA, MapLocation locB){
+        public int compare(MapLocation locA, MapLocation locB) {
             //noinspection ComparatorMethodParameterNotUsed
-            if(Navigation.aerialDistance(hqLocation, locA) > Navigation.aerialDistance(hqLocation, locB))
+            if (Navigation.aerialDistance(hqLocation, locA) > Navigation.aerialDistance(hqLocation, locB))
                 return 1;
             else if (Navigation.aerialDistance(hqLocation, locA) < Navigation.aerialDistance(hqLocation, locB))
                 return -1;
@@ -42,7 +41,7 @@ public class TwoMinerController {
     static int[] adjacencyID = {-1, -1, -1, -1, -1, -1, -1, -1};
 
 
-    static void findRoute()  {
+    static void findRoute() {
         for (int currX = 4; currX <= rc.getMapWidth() - 6; currX++) {
             if (currX % 5 == 0) {
                 for (int currY = 4; currY <= rc.getMapHeight() - 6; currY++) {
@@ -56,15 +55,13 @@ public class TwoMinerController {
     }
 
 
-
-
     public static void init() {
         searchRoute = new ArrayList<>();
         searchRouteVisited = new ArrayList<>();
         currentlyRefining = false;
         //currentTarget = rc.getLocation();
         findRoute();
-        if(searchRoute.contains(hqLocation)){
+        if (searchRoute.contains(hqLocation)) {
             searchRoute.remove(hqLocation);
             searchRouteVisited.add(hqLocation);
         }
@@ -72,11 +69,10 @@ public class TwoMinerController {
         currentTarget = searchRoute.get(0); // get the first location from sorted locations which are closest to HQ
 
 
-
     }
 
 
-    public static void checkRobotCollision() throws GameActionException{
+    public static void checkRobotCollision() throws GameActionException {
         for (int dirIndex = 0; dirIndex < 8; ++dirIndex) {
             Direction dir = dir8[dirIndex];
             if (rc.canSenseLocation(rc.getLocation().add(dir))) {
@@ -106,10 +102,10 @@ public class TwoMinerController {
         }
     }
 
-    public static void updateTarget() throws GameActionException{
-        if(searchRoute.isEmpty()){
+    public static void updateTarget() throws GameActionException {
+        if (searchRoute.isEmpty()) {
 
-        }else{
+        } else {
             Navigation.frustration = 0;
             searchRoute.remove(currentTarget);
             searchRouteVisited.add(currentTarget);
@@ -118,36 +114,35 @@ public class TwoMinerController {
     }
 
     public static void updateEnemyHQTarget() throws GameActionException {
-        if (Strategium.potentialEnemyHQLocations.isEmpty()) {
-
-        }
-        else {
+        if (!Strategium.potentialEnemyHQLocations.isEmpty()) {
             Strategium.potentialEnemyHQLocations.remove(Strategium.currentEnemyHQTarget);
             Strategium.currentEnemyHQTarget = Strategium.potentialEnemyHQLocations.get(0);
         }
     }
-    public static void buildDesignCenterNearEnemy() throws GameActionException {
+
+    public static boolean buildDesignCenterNearEnemy() throws GameActionException {
+        System.out.println("BILDING");
         // Build DesignCenter near enemy
-        for (MapLocation enemyLocation : Strategium.potentialEnemyHQLocations) {
-            //System.out.println("Pot" + Strategium.potentialEnemyHQLocations);
-            if (rc.canSenseLocation(enemyLocation)) {
-                RobotInfo info = rc.senseRobotAtLocation(enemyLocation);
-                if (info != null)
-                    if (info.getTeam() == Strategium.opponentTeam && info.getType() == RobotType.HQ) {
-                        if (Navigation.aerialDistance(enemyLocation) > 3) {
-                            Navigation.bugPath(enemyLocation);
-                        } else {
-                            for (Direction dir : dir8) {
-                                if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, dir) &&
-                                        Navigation.aerialDistance(rc.getLocation().add(dir), enemyLocation) <= 1) {
-                                    tryBuild(RobotType.DESIGN_SCHOOL, dir);
-                                }
-                            }
-                        }
-                    }
+        //System.out.println("Pot" + Strategium.potentialEnemyHQLocations);
+
+        if (Navigation.aerialDistance(Strategium.enemyHQLocation) > 2) {
+            System.out.println("BAGPAT");
+            Navigation.bugPath(Strategium.enemyHQLocation);
+            return false;
+        } else {
+            System.out.println("BILD");
+            for (Direction dir : dir8) {
+                if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, dir) &&
+                        Navigation.aerialDistance(rc.getLocation().add(dir), Strategium.enemyHQLocation) <= 2) {
+                    return tryBuild(RobotType.DESIGN_SCHOOL, dir);
+                }
             }
         }
+
+
+        return false;
     }
+
     public static void refineryRentability() throws GameActionException {
         if (Navigation.aerialDistance(rc.getLocation(), Strategium.nearestRefinery) > 7 &&
                 Navigation.aerialDistance(hqLocation, rc.getLocation()) > 4) {
@@ -160,12 +155,12 @@ public class TwoMinerController {
             int totalSoup = 0;
             for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++) {
                 for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
-                    MapLocation loc = new MapLocation(i,j);
-                    if(rc.canSenseLocation(loc))
+                    MapLocation loc = new MapLocation(i, j);
+                    if (rc.canSenseLocation(loc))
                         totalSoup += rc.senseSoup(loc);
                 }
             }
-            System.out.println("Totalna supa"+totalSoup);
+            System.out.println("Totalna supa" + totalSoup);
             if (totalSoup > 200) {
                 for (Direction dir : dir8) {
                     boolean refineryBuilt = tryBuild(RobotType.REFINERY, dir);
@@ -179,14 +174,13 @@ public class TwoMinerController {
         }
 
 
-
-
     }
-    public static boolean mineAndRefine() throws GameActionException{
+
+    public static boolean mineAndRefine() throws GameActionException {
         if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
             if (Strategium.nearestSoup != null) {
                 //System.out.println("Supa nadjena");
-                if(Navigation.aerialDistance(Strategium.nearestSoup, rc.getLocation()) > 1){
+                if (Navigation.aerialDistance(Strategium.nearestSoup, rc.getLocation()) > 1) {
                     Navigation.bugPath(Strategium.nearestSoup);
                 }
                 refineryRentability();
@@ -194,11 +188,10 @@ public class TwoMinerController {
 
                 return true;
             }
-        } else{
-            if(Navigation.aerialDistance(Strategium.nearestRefinery, rc.getLocation()) > 1){
+        } else {
+            if (Navigation.aerialDistance(Strategium.nearestRefinery, rc.getLocation()) > 1) {
                 Navigation.bugPath(Strategium.nearestRefinery);
             }
-
 
 
             tryRefine(rc.getLocation().directionTo(Strategium.nearestRefinery));
@@ -208,6 +201,7 @@ public class TwoMinerController {
         }
         return false;
     }
+
     public static void control() throws GameActionException {
         //System.out.println("Adj count: " + adjacencyCount);
         // Avoid collisions
@@ -215,7 +209,7 @@ public class TwoMinerController {
         System.out.println("Current target " + currentTarget);
         if (!rc.canSenseLocation(currentTarget) && Navigation.frustration < 50) {
 
-            if(mineAndRefine()) return;
+            if (mineAndRefine()) return;
             else {
                 Navigation.bugPath(currentTarget);
             }
@@ -283,7 +277,7 @@ public class TwoMinerController {
 //            }
 
 
-        }else {
+        } else {
             updateTarget();
         }
     }

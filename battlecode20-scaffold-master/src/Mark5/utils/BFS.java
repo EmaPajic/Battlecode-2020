@@ -13,23 +13,37 @@ import static Mark5.RobotPlayer.rc;
 
 public class BFS {
 
-    public static List<LocationNode> queue;
+    public static List<LocationNode> queue = new LinkedList<>();
+    public static List<LocationNode> stack = new LinkedList<>();
+    public static MapLocation bfsTarget;
     public static boolean[][] visitedLocations = null;
 
-    public static void init() {
-        queue = new LinkedList<>();
-
-    }
-
-
-    public void addVertex(MapLocation location) {
-        location = location.translate(-rc.getLocation().x + 6, -rc.getLocation().y + 6);
+    public static void addVertex(MapLocation location) {
+        location = location.translate(-rc.getLocation().x + 5, -rc.getLocation().y + 5);
         visitedLocations[location.x][location.y] = true;
     }
 
     private static boolean visited(MapLocation location){
-        location = location.translate(-rc.getLocation().x + 6, -rc.getLocation().y + 6);
+        location = location.translate(-rc.getLocation().x + 5, -rc.getLocation().y + 5);
         return visitedLocations[location.x][location.y];
+    }
+
+    public static Direction step(MapLocation target){
+        LocationNode node;
+        for(LocationNode n : stack) rc.setIndicatorLine(n.prev.loc, n.loc, 255, 0, 0);
+        if(!stack.isEmpty() && target == bfsTarget){
+            node = stack.remove(0);
+            if(rc.getLocation().equals(node.prev.loc)) {
+                return rc.getLocation().directionTo(node.loc);
+            }
+        }
+        bfsTarget = target;
+        if(bfs(target)){
+            for(LocationNode n : stack) rc.setIndicatorLine(n.prev.loc, n.loc, 255, 0, 0);
+            return rc.getLocation().directionTo(stack.remove(0).loc);
+        }
+
+        return Direction.CENTER;
     }
 
     /**
@@ -37,10 +51,11 @@ public class BFS {
      * @param target the target to find route to
      * @return the direction
      */
-    public Direction bfs(MapLocation target) {
+    public static boolean bfs(MapLocation target) {
         //
 
         queue.clear();
+        stack.clear();
         queue.add(new LocationNode(rc.getLocation(), null));
 
         /*switch (rc.getType()) {
@@ -63,16 +78,20 @@ public class BFS {
                 MapLocation curr = currHead.loc;
                 int x = step.x;
                 int y = step.y;
-                if (!visited(step)) if (rc.canSenseLocation(step)) {
+                if (rc.canSenseLocation(step)) if(!visited(step)) {
                     switch (rc.getType()) {
                         case MINER:
                         case LANDSCAPER:
                             if (Math.abs(Strategium.elevation[x][y] - Strategium.elevation[curr.x][curr.y])
                                     <= 3 && !Strategium.occupied[x][y] && !Strategium.water[x][y]) {
-                                if (step.equals(target)) {
+                                if (Navigation.aerialDistance(target) > Navigation.aerialDistance(step, target)) {
 
-                                    while(currHead.prev != null) currHead = currHead.prev;
-                                    return rc.getLocation().directionTo(currHead.loc);
+                                    stack.add(new LocationNode(step, currHead));
+                                    while(currHead.prev != null){
+                                        stack.add(0, currHead);
+                                        currHead = currHead.prev;
+                                    }
+                                    return true;
 
                                 }
                                 queue.add(new LocationNode(step, currHead));
@@ -81,10 +100,14 @@ public class BFS {
                             break;
                         case DELIVERY_DRONE:
                             if(!Strategium.occupied[x][y]) {
-                                if (step.equals(target)) {
+                                if (Navigation.aerialDistance(target) > Navigation.aerialDistance(step, target)) {
 
-                                    while(currHead.prev != null) currHead = currHead.prev;
-                                    return rc.getLocation().directionTo(currHead.loc);
+                                    stack.add(new LocationNode(step, currHead));
+                                    while(currHead.prev != null){
+                                        stack.add(0, currHead);
+                                        currHead = currHead.prev;
+                                    }
+                                    return true;
 
                                 }
                                 queue.add(new LocationNode(step, currHead));
@@ -96,7 +119,7 @@ public class BFS {
             }
         }
 
-        return Direction.CENTER;
+        return false;
 
     }
 

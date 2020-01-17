@@ -1,5 +1,6 @@
 package Mark5.robots;
 
+import Mark5.utils.BFS;
 import Mark5.utils.Lattice;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
@@ -15,24 +16,25 @@ public class RushMiner {
     static boolean builtFulfillment = false;
 
     static boolean foundEnemyHQ;
+
     public static void run() throws GameActionException {
         Strategium.gatherInfo();
         if (Strategium.enemyHQLocation != null) {
             Strategium.currentEnemyHQTarget = Strategium.enemyHQLocation;
+        } else if (Strategium.currentEnemyHQTarget == null) {
+            Strategium.currentEnemyHQTarget = Strategium.potentialEnemyHQLocations.get(0);
         }
-        else if (Strategium.currentEnemyHQTarget == null) {
-                Strategium.currentEnemyHQTarget = Strategium.potentialEnemyHQLocations.get(0);
-            }
         rushToEnemyHQ();
     }
 
-    public static void rushToEnemyHQ() throws GameActionException{
+    public static void rushToEnemyHQ() throws GameActionException {
         if (rc.canSenseLocation(Strategium.currentEnemyHQTarget)) {
             System.out.println("Enemy HQ: " + Strategium.currentEnemyHQTarget);
             RobotInfo info = rc.senseRobotAtLocation(Strategium.currentEnemyHQTarget);
             if (info != null) {
                 if (info.getTeam() == Strategium.opponentTeam && info.getType() == RobotType.HQ) {
                     buildToAttack();
+                    return;
                 } else {
                     TwoMinerController.updateEnemyHQTarget();
                 }
@@ -41,13 +43,28 @@ public class RushMiner {
             }
         }
 
+        if(Navigation.aerialDistance(Strategium.enemyHQLocation) <= 3){
+            buildToAttack();
+            return;
+        }
+
         Direction goToDir = Navigation.moveTowards(Strategium.currentEnemyHQTarget);
-        rc.setIndicatorLine(rc.getLocation(), Strategium.currentEnemyHQTarget, 255, 255, 255);
         MapLocation goToLoc = rc.adjacentLocation(goToDir);
-        if (rc.senseFlooding(goToLoc) ||
-                Math.abs(rc.senseElevation(goToLoc) - rc.senseElevation(rc.getLocation())) > 3) {
+
+        if (Strategium.canSafelyMove(goToDir)) {
+            rc.move(goToDir);
+        } else {
             //build fulfillment center and wait for drone
             //
+            System.out.println("BFSSTART");
+            rc.setIndicatorLine(rc.getLocation(), Strategium.currentEnemyHQTarget,
+                    255, 255, 255);
+            Direction circumnavigateDir = BFS.step(Strategium.currentEnemyHQTarget);
+            System.out.println("BFSEND " + circumnavigateDir);
+            if (circumnavigateDir != Direction.CENTER)
+                if (Strategium.canSafelyMove(circumnavigateDir)) {
+                    rc.move(circumnavigateDir);
+                } else
             if (!builtFulfillment) {
                 //build
                 for (Direction buildDir : dir8)
@@ -57,27 +74,22 @@ public class RushMiner {
                         builtFulfillment = true;
                     }
                 for (Direction buildDir : dir8)
-                    if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, buildDir)) {
+                    if (rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, buildDir)) {
                         rc.buildRobot(RobotType.FULFILLMENT_CENTER, buildDir);
                         builtFulfillment = true;
                     }
 
             }
-        }
-        else {
-            if (Strategium.canSafelyMove(goToDir) && rc.isReady()) {
-                rc.move(goToDir);
-            }
+
         }
     }
 
-    public static void buildToAttack() throws GameActionException{
-
+    public static void buildToAttack() throws GameActionException {
+        System.out.println("BILD TRN: " + buildTurn);
         if (buildTurn == 0) {
-            TwoMinerController.buildDesignCenterNearEnemy();
-            ++buildTurn;
-        }
-        else {
+            if(TwoMinerController.buildDesignCenterNearEnemy())
+                ++buildTurn;
+        } else {
             buildNetGunNearEnemy();
         }
     }
