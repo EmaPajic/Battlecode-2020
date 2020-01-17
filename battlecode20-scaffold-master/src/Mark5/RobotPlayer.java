@@ -3,6 +3,7 @@ package Mark5;
 import Mark5.robots.Drone;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
+import Mark5.robots.FulfillmentCenter;
 import Mark5.robots.TwoMinerController;
 import Mark5.utils.Wall;
 import battlecode.common.*;
@@ -290,21 +291,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runFulfillmentCenter() throws GameActionException {
-        Strategium.gatherInfo();
-        if (numDrones < 5)
-            for (Direction dir : dir8) {
-                if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
-                    ++numDrones;
-                    return;
-                }
-            }
-        if ((rc.getRoundNum() > 600) && !Strategium.shouldBuildLandscaper) {
-            if (tryBuild(RobotType.DELIVERY_DRONE, Direction.WEST)) {
-                ++numDrones;
-                return;
-            }
-
-        }
+        FulfillmentCenter.run();
     }
 
     static void runAttackLandscaper() throws GameActionException {
