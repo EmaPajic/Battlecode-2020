@@ -13,20 +13,21 @@ public class DesignSchool {
 
     public static void run() throws GameActionException {
         Strategium.gatherInfo();
-
-        if(DesignSchoolSensor.numThreats > DesignSchoolSensor.numLandscapers){
-        for(Direction buildDirection : DesignSchoolSensor.priorityBuildDirections)
-            if (tryBuild(RobotType.LANDSCAPER, buildDirection)) {
-                ++numLandscapers;
-            } else {
-                for (Direction dir : dir8) {
-                    if (tryBuild(RobotType.LANDSCAPER, dir)) {
-                        ++numLandscapers;
-                        return;
-                    }
+        
+        if (DesignSchoolSensor.numThreats > DesignSchoolSensor.numLandscapers) {
+            for (Direction buildDirection : DesignSchoolSensor.priorityBuildDirections)
+                if (tryBuild(RobotType.LANDSCAPER, buildDirection)) {
+                    ++numLandscapers;
+                    return;
+                }
+            for (Direction dir : dir8) {
+                if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                    ++numLandscapers;
+                    return;
                 }
             }
-        } else if (RobotType.VAPORATOR.cost + RobotType.LANDSCAPER.cost > rc.getTeamSoup()){
+
+        } else if (RobotType.VAPORATOR.cost + RobotType.LANDSCAPER.cost <= rc.getTeamSoup()) {
             for (Direction dir : dir8) {
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     ++numLandscapers;
