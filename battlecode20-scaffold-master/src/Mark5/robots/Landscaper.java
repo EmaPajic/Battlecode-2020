@@ -5,15 +5,11 @@ import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import battlecode.common.*;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import static Mark5.RobotPlayer.dir8;
 import static Mark5.RobotPlayer.rc;
 
 public class Landscaper {
     private static MapLocation waypoint = null;
-    private static MapLocation bestWaypoint = null;
 
     public static void run() throws GameActionException {
         //System.out.println("START");
@@ -213,7 +209,7 @@ public class Landscaper {
             }
         }
 
-        bestWaypoint = null;
+        MapLocation bestWaypoint = null;
         if (rc.getLocation().equals(waypoint)) waypoint = null;
 
         for (Direction dir : dir8)
