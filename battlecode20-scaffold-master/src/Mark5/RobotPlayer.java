@@ -1,6 +1,7 @@
 package Mark5;
 
 import Mark5.robots.*;
+import Mark5.sensors.HQSensor;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import Mark5.utils.Wall;
@@ -162,8 +163,8 @@ public strictfp class RobotPlayer {
             if (tryBuild(RobotType.MINER, Direction.SOUTH)) {
                 ++numMiners;
             }
-        } else if (numMiners < 2 || (numMiners > 2 && numMiners < 4)) {
-            for (Direction dir : directions)
+        } else if (numMiners < 2 || (numMiners > 2 && numMiners < HQSensor.totalMiners)) {
+            for (Direction dir : dir8)
                 if(dir != Direction.SOUTH)
                     if (tryBuild(RobotType.MINER, dir)) {
                         ++numMiners;

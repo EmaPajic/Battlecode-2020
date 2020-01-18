@@ -73,6 +73,9 @@ public class Strategium {
         opponentTeam = myTeam == Team.A ? Team.B : Team.A;
 
         switch (rc.getType()) {
+            case HQ:
+                HQSensor.init();
+                break;
             case MINER:
                 MinerSensor.init();
                 break;
@@ -194,6 +197,9 @@ public class Strategium {
         });
 
         switch (rc.getType()) {
+            case HQ:
+                HQSensor.sense();
+                break;
             case MINER:
                 MinerSensor.sense();
                 break;
