@@ -79,10 +79,22 @@ public class TwoMinerController {
         }
         Collections.sort(searchRoute, new LocationComparator());
         currentTarget = searchRoute.get(0); // get the first location from sorted locations which are closest to HQ
-        System.out.println("Init je potrosio: " + (Clock.getBytecodeNum() - startByteCodes));
+        //System.println("Init je potrosio: " + (Clock.getBytecodeNum() - startByteCodes));
 
     }
 
+
+
+    public static void updateTarget() throws GameActionException {
+        if (searchRoute.isEmpty()) {
+            // do nothing
+        } else {
+            Navigation.frustration = 0;
+            searchRoute.remove(currentTarget);
+            searchRouteVisited.add(currentTarget);
+            currentTarget = searchRoute.get(0); // get the first elem
+        }
+    }
 
     public static void checkRobotCollision() throws GameActionException {
         for (int dirIndex = 0; dirIndex < 8; ++dirIndex) {
@@ -114,16 +126,7 @@ public class TwoMinerController {
         }
     }
 
-    public static void updateTarget() throws GameActionException {
-        if (searchRoute.isEmpty()) {
-            // do nothing
-        } else {
-            Navigation.frustration = 0;
-            searchRoute.remove(currentTarget);
-            searchRouteVisited.add(currentTarget);
-            currentTarget = searchRoute.get(0); // get the first elem
-        }
-    }
+
 
     public static void updateEnemyHQTarget() throws GameActionException {
         if (!Strategium.potentialEnemyHQLocations.isEmpty()) {
@@ -133,16 +136,16 @@ public class TwoMinerController {
     }
 
     public static boolean buildDesignCenterNearEnemy() throws GameActionException {
-        System.out.println("BILDING");
+        //System.println("BILDING");
         // Build DesignCenter near enemy
-        //System.out.println("Pot" + Strategium.potentialEnemyHQLocations);
+        ////System.println("Pot" + Strategium.potentialEnemyHQLocations);
 
         if (Navigation.aerialDistance(Strategium.enemyHQLocation) > 3) {
-            System.out.println("BAGPAT");
+            //System.println("BAGPAT");
             Navigation.bugPath(Strategium.enemyHQLocation);
             return false;
         } else {
-            System.out.println("BILD");
+            //System.println("BILD");
             for (Direction dir : dir8) {
                 if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, dir) &&
                         Navigation.aerialDistance(rc.getLocation().add(dir), Strategium.enemyHQLocation) <= 2) {
@@ -155,12 +158,14 @@ public class TwoMinerController {
 
     }
 
+
+
     public static boolean refineryRentability() throws GameActionException {
         int startByteCodes = Clock.getBytecodeNum();
         if (Navigation.aerialDistance(rc.getLocation(), Strategium.nearestRefinery) > 7 &&
                 Navigation.aerialDistance(hqLocation, rc.getLocation()) > 4) {
 
-//            System.out.println("Daleko si");
+//            //System.println("Daleko si");
             int xMin = rc.getLocation().x - 3;
             int yMin = rc.getLocation().y - 3;
             int xMax = rc.getLocation().x + 3;
@@ -180,11 +185,11 @@ public class TwoMinerController {
                      tryToBuildRefinery = tryBuild(RobotType.REFINERY, dir);
                      if(tryToBuildRefinery) break;
                 }
-                System.out.println("RefineryRentabilityje potrosio: " + (Clock.getBytecodeNum() - startByteCodes));
+                //System.println("RefineryRentabilityje potrosio: " + (Clock.getBytecodeNum() - startByteCodes));
                 return tryToBuildRefinery;
             }
         }
-        System.out.println("refineryRentability je potrosio: " + (Clock.getBytecodeNum() - startByteCodes));
+        //System.println("refineryRentability je potrosio: " + (Clock.getBytecodeNum() - startByteCodes));
 
         return false;
 
@@ -196,37 +201,27 @@ public class TwoMinerController {
 
         if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
             if (Strategium.nearestSoup != null) {
-                //System.out.println("Supa nadjena");
+                ////System.println("Supa nadjena");
                 if (Navigation.aerialDistance(Strategium.nearestSoup, rc.getLocation()) > 1) {
-                    //Navigation.bugPath(Strategium.nearestSoup);
                     triedToBuildRefinery = false;
-                    System.out.println("mineNRefine(krecem se) je potrosio: " + (Clock.getBytecodeNum() - startByteCodes));
+                    //System.println("mineNRefine(krecem se) je potrosio: " + (Clock.getBytecodeNum() - startByteCodes));
                     return false;
                 } else if(!triedToBuildRefinery  && Navigation.aerialDistance(Strategium.nearestSoup, rc.getLocation()) == 1){
                     triedToBuildRefinery = true;
-                    System.out.println("Rafinerije ce pokusati da se izgradi");
+                    //System.println("Rafinerije ce pokusati da se izgradi");
                     return refineryRentability();
                 } else{
                     tryMine(rc.getLocation().directionTo(Strategium.nearestSoup));
-                    System.out.println("mineNRefine(kopam supu) je potrosio: " + (Clock.getBytecodeNum() - startByteCodes));
+                    //System.println("mineNRefine(kopam supu) je potrosio: " + (Clock.getBytecodeNum() - startByteCodes));
 
                     return true;
                 }
-
-
-
-
             }
         } else {
             if (Navigation.aerialDistance(Strategium.nearestRefinery, rc.getLocation()) == 1) {
                 tryRefine(rc.getLocation().directionTo(Strategium.nearestRefinery));
                 return true;
             }
-
-
-
-
-
 
         }
         return false;
@@ -235,53 +230,48 @@ public class TwoMinerController {
     public static void control() throws GameActionException {
 
         Strategium.gatherInfo();
-
+        //System.println("Current target : " + currentTarget);
         if (!rc.canSenseLocation(currentTarget) && Navigation.frustration < 50) {
 
             if (mineAndRefine() && rc.getTeamSoup() < RobotType.DESIGN_SCHOOL.cost){
 
-                System.out.println("Kopam");
+                //System.println("Kopam");
                 return;
             }
             else {
-                System.out.println("Ima dovoljno supe");
-                RobotInfo[] robots = rc.senseNearbyRobots();
+                //System.println("Ima dovoljno supe");
+
                 RobotType makeRobotType = null;
-                System.out.println(robots.length);
+                RobotInfo[] robots = rc.senseNearbyRobots();
+                //System.println(robots.length);
 
                 if(robots.length != 0) {
                     for (RobotInfo robot : robots) {
                         // try to defend
                         if (robot.team == Strategium.myTeam) {
+                            // if you spot endangered building make design school - OK
                             if (staticRobots.contains(robot.type) && robot.getDirtCarrying() > 0) {
                                 makeRobotType = RobotType.DESIGN_SCHOOL;
-                                System.out.println("Neprijatelj pokusava da nas zakopa");
+                                //System.println("Neprijatelj pokusava da nas zakopa");
                                 break;
                             }
 
-                            // if its not in visible radius make altern design school and fulfilment center if soup > 1000
-                            // if soup < 1000 make vaporator
-                            // if enemy drone spoted or enemy fulfilment center make net gun
-                            // if you spot endangered building make design school - OK
-                            // if you see miner or landscaper make fulfilment center - 0K
-                            // if enemy building and is not fulfilment center make design school - OK
-
                             // then if possible attack
                         } else if (robot.team != Strategium.myTeam) {
-
+                            // if enemy building and is not fulfilment center make design school - OK
                             if (staticRobots.contains(robot) && robot.type != RobotType.FULFILLMENT_CENTER) {
                                 makeRobotType = RobotType.DESIGN_SCHOOL;
-                                System.out.println("Neprijateljeske zgrade, nije fulfillment centar");
+                                //System.println("Neprijateljeske zgrade, nije fulfillment centar");
                                 break;
-
+                                // if enemy drone spoted or enemy fulfilment center make net gun
                             } else if (robot.type == RobotType.FULFILLMENT_CENTER || robot.type == RobotType.DELIVERY_DRONE) {
                                 makeRobotType = RobotType.NET_GUN;
-                                System.out.println("Neprijateljski fulfullment centar ili dron, napravi netgun");
+                                //System.println("Neprijateljski fulfullment centar ili dron, napravi netgun");
                                 break;
-
+                                // if you see miner or landscaper make fulfilment center - 0K
                             } else if (robot.type == RobotType.LANDSCAPER || robot.type == RobotType.MINER) {
                                 makeRobotType = RobotType.FULFILLMENT_CENTER;
-                                System.out.println("Vidjen je lendskejper ili miner gradi fulfillment");
+                                //System.println("Vidjen je lendskejper ili miner gradi fulfillment");
                                 break;
 
                             }
@@ -290,29 +280,32 @@ public class TwoMinerController {
 
 
                     }
+                    // stavi da pravi design school u ovom else-u dole ako ima mogucnost a nema ga u okolini baze
                 } else { // situacija kada ima okolnih nasih robota a ima mogucnost da pravi nije pokrivena
-                    if (rc.getTeamSoup() >= 500 && rc.getTeamSoup() < 1000) {
+                    // if soup < 1000 make vaporator
+                    if (rc.getTeamSoup() < 1000) {
                         makeRobotType = RobotType.VAPORATOR;
-                        System.out.println("Imamo dovoljno novca za Vaporator");
+                        //System.println("Imamo dovoljno novca za Vaporator");
                     } else if (rc.getTeamSoup() >= 1000) {
                         if (lastMadeRobotType == RobotType.DESIGN_SCHOOL) {
                             lastMadeRobotType = RobotType.FULFILLMENT_CENTER;
                             makeRobotType = RobotType.FULFILLMENT_CENTER;
+                            // if its not in visible radius make altern design school and fulfilment center if soup > 1000
                         } else {
                             lastMadeRobotType = RobotType.DESIGN_SCHOOL;
                             makeRobotType = RobotType.DESIGN_SCHOOL;
                         }
                     }
                 }
-                System.out.println(makeRobotType);
+                //System.println(makeRobotType);
 
-                if (makeRobotType != null) {
+                if (makeRobotType != null && rc.getTeamSoup() >= makeRobotType.cost) {
                     // try to make building
-                    System.out.println("Ovo je robot " + makeRobotType);
+                    //System.println("Ovo je robot " + makeRobotType);
                     if (staticRobots.contains(makeRobotType)) {
                         boolean noSameTwoBuildings = true;
-                        // decide to make design school first if there is none in HQ surrounding
-                        if(rc.canSenseLocation(hqLocation) && makeRobotType != RobotType.DESIGN_SCHOOL){
+                        // decide to make design school first if there is none in HQ surrounding less or equal to 4 squares
+                        if(Navigation.aerialDistance(rc.getLocation(), hqLocation)  <=  16 && makeRobotType != RobotType.DESIGN_SCHOOL){
                             for (RobotInfo robot2 : robots) {
                                 if (robot2.team == Strategium.myTeam && robot2.type == RobotType.DESIGN_SCHOOL) {
                                     noSameTwoBuildings = false;
@@ -345,7 +338,7 @@ public class TwoMinerController {
                     }
                 }
 
-                if (Strategium.nearestSoup == null) {
+                if (Strategium.nearestSoup == null || makeRobotType == null) {
                     Navigation.bugPath(currentTarget);
                     return;
                 }
@@ -360,7 +353,7 @@ public class TwoMinerController {
 
 //
         } else {
-            System.out.println("Update target");
+            //System.println("Update target");
             updateTarget();
             return;
         }
