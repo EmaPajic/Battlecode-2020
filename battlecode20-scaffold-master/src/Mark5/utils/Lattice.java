@@ -97,6 +97,12 @@ public class Lattice {
         for(Direction dir : Direction.allDirections()) {
             MapLocation location = rc.adjacentLocation(dir);
             if(!rc.onTheMap(location)) continue;
+            if(isAdjacentToWater(location)) continue;
+            if(isPath(location)) return dir;
+        }
+        for(Direction dir : Direction.allDirections()) {
+            MapLocation location = rc.adjacentLocation(dir);
+            if(!rc.onTheMap(location)) continue;
             if(isPit(location)) return dir;
         }
         return null;
