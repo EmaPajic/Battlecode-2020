@@ -126,7 +126,7 @@ public class TwoMinerController {
         // Build DesignCenter near enemy
         //System.out.println("Pot" + Strategium.potentialEnemyHQLocations);
 
-        if (Navigation.aerialDistance(Strategium.enemyHQLocation) > 2) {
+        if (Navigation.aerialDistance(Strategium.enemyHQLocation) > 3) {
             System.out.println("BAGPAT");
             Navigation.bugPath(Strategium.enemyHQLocation);
             return false;
@@ -135,13 +135,13 @@ public class TwoMinerController {
             for (Direction dir : dir8) {
                 if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, dir) &&
                         Navigation.aerialDistance(rc.getLocation().add(dir), Strategium.enemyHQLocation) <= 2) {
-                    return tryBuild(RobotType.DESIGN_SCHOOL, dir);
+                    if(tryBuild(RobotType.DESIGN_SCHOOL, dir)) return true;
                 }
             }
+            Navigation.bugPath(Strategium.enemyHQLocation);
+            return false;
         }
 
-
-        return false;
     }
 
     public static void refineryRentability() throws GameActionException {
