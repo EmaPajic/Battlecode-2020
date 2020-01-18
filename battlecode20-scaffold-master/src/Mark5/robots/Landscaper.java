@@ -16,7 +16,7 @@ public class Landscaper {
     private static MapLocation bestWaypoint = null;
 
     public static void run() throws GameActionException {
-        System.out.println("START");
+        //System.out.println("START");
         Strategium.gatherInfo();
 
         if (!rc.isReady()) return;
@@ -52,13 +52,13 @@ public class Landscaper {
         if (Strategium.nearestEnemyBuilding != null)
             if (attack(Strategium.nearestEnemyBuilding)) return;
 
-        System.out.println("DREIN");
+        //System.out.println("DREIN");
 
         if (Strategium.nearestWater != null)
             if (rc.getLocation().isAdjacentTo(Strategium.nearestWater))
                 if (drain(Strategium.nearestWater)) return;
 
-        System.out.println("PATROL");
+        //System.out.println("PATROL");
 
         if (patrol()) return;
 
@@ -144,7 +144,7 @@ public class Landscaper {
     }
 
     private static boolean patrol() throws GameActionException {
-        System.out.println(Clock.getBytecodeNum());
+        //System.out.println(Clock.getBytecodeNum());
         int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 500);
         if(waterLevel > 12) waterLevel = 12;
         if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y]) {
@@ -170,7 +170,7 @@ public class Landscaper {
                     }
                 }
         }
-        System.out.println(Clock.getBytecodeNum());
+        //System.out.println(Clock.getBytecodeNum());
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);

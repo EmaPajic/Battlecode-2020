@@ -292,6 +292,6 @@ public class Strategium {
                 potentialEnemyHQLocations.add(
                         new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
         }
-        System.out.println("Potential HQs: " + potentialEnemyHQLocations.toString());
+        //System.out.println("Potential HQs: " + potentialEnemyHQLocations.toString());
     }
 }

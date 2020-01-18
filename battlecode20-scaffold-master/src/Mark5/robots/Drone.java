@@ -68,10 +68,10 @@ public class Drone {
                 break;
         }
 
-        System.out.println(state);
+        //System.out.println(state);
 
         if (!rc.isReady()) return;
-        System.out.println(payload);
+        //System.out.println(payload);
 
         switch (payload) {
             case ENEMY:
@@ -142,7 +142,7 @@ public class Drone {
                 }
         }
 
-        System.out.println("DROWN:" + Strategium.nearestWater);
+        //System.out.println("DROWN:" + Strategium.nearestWater);
 
         if (Strategium.nearestWater != null) {
 

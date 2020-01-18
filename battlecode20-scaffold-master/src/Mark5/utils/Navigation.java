@@ -93,7 +93,7 @@ public class Navigation {
 
         lastDestination = destination;
 
-        System.out.println(dir + " " + lastDirection + " " + frustration);
+        //System.out.println(dir + " " + lastDirection + " " + frustration);
 
         if (!avoiding) {
             lastIntersection = rc.getLocation();

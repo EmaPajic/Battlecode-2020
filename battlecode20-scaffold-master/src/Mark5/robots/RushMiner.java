@@ -30,7 +30,7 @@ public class RushMiner {
 
     public static void rushToEnemyHQ() throws GameActionException {
         if (rc.canSenseLocation(Strategium.currentEnemyHQTarget)) {
-            System.out.println("Enemy HQ: " + Strategium.currentEnemyHQTarget);
+            //System.out.println("Enemy HQ: " + Strategium.currentEnemyHQTarget);
             RobotInfo info = rc.senseRobotAtLocation(Strategium.currentEnemyHQTarget);
             if (info != null) {
                 if (info.getTeam() == Strategium.opponentTeam && info.getType() == RobotType.HQ) {
@@ -62,13 +62,13 @@ public class RushMiner {
         } else {
             //build fulfillment center and wait for drone
             //
-            System.out.println("BFSSTART");
+            //System.out.println("BFSSTART");
             rc.setIndicatorLine(rc.getLocation(), Strategium.currentEnemyHQTarget,
                     255, 255, 255);
             if (!followBfs) {
                 circumnavigateDir = BFS.step(Strategium.currentEnemyHQTarget);
             }
-            System.out.println("BFSEND " + circumnavigateDir);
+            //System.out.println("BFSEND " + circumnavigateDir);
             if (circumnavigateDir != Direction.CENTER)
                 if (Strategium.canSafelyMove(circumnavigateDir)) {
                     followBfs = true;
@@ -95,7 +95,7 @@ public class RushMiner {
     }
 
     public static void buildToAttack() throws GameActionException {
-        System.out.println("BILD TRN: " + buildTurn);
+        //System.out.println("BILD TRN: " + buildTurn);
         if (buildTurn == 0) {
             if (TwoMinerController.buildDesignCenterNearEnemy())
                 ++buildTurn;
