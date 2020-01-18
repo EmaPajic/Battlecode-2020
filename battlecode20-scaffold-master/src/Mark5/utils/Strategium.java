@@ -260,8 +260,8 @@ public class Strategium {
     static public void updatePotentialEnemyHQLocations() {
         if (HQLocation == null)
             return;
-        if (Math.abs(rc.getMapWidth() / 2 - rc.getLocation().x) >
-                Math.abs(rc.getMapHeight() / 2 - rc.getLocation().y)) {
+        if (Math.abs(rc.getMapWidth() / 2 - HQLocation.x) >
+                Math.abs(rc.getMapHeight() / 2 - HQLocation.y)) {
             if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
                 potentialEnemyHQLocations.add(
                         new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
@@ -291,5 +291,6 @@ public class Strategium {
                 potentialEnemyHQLocations.add(
                         new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
         }
+        System.out.println("Potential HQs: " + potentialEnemyHQLocations.toString());
     }
 }
