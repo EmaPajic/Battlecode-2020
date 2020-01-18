@@ -5,15 +5,18 @@ import Mark5.utils.Strategium;
 import Mark5.utils.Wall;
 import battlecode.common.*;
 
+import java.awt.*;
 import java.util.Iterator;
 import java.util.Map;
 
+import static Mark5.RobotPlayer.dir8;
 import static Mark5.RobotPlayer.rc;
 import static Mark5.utils.Strategium.*;
 
 public class DroneSensor {
 
     public static DroneSensor strategium = null;
+    public static RobotInfo potentialTaxiPayload = null;
 
     public static void init() {
 
@@ -78,20 +81,21 @@ public class DroneSensor {
                         Wall.init();
                         Strategium.updatePotentialEnemyHQLocations();
                     }
-                } else if (HQLocation != null) {
-                    if (robot.type == RobotType.LANDSCAPER) {
-                        if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestLandscaper) &&
-                                Navigation.aerialDistance(robot.location, HQLocation) <= 2) nearestLandscaper = robot;
+                } else if(robot.type == RobotType.MINER) {
+                    boolean NearFulfillmentCenter = false;
+                    for(Direction dir : dir8) {
+                        if(rc.canSenseLocation(robot.location.add(dir))) {
+                            RobotInfo maybeFulfillment = rc.senseRobotAtLocation(robot.location.add(dir));
+                            if(maybeFulfillment != null) if(maybeFulfillment.type == RobotType.FULFILLMENT_CENTER) {
+                                NearFulfillmentCenter = true;
+                                break;
+                            }
+                        }
                     }
-                }
-                if (robot.type == RobotType.DELIVERY_DRONE) {
-                    alliedDrones.add(robot);
-
-                    if (!robotsMet[robot.ID]) {
-                        robotsMet[robot.ID] = true;
-                        numDronesMet++;
-                        if (robot.ID < rc.getID()) dronesMetWithLowerID++;
-                    }
+                    if(NearFulfillmentCenter)
+                        potentialTaxiPayload = robot;
+                    else
+                        potentialTaxiPayload = null;
                 }
 
             } else {

@@ -5,6 +5,8 @@ import Mark5.sensors.*;
 import battlecode.common.*;
 
 import java.util.*;
+import java.util.*;
+import java.util.List;
 
 import static Mark5.RobotPlayer.rc;
 import static java.lang.Math.max;
@@ -212,20 +214,22 @@ public class Strategium {
 
     }
 
-    static void gatherInfo(int bytecodesReq) throws GameActionException {
+    public static void gatherInfo(int bytecodesReq) throws GameActionException {
 
         upToDate = false;
 
         sense();
 
-        if (rc.getType() == RobotType.HQ) do {
-
-            parseTransactions(Blockchain.parseBlockchain(transactions));
-
-        } while (Clock.getBytecodesLeft() > bytecodesReq && !upToDate);
+        if (rc.getType() == RobotType.HQ) {
+            Blockchain.reportHQLocation(5);
+        }
+        if (rc.getType() == RobotType.DELIVERY_DRONE) {
+            Blockchain.parseBlockchain();
+            parseTransactions();
+        }
     }
 
-    static private void parseTransactions(List<Transaction> transactions) {
+    public static void parseTransactions() {
         if (transactions == null) {
             upToDate = true;
             return;

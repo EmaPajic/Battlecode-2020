@@ -1,5 +1,6 @@
 package Mark5.robots;
 
+import Mark5.sensors.DroneSensor;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import Mark5.utils.Wall;
@@ -24,7 +25,7 @@ public class Drone {
     private enum Payload {
         POTENTIAL,
         FRIENDLY_LANDSCAPER,
-        UNRULY_MINER,
+        RUSH_MINER,
         BIOLOGICAL,
         ENEMY
     }
@@ -78,6 +79,10 @@ public class Drone {
                 drown();
                 break;
             case POTENTIAL:
+                if(DroneSensor.potentialTaxiPayload != null) {
+                    attack(DroneSensor.potentialTaxiPayload);
+                    return;
+                }
                 if (rc.adjacentLocation(Direction.NORTHEAST).equals(Strategium.HQLocation)) {
                     boolean canMove = false;
                     for (Direction dir : dir8) if(rc.canMove(dir)) canMove = true;
@@ -94,8 +99,8 @@ public class Drone {
                 if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
                 patrol();
                 break;
-            case UNRULY_MINER:
-                remove();
+            case RUSH_MINER:
+                patrol();
                 break;
             case FRIENDLY_LANDSCAPER:
                 climb();
@@ -114,7 +119,8 @@ public class Drone {
                         payload = Payload.FRIENDLY_LANDSCAPER;
                         return true;
                     case MINER:
-                        payload = Payload.UNRULY_MINER;
+                        payload = Payload.RUSH_MINER;
+                        state = State.TAXI;
                         return true;
                 }
             }
@@ -262,7 +268,7 @@ public class Drone {
                 case TAXI:
                     waypoint = null;
 
-                    if(rc.isCurrentlyHoldingUnit()){
+                    if(rc.isCurrentlyHoldingUnit()) {
                         if (Strategium.enemyHQLocation != null) waypoint = Strategium.enemyHQLocation;
                         else if (!Strategium.potentialEnemyHQLocations.isEmpty())
                             waypoint = Strategium.potentialEnemyHQLocations.get(
@@ -279,7 +285,6 @@ public class Drone {
             }
 
         }
-
         return Navigation.bugPath(waypoint);
 
     }
