@@ -283,17 +283,19 @@ public class Drone {
             }
 
         }
-        if(rc.isCurrentlyHoldingUnit() && Navigation.aerialDistance(waypoint) <= 3) {
-            RobotInfo robot = rc.senseRobotAtLocation(waypoint);
-            if(robot != null) if(robot.type == RobotType.HQ && robot.team == Strategium.opponentTeam)
-                for (Direction dir : dir8)
-                    if (rc.canDropUnit(dir))
-                        if (Navigation.aerialDistance(waypoint, rc.adjacentLocation(dir)) <= 4) {
-                            rc.dropUnit(dir);
-                            payload = Payload.POTENTIAL;
-                            state = State.SWARMER;
-                            return true;
-                        }
+        RobotInfo[] robots = rc.senseNearbyRobots();
+        for(RobotInfo robot : robots) {
+            if(rc.isCurrentlyHoldingUnit()) {
+                if (robot != null) if (robot.type == RobotType.HQ && robot.team == Strategium.opponentTeam)
+                    for (Direction dir : dir8)
+                        if (rc.canDropUnit(dir))
+                            if (Navigation.aerialDistance(robot.getLocation(), rc.adjacentLocation(dir)) <= 4) {
+                                rc.dropUnit(dir);
+                                payload = Payload.POTENTIAL;
+                                state = State.SWARMER;
+                                return true;
+                            }
+            }
         }
         return Navigation.bugPath(waypoint);
 
