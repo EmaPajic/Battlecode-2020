@@ -277,7 +277,7 @@ public class TwoMinerController {
                 makeRobotType = RobotType.DESIGN_SCHOOL;
         }
 
-        if (rc.getTeamSoup() < RobotType.LANDSCAPER.cost + RobotType.DESIGN_SCHOOL.cost) {
+        if (rc.getTeamSoup() > RobotType.LANDSCAPER.cost + RobotType.DESIGN_SCHOOL.cost) {
 
             if (makeRobotType == null && !friendlyNetGunsNearby &&
                     (enemyDronesNearby || enemyFulfillmentCenterNearby)) {
@@ -311,6 +311,7 @@ public class TwoMinerController {
                 }
 
             }
+            System.out.println(makeRobotType);
             if (rc.getTeamSoup() >= makeRobotType.cost)
                 for (Direction dir : dir8)
                     if (rc.canBuildRobot(makeRobotType, dir))
