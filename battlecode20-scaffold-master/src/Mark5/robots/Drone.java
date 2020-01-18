@@ -269,10 +269,7 @@ public class Drone {
                     waypoint = null;
 
                     if(rc.isCurrentlyHoldingUnit()) {
-                        if (Strategium.enemyHQLocation != null) waypoint = Strategium.enemyHQLocation;
-                        else if (!Strategium.potentialEnemyHQLocations.isEmpty())
-                            waypoint = Strategium.potentialEnemyHQLocations.get(
-                                    Strategium.rand.nextInt(Strategium.potentialEnemyHQLocations.size()));
+                        waypoint = Strategium.currentEnemyHQTarget;
 
 
                         if (waypoint == null)
@@ -280,8 +277,8 @@ public class Drone {
 
                         if (waypoint == null) waypoint = new MapLocation(
                                 Strategium.rand.nextInt(rc.getMapWidth()), Strategium.rand.nextInt(rc.getMapHeight()));
-
                     } else waypoint = Strategium.HQLocation;
+
             }
 
         }
