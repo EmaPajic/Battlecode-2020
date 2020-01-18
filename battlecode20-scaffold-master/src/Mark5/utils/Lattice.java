@@ -29,7 +29,7 @@ public class Lattice {
      */
     public static boolean isPath(MapLocation location) {
 
-        return ((location.x + location.y) % 2 == 1 || location.isAdjacentTo(Strategium.HQLocation)) &&
+        return ((location.x + location.y) % 2 == 1 /*|| location.isAdjacentTo(Strategium.HQLocation)*/) &&
                 !location.equals(Strategium.HQLocation);
     }
 
@@ -64,6 +64,7 @@ public class Lattice {
         }
         return true;
     }
+
 
     /**
      * Calculates how much dirt can be deposited at the location while keeping it even

@@ -142,7 +142,7 @@ public class Landscaper {
     private static boolean patrol() throws GameActionException {
         //System.out.println(Clock.getBytecodeNum());
         int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 500);
-        if(waterLevel > 12) waterLevel = 12;
+        if (waterLevel > 12) waterLevel = 12;
         if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y]) {
             if (rc.canDepositDirt(Direction.CENTER)) {
 
@@ -160,7 +160,7 @@ public class Landscaper {
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
-            if(!rc.onTheMap(location)) continue;
+            if (!rc.onTheMap(location)) continue;
             if (Lattice.isPath(location))
                 if (waterLevel > Strategium.elevation[location.x][location.y]) {
                     if (rc.canDepositDirt(dir)) {
@@ -174,7 +174,7 @@ public class Landscaper {
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
-            if(!rc.onTheMap(location)) continue;
+            if (!rc.onTheMap(location)) continue;
             if (Lattice.isBuildingSite(location) && !Strategium.occupied[location.x][location.y])
                 if (waterLevel > Strategium.elevation[location.x][location.y] ||
                         Lattice.maxDeposit(location) > 0) {
@@ -185,34 +185,35 @@ public class Landscaper {
                     }
                 }
         }
+        if (!Lattice.isPit(rc.getLocation()))
+            for (Direction dir : dir8) {
+                MapLocation location = rc.adjacentLocation(dir);
+                if (!rc.onTheMap(location)) continue;
+                if (Lattice.isPath(location) ||
+                        (Lattice.isBuildingSite(location) && !Strategium.occupied[location.x][location.y]))
+                    if (Strategium.elevation[location.x][location.y] >
+                            3 + Strategium.elevation[rc.getLocation().x][rc.getLocation().y])
+                        if (!Lattice.isAdjacentToWater(location)) {
+                            if (rc.canDigDirt(dir)) {
 
-        for (Direction dir : dir8) {
-            MapLocation location = rc.adjacentLocation(dir);
-            if(!rc.onTheMap(location)) continue;
-            if (Lattice.isPath(location) ||
-                    (Lattice.isBuildingSite(location) && !Strategium.occupied[location.x][location.y]))
-                if (Strategium.elevation[location.x][location.y] >
-                        3 + Strategium.elevation[rc.getLocation().x][rc.getLocation().y]) {
-                    if (rc.canDigDirt(dir)) {
+                                rc.digDirt(dir);
+                                return true;
+                            }
+                        }
+            }
 
-                        rc.digDirt(dir);
-                        return true;
-                    }
-                }
-        }
-
-        if(rc.getDirtCarrying() == RobotType.LANDSCAPER.dirtLimit){
+        if (rc.getDirtCarrying() == RobotType.LANDSCAPER.dirtLimit) {
             Direction dir = Lattice.bestDepositDirection();
-            if(rc.canDepositDirt(dir)){
+            if (rc.canDepositDirt(dir)) {
 
                 rc.depositDirt(dir);
                 return true;
             }
         }
 
-        if(rc.getDirtCarrying() == 0){
+        if (rc.getDirtCarrying() == 0) {
             Direction dir = Lattice.bestDigDirection();
-            if(rc.canDigDirt(dir)){
+            if (rc.canDigDirt(dir)) {
 
                 rc.digDirt(dir);
                 return true;
@@ -242,7 +243,7 @@ public class Landscaper {
                 }
         }
 
-        if(bestWaypoint != null) waypoint = bestWaypoint;
+        if (bestWaypoint != null) waypoint = bestWaypoint;
 
         if (waypoint == null) {
             waypoint = Strategium.currentEnemyHQTarget;
@@ -252,7 +253,6 @@ public class Landscaper {
             waypoint = new MapLocation(
                     Strategium.rand.nextInt(rc.getMapWidth()), Strategium.rand.nextInt(rc.getMapHeight()));
         }
-
 
 
         for (Direction dir : dir8) {
