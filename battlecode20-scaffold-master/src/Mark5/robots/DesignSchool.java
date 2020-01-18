@@ -13,8 +13,9 @@ public class DesignSchool {
 
     public static void run() throws GameActionException {
         Strategium.gatherInfo();
-        Direction buildDirection = observer();
-        if(buildDirection != null){
+
+        if(DesignSchoolSensor.numThreats > DesignSchoolSensor.numLandscapers){
+        for(Direction buildDirection : DesignSchoolSensor.priorityBuildDirections)
             if (tryBuild(RobotType.LANDSCAPER, buildDirection)) {
                 ++numLandscapers;
             } else {
@@ -34,11 +35,6 @@ public class DesignSchool {
             }
         }
 
-    }
-
-
-    public static Direction observer() {
-        return DesignSchoolSensor.shouldCreateLandscaper();
     }
 }
 

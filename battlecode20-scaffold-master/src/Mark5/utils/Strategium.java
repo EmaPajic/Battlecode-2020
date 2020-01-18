@@ -1,5 +1,6 @@
 package Mark5.utils;
 
+import Mark5.robots.DesignSchool;
 import Mark5.robots.Drone;
 import Mark5.sensors.*;
 import battlecode.common.*;
@@ -82,6 +83,8 @@ public class Strategium {
                 LandscaperSensor.init();
                 break;
             case DESIGN_SCHOOL:
+                DesignSchoolSensor.init();
+                break;
             case FULFILLMENT_CENTER:
                 //industrySense();
                 break;
