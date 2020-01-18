@@ -87,6 +87,11 @@ public class Navigation {
     public static boolean bugPath(MapLocation destination) throws GameActionException {
         Direction dir = moveTowards(destination);
         Direction straight = moveTowards(destination);
+        int sections = 0;
+        for(int i = 8; i-- > 0; dir = dir.rotateRight()){
+            if(Strategium.canSafelyMove(dir.rotateRight()) && !Strategium.canSafelyMove(dir)) sections++;
+        }
+
         if (dir != moveTowards(lastDestination) && destination != lastDestination) {
             frustration = 0;
             avoiding = false;
@@ -94,7 +99,7 @@ public class Navigation {
 
         lastDestination = destination;
 
-        //System.out.println(dir + " " + lastDirection + " " + frustration);
+        System.out.println("SEC " + sections);
 
         if (!avoiding) {
             lastIntersection = rc.getLocation();
@@ -144,20 +149,22 @@ public class Navigation {
         }
         avoiding = true;
         for (; !Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++) {
+            rc.setIndicatorLine(rc.getLocation(), rc.adjacentLocation(dir), 255, 0, 0);
             if (i == 8) {
 
                 return false;
             }
         }
 
-        if (avoiding && straight == lastDirection &&
-                aerialDistance(destination) <= aerialDistance(lastIntersection, destination)) {
+        if (avoiding &&
+                rc.getLocation().distanceSquaredTo(destination) <= lastIntersection.distanceSquaredTo(destination)) {
             if (Strategium.canSafelyMove(straight)) {
                 avoiding = false;
                 lastIntersection = rc.getLocation();
                 rc.move(straight);
                 return true;
-            } else {
+            } else if (sections>1 && straight == lastDirection){
+                System.out.println("HOP");
                 lastAvoidingDirection = lastAvoidingDirection.opposite();
                 lastIntersection = rc.getLocation();
 
