@@ -5,11 +5,15 @@ import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import battlecode.common.*;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import static Mark5.RobotPlayer.dir8;
 import static Mark5.RobotPlayer.rc;
 
 public class Landscaper {
     private static MapLocation waypoint = null;
+    private static List<MapLocation> moveLocs = new LinkedList<>();
 
     public static void run() throws GameActionException {
         System.out.println("START");
@@ -142,6 +146,7 @@ public class Landscaper {
     private static boolean patrol() throws GameActionException {
         System.out.println(Clock.getBytecodeNum());
         int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 500);
+        if(waterLevel > 12) waterLevel = 12;
         if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y]) {
             if (rc.canDepositDirt(Direction.CENTER)) {
                 rc.depositDirt(Direction.CENTER);
@@ -154,10 +159,6 @@ public class Landscaper {
             }
             return false;
         }
-        System.out.println(Clock.getBytecodeNum());
-        Direction dig = Lattice.bestDigDirection();
-        Direction dep = Lattice.bestDepositDirection();
-        System.out.println(Clock.getBytecodeNum());
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
@@ -165,11 +166,6 @@ public class Landscaper {
                 if (waterLevel > Strategium.elevation[location.x][location.y]) {
                     if (rc.canDepositDirt(dir)) {
                         rc.depositDirt(dir);
-                        return true;
-                    }
-
-                    if (rc.canDigDirt(dig)) {
-                        rc.digDirt(dig);
                         return true;
                     }
                 }
@@ -185,13 +181,8 @@ public class Landscaper {
                         rc.depositDirt(dir);
                         return true;
                     }
-                    if (rc.canDigDirt(dig)) {
-                        rc.digDirt(dig);
-                        return true;
-                    }
                 }
         }
-        System.out.println(Clock.getBytecodeNum());
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
@@ -203,31 +194,56 @@ public class Landscaper {
                         rc.digDirt(dir);
                         return true;
                     }
-                    if (rc.canDepositDirt(dep)) {
-                        rc.depositDirt(dep);
-                        return true;
-                    }
                 }
         }
-        System.out.println(Clock.getBytecodeNum());
+
+        if(rc.getDirtCarrying() == RobotType.LANDSCAPER.dirtLimit){
+            Direction dir = Lattice.bestDepositDirection();
+            if(rc.canDepositDirt(dir)){
+                rc.depositDirt(dir);
+                return true;
+            }
+        }
+
+        if(rc.getDirtCarrying() == 0){
+            Direction dir = Lattice.bestDigDirection();
+            if(rc.canDigDirt(dir)){
+                rc.digDirt(dir);
+                return true;
+            }
+        }
+
+        moveLocs.clear();
 
         for (Direction dir : dir8)
             if (Lattice.isPath(rc.adjacentLocation(dir))) {
                 if (!Lattice.isEven(rc.adjacentLocation(dir)))
                     if (rc.canMove(dir)) {
-                        rc.move(dir);
-                        return true;
+                        if(Strategium.HQLocation != null) {
+                            if(Navigation.aerialDistance(Strategium.HQLocation, waypoint) >
+                                    Navigation.aerialDistance(Strategium.HQLocation, rc.adjacentLocation(dir)))
+                                waypoint = rc.adjacentLocation(dir);
+                        } else {
+                            rc.move(dir);
+                            return true;
+                        }
+
                     }
             }
-        System.out.println(Clock.getBytecodeNum());
+
+
+
 
         if (waypoint.equals(rc.getLocation())) waypoint = null;
+
+        if (waypoint == null) {
+            waypoint = Strategium.currentEnemyHQTarget;
+        }
 
         if (waypoint == null) {
             waypoint = new MapLocation(
                     Strategium.rand.nextInt(rc.getMapWidth()), Strategium.rand.nextInt(rc.getMapHeight()));
         }
-        System.out.println(Clock.getBytecodeNum());
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
@@ -238,7 +254,6 @@ public class Landscaper {
                         return true;
                     }
         }
-        System.out.println(Clock.getBytecodeNum());
 
         return false;
 
