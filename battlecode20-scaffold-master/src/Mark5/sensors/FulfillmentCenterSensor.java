@@ -26,16 +26,18 @@ public class FulfillmentCenterSensor {
         // Sensing if someone needs a taxi
         if(rc.getType() == RobotType.FULFILLMENT_CENTER) {
             for (int i = 0; i < 8; ++i) {
-                RobotInfo robot = rc.senseRobotAtLocation(
-                        rc.getLocation().add(RobotPlayer.dir8[i]));
-                if (robot != null) if (!robot.type.isBuilding() && robot.getType() != RobotType.DELIVERY_DRONE  && robot.getSoupCarrying() == 0) {
-                    if(adjacentRobotTurnID[i] == robot.getID()) {
-                        ++adjacentRobotTurnCount[i];
-                    }
-                    else {
-                        adjacentRobotTurnID[i] = robot.getID();
-                        adjacentRobotTurnCount[i] = 1;
-                    }
+                if(rc.canSenseLocation(rc.getLocation().add(RobotPlayer.dir8[i]))) {
+                    RobotInfo robot = rc.senseRobotAtLocation(
+                            rc.getLocation().add(RobotPlayer.dir8[i]));
+                    if (robot != null)
+                        if (!robot.type.isBuilding() && robot.getType() != RobotType.DELIVERY_DRONE && robot.getSoupCarrying() == 0) {
+                            if (adjacentRobotTurnID[i] == robot.getID()) {
+                                ++adjacentRobotTurnCount[i];
+                            } else {
+                                adjacentRobotTurnID[i] = robot.getID();
+                                adjacentRobotTurnCount[i] = 1;
+                            }
+                        }
                 }
             }
             for(int i = 0; i < 8; ++i) {
