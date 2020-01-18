@@ -22,6 +22,7 @@ public class RushMiner {
         Strategium.gatherInfo();
         if (Strategium.enemyHQLocation != null) {
             Strategium.currentEnemyHQTarget = Strategium.enemyHQLocation;
+            buildToAttack();
         } else if (Strategium.currentEnemyHQTarget == null) {
             Strategium.currentEnemyHQTarget = Strategium.potentialEnemyHQLocations.get(0);
         }
@@ -44,10 +45,10 @@ public class RushMiner {
             }
         }
 
-        if (Navigation.aerialDistance(Strategium.enemyHQLocation) <= 3) {
+        /*if (Navigation.aerialDistance(Strategium.enemyHQLocation) <= 3) {
             buildToAttack();
             return;
-        }
+        }*/
 
         Direction goToDir = Navigation.moveTowards(Strategium.currentEnemyHQTarget);
         MapLocation goToLoc = rc.adjacentLocation(goToDir);
