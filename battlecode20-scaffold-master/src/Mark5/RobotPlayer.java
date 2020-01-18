@@ -155,6 +155,8 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
+        if(rc.getRoundNum() == 1)
+            Strategium.gatherInfo();
         if (numMiners == 2) {
             if (tryBuild(RobotType.MINER, Direction.SOUTH)) {
                 ++numMiners;

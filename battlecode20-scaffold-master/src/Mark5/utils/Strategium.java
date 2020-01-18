@@ -224,7 +224,7 @@ public class Strategium {
         sense();
 
         if (rc.getType() == RobotType.HQ) {
-            Blockchain.reportHQLocation(5);
+            Blockchain.reportHQLocation(1);
         }
         if (rc.getType() == RobotType.DELIVERY_DRONE) {
             Blockchain.parseBlockchain();
