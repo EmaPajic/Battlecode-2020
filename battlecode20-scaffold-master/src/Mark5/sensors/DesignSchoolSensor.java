@@ -40,12 +40,8 @@ public class DesignSchoolSensor {
 
     public void init() {
 
-        water = new boolean[9][9];
-        occupied = new boolean[9][9];
-
-
-
-
+        water = new boolean[rc.getMapWidth()][rc.getMapHeight()];
+        occupied = new boolean[rc.getMapWidth()][rc.getMapHeight()];
 
     }
 
