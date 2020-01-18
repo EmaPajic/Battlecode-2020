@@ -159,7 +159,7 @@ public strictfp class RobotPlayer {
             if (tryBuild(RobotType.MINER, Direction.SOUTH)) {
                 ++numMiners;
             }
-        } else if (numMiners < 2 || (numMiners > 2 && numMiners < 8)) {
+        } else if (numMiners < 2 || (numMiners > 2 && numMiners < 5)) {
             for (Direction dir : directions)
                 if(dir != Direction.SOUTH)
                     if (tryBuild(RobotType.MINER, dir)) {

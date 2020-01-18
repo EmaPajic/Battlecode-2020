@@ -43,7 +43,7 @@ public class RushMiner {
             }
         }
 
-        if(Navigation.aerialDistance(Strategium.enemyHQLocation) <= 3){
+        if (Navigation.aerialDistance(Strategium.enemyHQLocation) <= 3) {
             buildToAttack();
             return;
         }
@@ -64,22 +64,21 @@ public class RushMiner {
             if (circumnavigateDir != Direction.CENTER)
                 if (Strategium.canSafelyMove(circumnavigateDir)) {
                     rc.move(circumnavigateDir);
-                } else
-            if (!builtFulfillment) {
-                //build
-                for (Direction buildDir : dir8)
-                    if (Lattice.isBuildingSite(rc.getLocation().add(buildDir)) &&
-                            rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, buildDir) && rc.isReady()) {
-                        rc.buildRobot(RobotType.FULFILLMENT_CENTER, buildDir);
-                        builtFulfillment = true;
-                    }
-                for (Direction buildDir : dir8)
-                    if (rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, buildDir)) {
-                        rc.buildRobot(RobotType.FULFILLMENT_CENTER, buildDir);
-                        builtFulfillment = true;
-                    }
+                } else if (!builtFulfillment) {
+                    //build
+                    for (Direction buildDir : dir8)
+                        if (Lattice.isBuildingSite(rc.getLocation().add(buildDir)) &&
+                                rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, buildDir) && rc.isReady()) {
+                            rc.buildRobot(RobotType.FULFILLMENT_CENTER, buildDir);
+                            builtFulfillment = true;
+                        }
+                    for (Direction buildDir : dir8)
+                        if (rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, buildDir)) {
+                            rc.buildRobot(RobotType.FULFILLMENT_CENTER, buildDir);
+                            builtFulfillment = true;
+                        }
 
-            }
+                }
 
         }
     }
@@ -87,31 +86,28 @@ public class RushMiner {
     public static void buildToAttack() throws GameActionException {
         System.out.println("BILD TRN: " + buildTurn);
         if (buildTurn == 0) {
-            if(TwoMinerController.buildDesignCenterNearEnemy())
+            if (TwoMinerController.buildDesignCenterNearEnemy())
                 ++buildTurn;
         } else {
             buildNetGunNearEnemy();
         }
     }
 
-    public static void buildNetGunNearEnemy() throws GameActionException {
-        // Build DesignCenter near enemy
-        if (rc.canSenseLocation(Strategium.currentEnemyHQTarget)) {
-            RobotInfo info = rc.senseRobotAtLocation(Strategium.currentEnemyHQTarget);
-            if (info != null)
-                if (info.getTeam() == Strategium.opponentTeam && info.getType() == RobotType.HQ) {
-                    if (Navigation.aerialDistance(Strategium.currentEnemyHQTarget) > 4) {
-                        Navigation.bugPath(Strategium.currentEnemyHQTarget);
-                    } else {
-                        for (Direction dir : dir8) {
-                            if (rc.canBuildRobot(RobotType.NET_GUN, dir) &&
-                                    Navigation.aerialDistance(rc.getLocation().add(dir), Strategium.currentEnemyHQTarget) <= 3) {
-                                tryBuild(RobotType.DESIGN_SCHOOL, dir);
-                            }
-                        }
+    public static boolean buildNetGunNearEnemy() throws GameActionException {
+
+
+        if (Navigation.aerialDistance(Strategium.currentEnemyHQTarget) <= 4) {
+            for (Direction dir : dir8) {
+                if (rc.canBuildRobot(RobotType.NET_GUN, dir) &&
+                        Navigation.aerialDistance(rc.getLocation().add(dir), Strategium.currentEnemyHQTarget) <= 3)
+                    if (tryBuild(RobotType.NET_GUN, dir)) {
+                        return true;
                     }
-                }
+            }
         }
+        Navigation.bugPath(Strategium.currentEnemyHQTarget);
+        return false;
+
     }
 
 }
