@@ -13,7 +13,7 @@ import static Mark5.RobotPlayer.rc;
 
 public class Landscaper {
     private static MapLocation waypoint = null;
-    private static List<MapLocation> moveLocs = new LinkedList<>();
+    private static MapLocation bestWaypoint = null;
 
     public static void run() throws GameActionException {
         System.out.println("START");
@@ -213,16 +213,17 @@ public class Landscaper {
             }
         }
 
-        moveLocs.clear();
+        bestWaypoint = null;
+        if (rc.getLocation().equals(waypoint)) waypoint = null;
 
         for (Direction dir : dir8)
             if (Lattice.isPath(rc.adjacentLocation(dir))) {
                 if (!Lattice.isEven(rc.adjacentLocation(dir)))
                     if (rc.canMove(dir)) {
                         if(Strategium.HQLocation != null) {
-                            if(Navigation.aerialDistance(Strategium.HQLocation, waypoint) >
+                            if(Navigation.aerialDistance(Strategium.HQLocation, bestWaypoint) >=
                                     Navigation.aerialDistance(Strategium.HQLocation, rc.adjacentLocation(dir)))
-                                waypoint = rc.adjacentLocation(dir);
+                                bestWaypoint = rc.adjacentLocation(dir);
                         } else {
                             rc.move(dir);
                             return true;
@@ -231,10 +232,7 @@ public class Landscaper {
                     }
             }
 
-
-
-
-        if (waypoint.equals(rc.getLocation())) waypoint = null;
+        if(bestWaypoint != null) waypoint = bestWaypoint;
 
         if (waypoint == null) {
             waypoint = Strategium.currentEnemyHQTarget;
