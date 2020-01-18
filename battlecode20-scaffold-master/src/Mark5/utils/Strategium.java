@@ -223,8 +223,8 @@ public class Strategium {
 
         sense();
 
-        if (rc.getType() == RobotType.HQ) {
-            Blockchain.reportHQLocation(1);
+        if (rc.getType() == RobotType.HQ && rc.getRoundNum() < 3) {
+            Blockchain.reportHQLocation(3);
         } else do {
 
                 Blockchain.parseBlockchain();
