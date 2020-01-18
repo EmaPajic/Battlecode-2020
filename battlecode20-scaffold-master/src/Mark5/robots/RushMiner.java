@@ -14,6 +14,7 @@ public class RushMiner {
 
     static int buildTurn = 0;
     static boolean builtFulfillment = false;
+    static boolean followBfs = false;
 
     static boolean foundEnemyHQ;
 
@@ -50,8 +51,13 @@ public class RushMiner {
 
         Direction goToDir = Navigation.moveTowards(Strategium.currentEnemyHQTarget);
         MapLocation goToLoc = rc.adjacentLocation(goToDir);
-
-        if (Strategium.canSafelyMove(goToDir)) {
+        Direction circumnavigateDir = Direction.CENTER;
+        if (followBfs) {
+            circumnavigateDir = BFS.step(Strategium.currentEnemyHQTarget);
+            if (goToDir == circumnavigateDir)
+                followBfs = false;
+        }
+        if (Strategium.canSafelyMove(goToDir) && !followBfs) {
             rc.move(goToDir);
         } else {
             //build fulfillment center and wait for drone
@@ -59,10 +65,13 @@ public class RushMiner {
             System.out.println("BFSSTART");
             rc.setIndicatorLine(rc.getLocation(), Strategium.currentEnemyHQTarget,
                     255, 255, 255);
-            Direction circumnavigateDir = BFS.step(Strategium.currentEnemyHQTarget);
+            if (!followBfs) {
+                circumnavigateDir = BFS.step(Strategium.currentEnemyHQTarget);
+            }
             System.out.println("BFSEND " + circumnavigateDir);
             if (circumnavigateDir != Direction.CENTER)
                 if (Strategium.canSafelyMove(circumnavigateDir)) {
+                    followBfs = true;
                     rc.move(circumnavigateDir);
                     return;
                 }
