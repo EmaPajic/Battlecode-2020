@@ -54,7 +54,7 @@ public class Lattice {
         int elevation = Strategium.elevation[location.x][location.y];
         for (Direction dir : dir8) {
             MapLocation loc = location.add(dir);
-            if (rc.onTheMap(loc) && !(isPit(location)) && !loc.isAdjacentTo(Strategium.HQLocation) &&
+            if (rc.onTheMap(loc) && isPath(location) && !loc.isAdjacentTo(Strategium.HQLocation) &&
                     !loc.equals(Strategium.HQLocation))
                 if (Math.abs(Strategium.elevation[loc.x][loc.y] - elevation) > 3 &&
                         !isAdjacentToWater(loc)) return false;
