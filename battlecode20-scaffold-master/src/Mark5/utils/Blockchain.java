@@ -6,7 +6,8 @@ import battlecode.common.Transaction;
 import java.util.ArrayList;
 import java.util.List;
 
-import static Mark4.RobotPlayer.rc;
+import static Mark5.RobotPlayer.rc;
+import static java.lang.Integer.min;
 
 public class Blockchain {
 
@@ -74,14 +75,12 @@ public class Blockchain {
         return true;
     }
 
-    static List<Transaction> parseBlockchain(List<Transaction> target) throws GameActionException {
-        if (parsingProgress < rc.getRoundNum()) {
-            if(target == null) target = new ArrayList<>();
+    public static void parseBlockchain() throws GameActionException {
+        if (parsingProgress < min(rc.getRoundNum(), 50)) {
+            System.out.println("here?");
             Transaction[] block = rc.getBlock(parsingProgress);
-            for(Transaction transaction : block) if(checkAuth(transaction)) target.add(transaction);
+            for(Transaction transaction : block) if(checkAuth(transaction)) Strategium.transactions.add(transaction);
             parsingProgress++;
-            return target;
         }
-        return null;
     }
 }

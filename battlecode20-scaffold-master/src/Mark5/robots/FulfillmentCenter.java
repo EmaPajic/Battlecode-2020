@@ -30,19 +30,13 @@ public class FulfillmentCenter {
                 }
                 break;
             case PERIODIC_BUILDING:
-                if (numDrones < 5)
+                if (numDrones < 5 && rc.getTeamSoup() > 650)
                     for (Direction dir : dir8) {
                         if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
                             ++numDrones;
                             return;
                         }
                     }
-                if ((rc.getRoundNum() > 600) && !Strategium.shouldBuildLandscaper) {
-                    if (tryBuild(RobotType.DELIVERY_DRONE, Direction.WEST)) {
-                        ++numDrones;
-                        return;
-                    }
-                }
                 break;
         }
     }
