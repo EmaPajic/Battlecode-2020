@@ -2,8 +2,9 @@ package Mark5.robots;
 
 import Mark5.sensors.DesignSchoolSensor;
 import Mark5.utils.Strategium;
-import Mark5.RobotPlayer;
-import battlecode.common.*;
+import battlecode.common.Direction;
+import battlecode.common.GameActionException;
+import battlecode.common.RobotType;
 
 import static Mark5.RobotPlayer.*;
 
