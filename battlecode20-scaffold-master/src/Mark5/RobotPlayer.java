@@ -189,7 +189,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runSearchMiner() throws GameActionException {
-        Strategium.gatherInfo();
+        //Strategium.gatherInfo();
         TwoMinerController.control();
     }
 

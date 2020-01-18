@@ -18,6 +18,7 @@ import static java.lang.Math.min;
 import static Mark5.utils.Strategium.*;
 
 public class MinerSensor {
+    public static int visibleSoup;
 
     public static void init() {
         soup = new boolean[rc.getMapWidth()][rc.getMapHeight()];
@@ -31,6 +32,7 @@ public class MinerSensor {
 
         enemyDrones.clear();
         nearestEnemyDrone = null;
+        visibleSoup = 0;
 
         int xMin = rc.getLocation().x - 5;
         int yMin = rc.getLocation().y - 5;
@@ -44,6 +46,7 @@ public class MinerSensor {
                     elevation[i][j] = rc.senseElevation(location);
                     water[i][j] = rc.senseFlooding(location);
                     occupied[i][j] = false;
+                    visibleSoup += rc.senseSoup(location);
                     if (rc.senseSoup(location) > 0) {
                         //explored[i][j] = true;
                         if (!soup[i][j]) {
