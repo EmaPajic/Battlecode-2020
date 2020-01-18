@@ -23,6 +23,7 @@ public class RushMiner {
         if (Strategium.enemyHQLocation != null) {
             Strategium.currentEnemyHQTarget = Strategium.enemyHQLocation;
             buildToAttack();
+            return;
         } else if (Strategium.currentEnemyHQTarget == null) {
             Strategium.currentEnemyHQTarget = Strategium.potentialEnemyHQLocations.get(0);
         }
