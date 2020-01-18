@@ -86,7 +86,8 @@ public class DroneSensor {
                     for(Direction dir : dir8) {
                         if(rc.canSenseLocation(robot.location.add(dir))) {
                             RobotInfo maybeFulfillment = rc.senseRobotAtLocation(robot.location.add(dir));
-                            if(maybeFulfillment != null) if(maybeFulfillment.type == RobotType.FULFILLMENT_CENTER) {
+                            if(maybeFulfillment != null) if(maybeFulfillment.type == RobotType.FULFILLMENT_CENTER &&
+                                                            maybeFulfillment.getTeam() == opponentTeam) {
                                 NearFulfillmentCenter = true;
                                 break;
                             }
