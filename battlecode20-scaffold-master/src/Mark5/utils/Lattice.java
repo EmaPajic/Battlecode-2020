@@ -36,7 +36,7 @@ public class Lattice {
      * @return true if it is a building site, false otherwise
      */
     public static boolean isBuildingSite(MapLocation location) {
-        return location.x % 2 == 1 && location.y % 2 == 1;
+        return location.x % 2 == 1 && location.y % 2 == 1 && !location.isAdjacentTo(Strategium.HQLocation);
     }
 
     /**

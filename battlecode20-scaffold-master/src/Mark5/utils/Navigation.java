@@ -16,7 +16,7 @@ public class Navigation {
     private static Direction lastAvoidingDirection = Direction.SOUTHEAST;
     private static MapLocation lastDestination;
 
-    private static int typeMobility(RobotType type){
+    private static int typeMobility(RobotType type) {
         switch (type) {
             case REFINERY:
             case HQ:
@@ -25,15 +25,19 @@ public class Navigation {
             case VAPORATOR:
             case NET_GUN:
                 return -1;
-            case LANDSCAPER: return 10;
-            case MINER: return 20;
-            case COW: return 30;
-            case DELIVERY_DRONE: return 50;
+            case LANDSCAPER:
+                return 10;
+            case MINER:
+                return 20;
+            case COW:
+                return 30;
+            case DELIVERY_DRONE:
+                return 50;
         }
         return 0;
     }
 
-    public static boolean diagonal(MapLocation a, MapLocation b){
+    public static boolean diagonal(MapLocation a, MapLocation b) {
         if (a == null || b == null) return false;
         MapLocation distance = a.translate(-b.x, -b.y);
         return Math.abs(distance.x) == Math.abs(distance.y);
@@ -46,26 +50,27 @@ public class Navigation {
 
     /**
      * Checks if a location is suitable for offensive landing
+     *
      * @param location The location to check. It needs to be within the map boundaries.
      * @return true if it is known to be a good landing spot, false otherwise.
      */
-    public static boolean goodLandingSpot(MapLocation location){
-        if(location == null) return false;
-        if(Strategium.enemyHQLocation == null) return false;
-        if(Strategium.water[location.x][location.y]) return false;
-        if(location.distanceSquaredTo(Strategium.enemyHQLocation) > RobotType.LANDSCAPER.sensorRadiusSquared)
+    public static boolean goodLandingSpot(MapLocation location) {
+        if (location == null) return false;
+        if (Strategium.enemyHQLocation == null) return false;
+        if (Strategium.water[location.x][location.y]) return false;
+        if (location.distanceSquaredTo(Strategium.enemyHQLocation) > RobotType.LANDSCAPER.sensorRadiusSquared)
             return false;
-        if(location.isAdjacentTo(Strategium.enemyHQLocation)) return true;
+        if (location.isAdjacentTo(Strategium.enemyHQLocation)) return true;
         return Strategium.elevation[location.x][location.y] > 15;
     }
 
     private static boolean isOnLine(MapLocation destination) {
         MapLocation line = destination.translate(-lastIntersection.x, -lastIntersection.y);
         MapLocation point = rc.getLocation().translate(-lastIntersection.x, -lastIntersection.y);
-        if(line.equals(point)) return true;
-        if(line.x * point.x < 0  || line.y * point.y < 0) return false;
-        if(line.x == 0) return point.x == 0;
-        if(line.y == 0) return point.y == 0;
+        if (line.equals(point)) return true;
+        if (line.x * point.x < 0 || line.y * point.y < 0) return false;
+        if (line.x == 0) return point.x == 0;
+        if (line.y == 0) return point.y == 0;
         return Math.abs(point.x) == Math.abs(point.y);
     }
 
@@ -74,13 +79,14 @@ public class Navigation {
      * The field "frustration" represents the amount of obstacles encountered along the way. It can and should be used
      * to determine if the destination is unreachable, the unit got stuck or it has spent a certain amount of time
      * circling the target.
+     *
      * @param destination the location to go towards
      * @return true if move was made, false otherwise
      * @throws GameActionException it doesn't
      */
     public static boolean bugPath(MapLocation destination) throws GameActionException {
         Direction dir = moveTowards(destination);
-        if(dir != moveTowards(lastDestination)) {
+        if (dir != moveTowards(lastDestination) && destination != lastDestination) {
             frustration = 0;
             avoiding = false;
         }
@@ -89,18 +95,18 @@ public class Navigation {
 
         System.out.println(dir + " " + lastDirection + " " + frustration);
 
-        if(!avoiding) {
+        if (!avoiding) {
             lastIntersection = rc.getLocation();
             lastDirection = dir;
-            if(Strategium.canSafelyMove(dir)){
+            if (Strategium.canSafelyMove(dir)) {
                 rc.move(dir);
                 return true;
             }
             MapLocation obstacle = rc.adjacentLocation(dir);
-            if(rc.canSenseLocation(obstacle)){
+            if (rc.canSenseLocation(obstacle)) {
                 RobotInfo robot = rc.senseRobotAtLocation(obstacle);
-                if(robot != null) {
-                    if(robot.team == Strategium.myTeam && robot.ID > rc.getID() && !robot.type.isBuilding() &&
+                if (robot != null) {
+                    if (robot.team == Strategium.myTeam && robot.ID > rc.getID() && !robot.type.isBuilding() &&
                             frustration < typeMobility(robot.type)) {
                         frustration += 10;
                         return false;
@@ -112,9 +118,9 @@ public class Navigation {
 
         System.out.println(aerialDistance(destination) + " " + aerialDistance(lastIntersection, destination) + " " + lastIntersection);
 
-        if(avoiding && dir == lastDirection &&
+        if (avoiding && dir == lastDirection &&
                 aerialDistance(destination) <= aerialDistance(lastIntersection, destination)) {
-            if(Strategium.canSafelyMove(dir)){
+            if (Strategium.canSafelyMove(dir)) {
                 avoiding = false;
                 lastIntersection = rc.getLocation();
                 rc.move(dir);
@@ -126,7 +132,7 @@ public class Navigation {
         dir = lastAvoidingDirection;
 
         int i;
-        for(i = 0; Strategium.canSafelyMove(dir); dir = dir.rotateRight(), i++) {
+        for (i = 0; Strategium.canSafelyMove(dir); dir = dir.rotateRight(), i++) {
             if (i == 8) {
                 avoiding = false;
                 lastAvoidingDirection = dir;
@@ -134,13 +140,13 @@ public class Navigation {
                 return true;
             }
         }
-        if(i > 0) {
+        if (i > 0) {
             rc.move(dir.rotateLeft());
             lastAvoidingDirection = dir.rotateLeft();
             return true;
         }
-        for(; !Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++){
-            if (i == 8){
+        for (; !Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++) {
+            if (i == 8) {
                 return false;
             }
         }
@@ -330,6 +336,7 @@ public class Navigation {
 
     /**
      * Calculates a direction in which the unit should move in order to follow a clockwise square path.
+     *
      * @param center center of the square
      * @return direction to move in
      */
@@ -353,7 +360,8 @@ public class Navigation {
     /**
      * Computes the aerial distance (ie. the distance between them along either x or y axis, whichever is larger)
      * between the two points.
-     * @param source one point
+     *
+     * @param source      one point
      * @param destination other point
      * @return distance between the points
      */
@@ -365,9 +373,10 @@ public class Navigation {
     /**
      * Computes the aerial distance (ie. the distance between them along either x or y axis, whichever is larger)
      * between the two points.
+     *
      * @param source one point
-     * @param destX other point x coordinate
-     * @param destY other point y coordinate
+     * @param destX  other point x coordinate
+     * @param destY  other point y coordinate
      * @return distance between the points
      */
     public static int aerialDistance(MapLocation source, int destX, int destY) {
@@ -378,6 +387,7 @@ public class Navigation {
     /**
      * Computes the aerial distance (ie. the distance between them along either x or y axis, whichever is larger)
      * to the target robot
+     *
      * @param target target robot
      * @return distance to the target robot
      */
@@ -389,6 +399,7 @@ public class Navigation {
     /**
      * Computes the aerial distance (ie. the distance between them along either x or y axis, whichever is larger)
      * to the location
+     *
      * @param destination point to compute the distance to
      * @return distance to the target location
      */
@@ -399,6 +410,7 @@ public class Navigation {
     /**
      * Computes the aerial distance (ie. the distance between them along either x or y axis, whichever is larger)
      * to the location
+     *
      * @param destX x coordinate of the point to compute the distance to
      * @param destY y coordinate of the point to compute the distance to
      * @return distance to the target location
@@ -409,17 +421,18 @@ public class Navigation {
 
     /**
      * Clamps the location coordinates to be within the map boundaries
+     *
      * @param location the location to clamp
      * @return the location with clamped coordinates
      */
-    public static MapLocation clamp(MapLocation location){
+    public static MapLocation clamp(MapLocation location) {
         int x = location.x;
         int y = location.y;
-        if(x >= rc.getMapWidth()) x = rc.getMapWidth() - 1;
-        if(y >= rc.getMapHeight()) y = rc.getMapHeight() - 1;
-        if(x < 0) x = 0;
-        if(y < 0) y = 0;
-        return  new MapLocation(x, y);
+        if (x >= rc.getMapWidth()) x = rc.getMapWidth() - 1;
+        if (y >= rc.getMapHeight()) y = rc.getMapHeight() - 1;
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        return new MapLocation(x, y);
     }
 
 }

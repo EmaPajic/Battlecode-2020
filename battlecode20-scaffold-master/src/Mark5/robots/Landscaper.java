@@ -140,6 +140,7 @@ public class Landscaper {
     }
 
     private static boolean patrol() throws GameActionException {
+        System.out.println(Clock.getBytecodeNum());
         int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 500);
         if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y]) {
             if (rc.canDepositDirt(Direction.CENTER)) {
@@ -153,9 +154,10 @@ public class Landscaper {
             }
             return false;
         }
-
+        System.out.println(Clock.getBytecodeNum());
         Direction dig = Lattice.bestDigDirection();
         Direction dep = Lattice.bestDepositDirection();
+        System.out.println(Clock.getBytecodeNum());
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
@@ -172,6 +174,7 @@ public class Landscaper {
                     }
                 }
         }
+        System.out.println(Clock.getBytecodeNum());
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
@@ -188,6 +191,7 @@ public class Landscaper {
                     }
                 }
         }
+        System.out.println(Clock.getBytecodeNum());
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
@@ -205,6 +209,7 @@ public class Landscaper {
                     }
                 }
         }
+        System.out.println(Clock.getBytecodeNum());
 
         for (Direction dir : dir8)
             if (Lattice.isPath(rc.adjacentLocation(dir))) {
@@ -214,6 +219,7 @@ public class Landscaper {
                         return true;
                     }
             }
+        System.out.println(Clock.getBytecodeNum());
 
         if (waypoint.equals(rc.getLocation())) waypoint = null;
 
@@ -221,6 +227,7 @@ public class Landscaper {
             waypoint = new MapLocation(
                     Strategium.rand.nextInt(rc.getMapWidth()), Strategium.rand.nextInt(rc.getMapHeight()));
         }
+        System.out.println(Clock.getBytecodeNum());
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
@@ -231,6 +238,7 @@ public class Landscaper {
                         return true;
                     }
         }
+        System.out.println(Clock.getBytecodeNum());
 
         return false;
 
