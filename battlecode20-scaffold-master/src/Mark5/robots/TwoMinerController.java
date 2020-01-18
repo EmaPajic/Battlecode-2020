@@ -35,7 +35,7 @@ public class TwoMinerController {
 
     static MapLocation currentTarget;
     static public ArrayList<RobotType> staticRobots;
-
+    static public RobotType lastMadeRobotType;
     static boolean currentlyRefining;
     static int[] adjacencyCount = {0, 0, 0, 0, 0, 0, 0, 0};
     static int[] adjacencyID = {-1, -1, -1, -1, -1, -1, -1, -1};
@@ -60,7 +60,7 @@ public class TwoMinerController {
         searchRoute = new ArrayList<>();
         searchRouteVisited = new ArrayList<>();
         currentlyRefining = false;
-        //currentTarget = rc.getLocation();
+        lastMadeRobotType = RobotType.DESIGN_SCHOOL;
         findRoute();
         if (searchRoute.contains(hqLocation)) {
             searchRoute.remove(hqLocation);
@@ -105,7 +105,7 @@ public class TwoMinerController {
 
     public static void updateTarget() throws GameActionException {
         if (searchRoute.isEmpty()) {
-
+            // do nothing
         } else {
             Navigation.frustration = 0;
             searchRoute.remove(currentTarget);
@@ -144,7 +144,7 @@ public class TwoMinerController {
 
     }
 
-    public static void refineryRentability() throws GameActionException {
+    public static boolean refineryRentability() throws GameActionException {
         if (Navigation.aerialDistance(rc.getLocation(), Strategium.nearestRefinery) > 7 &&
                 Navigation.aerialDistance(hqLocation, rc.getLocation()) > 4) {
 
@@ -164,15 +164,12 @@ public class TwoMinerController {
 
             if (totalSoup > 200) {
                 for (Direction dir : dir8) {
-                    boolean refineryBuilt = tryBuild(RobotType.REFINERY, dir);
-//                    System.out.println("Moguce napraviti rafineriju "+ refineryBuilt);
-                    if (refineryBuilt) {
-                        //System.out.println("napravio rafineriju");
-                        return;
-                    }
+                    return tryBuild(RobotType.REFINERY, dir);
+
                 }
             }
         }
+        return false;
 
 
     }
@@ -183,22 +180,28 @@ public class TwoMinerController {
                 //System.out.println("Supa nadjena");
                 if (Navigation.aerialDistance(Strategium.nearestSoup, rc.getLocation()) > 1) {
                     Navigation.bugPath(Strategium.nearestSoup);
+                } else{
+                    tryMine(rc.getLocation().directionTo(Strategium.nearestSoup));
+                    return true;
                 }
-                refineryRentability();
-                tryMine(rc.getLocation().directionTo(Strategium.nearestSoup));
+                return refineryRentability();
 
-                return true;
+
+
             }
         } else {
             if (Navigation.aerialDistance(Strategium.nearestRefinery, rc.getLocation()) > 1) {
                 Navigation.bugPath(Strategium.nearestRefinery);
+            }else{
+                tryRefine(rc.getLocation().directionTo(Strategium.nearestRefinery));
+                return true;
             }
 
 
-            tryRefine(rc.getLocation().directionTo(Strategium.nearestRefinery));
+            return false;
 
 
-            return true;
+
         }
         return false;
     }
@@ -211,14 +214,19 @@ public class TwoMinerController {
 //        System.out.println("Current target " + currentTarget);
         if (!rc.canSenseLocation(currentTarget) && Navigation.frustration < 50) {
 
-            if (mineAndRefine()) return;
+            if (mineAndRefine()){
+                System.out.println("Kopam");
+                return;
+            }
             else {
                 RobotInfo[] robots = rc.senseNearbyRobots();
                 RobotType makeRobotType = null;
                 for(RobotInfo robot : robots) {
+                    // try to defend
                     if (robot.team == Strategium.myTeam) {
                         if (staticRobots.contains(robot.type) && robot.getDirtCarrying() > 0) {
                             makeRobotType = RobotType.DESIGN_SCHOOL;
+                            System.out.println("Neprijatelj pokusava da nas zakopa");
                         }
 
                         // if its not in visible radius make altern design school and fulfilment center if soup > 1000
@@ -228,23 +236,41 @@ public class TwoMinerController {
                         // if you see miner or landscaper make fulfilment center - 0K
                         // if enemy building and is not fulfilment center make design school - OK
 
-
-                    } else {
-                        if (robot.type != RobotType.FULFILLMENT_CENTER) {
+                    // then if possible attack
+                    } else if(robot.team != Strategium.myTeam) {
+                        if (staticRobots.contains(robot) && robot.type != RobotType.FULFILLMENT_CENTER) {
                             makeRobotType = RobotType.DESIGN_SCHOOL;
+                            System.out.println("Neprijateljeske zgrade, nije fulfillment centar");
+
                         } else if (robot.type == RobotType.FULFILLMENT_CENTER || robot.type == RobotType.DELIVERY_DRONE) {
                             makeRobotType = RobotType.NET_GUN;
+                            System.out.println("Neprijateljski fulfullment centar ili dron, napravi netgun");
+
                         } else if (robot.type == RobotType.LANDSCAPER || robot.type == RobotType.MINER) {
                             makeRobotType = RobotType.FULFILLMENT_CENTER;
-                        } else if (rc.getTeamSoup() < 1000) {
-                            makeRobotType = RobotType.VAPORATOR;
-                        } else if (rc.getTeamSoup() >= 1000) {
+                            System.out.println("Vidjen je lendskejper ili miner gradi fulfillment");
+
+                        }
+                    // then try to expand
+                    } else if (rc.getTeamSoup() < 1000) {
+                        makeRobotType = RobotType.VAPORATOR;
+                        System.out.println("Imamo dovoljno novca za Vaporator");
+                    } else if (rc.getTeamSoup() >= 1000) {
+                        if(lastMadeRobotType == RobotType.DESIGN_SCHOOL){
+                            lastMadeRobotType = makeRobotType;
+                            makeRobotType = RobotType.FULFILLMENT_CENTER;
+                        } else{
+                            lastMadeRobotType = makeRobotType;
                             makeRobotType = RobotType.DESIGN_SCHOOL;
 
                         }
 
+//                        makeRobotType = RobotType.FULFILLMENT_CENTER;
+                        System.out.println("Imamo dovoljno novca za ds ili fc");
+
                     }
                     if (makeRobotType != null) {
+                        // try to make building
                         if (staticRobots.contains(makeRobotType)) {
                             boolean noSameTwoBuildings = true;
                             for (RobotInfo robot2 : robots) {
@@ -260,6 +286,7 @@ public class TwoMinerController {
                                     }
                                 }
                             }
+                         // try to make unit
                         } else {
                             for (Direction dir : dir8) {
                                 if (Lattice.isBuildingSite(rc.getLocation().add(dir))) {
@@ -338,6 +365,7 @@ public class TwoMinerController {
 
 
         } else {
+            System.out.println("Update target");
             updateTarget();
             return;
         }
