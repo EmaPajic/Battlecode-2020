@@ -57,7 +57,8 @@ public class MinerSensor {
                     } else if (soup[i][j]) {
                         soup[i][j] = false;
                         knownSoup--;
-                        if (nearestSoup.x == i && nearestSoup.y == j) nearestSoup = null;
+                        if (nearestSoup != null)
+                            if (nearestSoup.x == i && nearestSoup.y == j) nearestSoup = null;
                     }
 
                 }

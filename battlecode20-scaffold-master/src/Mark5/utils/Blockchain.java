@@ -77,7 +77,7 @@ public class Blockchain {
 
     public static void parseBlockchain() throws GameActionException {
         if (parsingProgress < min(rc.getRoundNum(), 50)) {
-            System.out.println("here?");
+            //System.out.println("here?");
             Transaction[] block = rc.getBlock(parsingProgress);
             for(Transaction transaction : block) if(checkAuth(transaction)) Strategium.transactions.add(transaction);
             parsingProgress++;

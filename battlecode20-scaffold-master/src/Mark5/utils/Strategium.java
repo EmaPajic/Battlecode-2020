@@ -223,8 +223,8 @@ public class Strategium {
 
         sense();
 
-        if (rc.getType() == RobotType.HQ) {
-            Blockchain.reportHQLocation(1);
+        if (rc.getType() == RobotType.HQ && rc.getRoundNum() == 1) {
+            Blockchain.reportHQLocation(3);
         } else do {
 
                 Blockchain.parseBlockchain();
@@ -292,6 +292,6 @@ public class Strategium {
                 potentialEnemyHQLocations.add(
                         new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
         }
-        System.out.println("Potential HQs: " + potentialEnemyHQLocations.toString());
+        //System.out.println("Potential HQs: " + potentialEnemyHQLocations.toString());
     }
 }

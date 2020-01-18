@@ -83,7 +83,7 @@ public strictfp class RobotPlayer {
                     vaporatorLocation1 = new MapLocation(hqLocation.x - 1, hqLocation.y + 1);
                     vaporatorLocation2 = new MapLocation(hqLocation.x + 1, hqLocation.y + 1);
                     //netGunLocation3 = new MapLocation(hqLocation.x + 1, hqLocation.y - 1);
-                    System.out.println("Found HQ!");
+                    //System.out.println("Found HQ!");
                 }
             }
             if (hqLocation == null) {
@@ -162,7 +162,7 @@ public strictfp class RobotPlayer {
             if (tryBuild(RobotType.MINER, Direction.SOUTH)) {
                 ++numMiners;
             }
-        } else if (numMiners < 2 || (numMiners > 2 && numMiners < 5)) {
+        } else if (numMiners < 2 || (numMiners > 2 && numMiners < 4)) {
             for (Direction dir : directions)
                 if(dir != Direction.SOUTH)
                     if (tryBuild(RobotType.MINER, dir)) {
@@ -363,7 +363,7 @@ public strictfp class RobotPlayer {
     static void runLateLandscaper() throws GameActionException {
         if (rc.getDirtCarrying() >= 1) {
             Direction depositDirtDir = getOptimalDepositDir();
-            System.out.println("Should build: " + Wall.shouldBuild(depositDirtDir));
+            //System.out.println("Should build: " + Wall.shouldBuild(depositDirtDir));
             if (rc.canDepositDirt(depositDirtDir) && Wall.shouldBuild(depositDirtDir)) {
                 rc.depositDirt(depositDirtDir);
             }
@@ -583,11 +583,11 @@ public strictfp class RobotPlayer {
             edgeLoc = rc.getLocation().add(edgeDir);
             elevationEgde = rc.senseElevation(edgeLoc);
         }
-        System.out.println("Prev: " + elevationPrev + " " + prevStepDir.toString() + " " + prevLoc.toString());
-        System.out.println("Curr: " + elevationCurr + " " + Direction.CENTER.toString() + rc.getLocation());
-        System.out.println("Next: " + elevationNext + " " + nextStepDir.toString() + " " + nextLoc.toString());
+        //System.out.println("Prev: " + elevationPrev + " " + prevStepDir.toString() + " " + prevLoc.toString());
+        //System.out.println("Curr: " + elevationCurr + " " + Direction.CENTER.toString() + rc.getLocation());
+        //System.out.println("Next: " + elevationNext + " " + nextStepDir.toString() + " " + nextLoc.toString());
         if (edgeDir != null)
-            System.out.println("Edge: " + elevationEgde + " " + edgeDir.toString() + " " + edgeLoc.toString());
+            //System.out.println("Edge: " + elevationEgde + " " + edgeDir.toString() + " " + edgeLoc.toString());
         if (elevationPrev <= elevationNext && elevationPrev < elevationCurr) {
             if (edgeDir != null) {
                 if (elevationEgde < elevationPrev)

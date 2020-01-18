@@ -28,7 +28,7 @@ public class DesignSchool {
             }
         } else if (RobotType.VAPORATOR.cost + RobotType.LANDSCAPER.cost > rc.getTeamSoup()){
             for (Direction dir : dir8) {
-                if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
+                if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     ++numLandscapers;
                     return;
                 }
