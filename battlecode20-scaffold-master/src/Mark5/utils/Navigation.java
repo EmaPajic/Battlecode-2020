@@ -157,7 +157,7 @@ public class Navigation {
         }
 
         if (avoiding &&
-                aerialDistance(destination) <= aerialDistance(lastIntersection, destination)) {
+                rc.getLocation().distanceSquaredTo(destination) <= lastIntersection.distanceSquaredTo(destination)) {
             if (Strategium.canSafelyMove(straight)) {
                 avoiding = false;
                 lastIntersection = rc.getLocation();
