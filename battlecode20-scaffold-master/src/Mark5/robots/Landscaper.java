@@ -145,13 +145,13 @@ public class Landscaper {
         if(waterLevel > 12) waterLevel = 12;
         if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y]) {
             if (rc.canDepositDirt(Direction.CENTER)) {
-                rc.setIndicatorDot(rc.getLocation(), 0, 0, 0);
+
                 rc.depositDirt(Direction.CENTER);
                 return true;
             }
             Direction dir = Lattice.bestDigDirection();
             if (rc.canDigDirt(dir)) {
-                rc.setIndicatorDot(rc.getLocation(), 100, 100, 100);
+
                 rc.digDirt(dir);
                 return true;
             }
@@ -164,7 +164,7 @@ public class Landscaper {
             if (Lattice.isPath(location))
                 if (waterLevel > Strategium.elevation[location.x][location.y]) {
                     if (rc.canDepositDirt(dir)) {
-                        rc.setIndicatorDot(rc.getLocation(), 0, 0, 0);
+
                         rc.depositDirt(dir);
                         return true;
                     }
@@ -179,7 +179,7 @@ public class Landscaper {
                 if (waterLevel > Strategium.elevation[location.x][location.y] ||
                         Lattice.maxDeposit(location) > 0) {
                     if (rc.canDepositDirt(dir)) {
-                        rc.setIndicatorDot(rc.getLocation(), 0, 0, 0);
+
                         rc.depositDirt(dir);
                         return true;
                     }
@@ -194,7 +194,7 @@ public class Landscaper {
                 if (Strategium.elevation[location.x][location.y] >
                         3 + Strategium.elevation[rc.getLocation().x][rc.getLocation().y]) {
                     if (rc.canDigDirt(dir)) {
-                        rc.setIndicatorDot(rc.getLocation(), 0, 0, 0);
+
                         rc.digDirt(dir);
                         return true;
                     }
@@ -204,7 +204,7 @@ public class Landscaper {
         if(rc.getDirtCarrying() == RobotType.LANDSCAPER.dirtLimit){
             Direction dir = Lattice.bestDepositDirection();
             if(rc.canDepositDirt(dir)){
-                rc.setIndicatorDot(rc.getLocation(), 0, 0, 0);
+
                 rc.depositDirt(dir);
                 return true;
             }
@@ -213,7 +213,7 @@ public class Landscaper {
         if(rc.getDirtCarrying() == 0){
             Direction dir = Lattice.bestDigDirection();
             if(rc.canDigDirt(dir)){
-                rc.setIndicatorDot(rc.getLocation(), 100, 100, 100);
+
                 rc.digDirt(dir);
                 return true;
             }
@@ -253,7 +253,7 @@ public class Landscaper {
                     Strategium.rand.nextInt(rc.getMapWidth()), Strategium.rand.nextInt(rc.getMapHeight()));
         }
 
-        rc.setIndicatorLine(rc.getLocation(), waypoint, 0, 255, 0);
+
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
