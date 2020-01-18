@@ -64,7 +64,9 @@ public class RushMiner {
             if (circumnavigateDir != Direction.CENTER)
                 if (Strategium.canSafelyMove(circumnavigateDir)) {
                     rc.move(circumnavigateDir);
-                } else if (!builtFulfillment) {
+                    return;
+                }
+            if (!builtFulfillment) {
                     //build
                     for (Direction buildDir : dir8)
                         if (Lattice.isBuildingSite(rc.getLocation().add(buildDir)) &&

@@ -1,10 +1,7 @@
 package Mark5.utils;
 
 import Mark5.robots.Drone;
-import Mark5.sensors.DroneSensor;
-import Mark5.sensors.FulfillmentCenterSensor;
-import Mark5.sensors.LandscaperSensor;
-import Mark5.sensors.MinerSensor;
+import Mark5.sensors.*;
 import battlecode.common.*;
 
 import java.util.*;
@@ -202,6 +199,8 @@ public class Strategium {
                 LandscaperSensor.sense();
                 break;
             case DESIGN_SCHOOL:
+                DesignSchoolSensor.sense();
+                break;
             case FULFILLMENT_CENTER:
                 FulfillmentCenterSensor.sense();
                 break;

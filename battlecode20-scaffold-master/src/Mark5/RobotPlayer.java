@@ -128,7 +128,7 @@ public strictfp class RobotPlayer {
                         runVaporator();
                         break;
                     case DESIGN_SCHOOL:
-                        runDesignSchool();
+                        DesignSchool.run();
                         break;
                     case FULFILLMENT_CENTER:
                         runFulfillmentCenter();

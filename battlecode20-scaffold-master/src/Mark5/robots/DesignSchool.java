@@ -9,24 +9,17 @@ import static Mark5.RobotPlayer.*;
 
 public class DesignSchool {
 
-
-
-
-
     public static int numLandscapers = 0;
-
-
 
     public static void run() throws GameActionException {
         Strategium.gatherInfo();
         Direction buildDirection = observer();
         if(buildDirection != null){
-            if (tryBuild(RobotType.DELIVERY_DRONE, buildDirection)) {
+            if (tryBuild(RobotType.LANDSCAPER, buildDirection)) {
                 ++numLandscapers;
-                return;
             } else {
                 for (Direction dir : dir8) {
-                    if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
+                    if (tryBuild(RobotType.LANDSCAPER, dir)) {
                         ++numLandscapers;
                         return;
                     }

@@ -49,7 +49,7 @@ public class DesignSchoolSensor {
 
     }
 
-    public void sense() throws GameActionException {
+    public static void sense() throws GameActionException {
 
         //enemyUnits.clear();
 
