@@ -80,8 +80,8 @@ public class Drone {
                 break;
             case POTENTIAL:
                 if(DroneSensor.potentialTaxiPayload != null) {
-                    attack(DroneSensor.potentialTaxiPayload);
-                    return;
+                    if(attack(DroneSensor.potentialTaxiPayload))
+                        return;
                 }
                 if (rc.adjacentLocation(Direction.NORTHEAST).equals(Strategium.HQLocation)) {
                     boolean canMove = false;
@@ -95,7 +95,6 @@ public class Drone {
 
                 }
                 if (Strategium.nearestEnemyUnit != null) if (attack(Strategium.nearestEnemyUnit)) break;
-                if (Strategium.blockingUnit != null) if (attack(Strategium.blockingUnit)) break;
                 if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
                 patrol();
                 break;
@@ -119,6 +118,7 @@ public class Drone {
                         payload = Payload.FRIENDLY_LANDSCAPER;
                         return true;
                     case MINER:
+                        DroneSensor.potentialTaxiPayload = null;
                         payload = Payload.RUSH_MINER;
                         state = State.TAXI;
                         return true;
@@ -278,9 +278,22 @@ public class Drone {
                         if (waypoint == null) waypoint = new MapLocation(
                                 Strategium.rand.nextInt(rc.getMapWidth()), Strategium.rand.nextInt(rc.getMapHeight()));
                     } else waypoint = Strategium.HQLocation;
+                    break;
 
             }
 
+        }
+        if(rc.isCurrentlyHoldingUnit() && Navigation.aerialDistance(waypoint) <= 3) {
+            RobotInfo robot = rc.senseRobotAtLocation(waypoint);
+            if(robot != null) if(robot.type == RobotType.HQ && robot.team == Strategium.opponentTeam)
+                for (Direction dir : dir8)
+                    if (rc.canDropUnit(dir))
+                        if (Navigation.aerialDistance(waypoint, rc.adjacentLocation(dir)) <= 4) {
+                            rc.dropUnit(dir);
+                            payload = Payload.POTENTIAL;
+                            state = State.SWARMER;
+                            return true;
+                        }
         }
         return Navigation.bugPath(waypoint);
 

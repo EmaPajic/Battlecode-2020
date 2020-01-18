@@ -96,7 +96,7 @@ public strictfp class RobotPlayer {
             if (myFun != 4 && Navigation.aerialDistance(fulfillmentCenterLocation) > 0) {
                 myFun = 1; // main search miner
             } else if (myFun != 4){
-                myFun = 3; // build miner
+                myFun = 1; // build miner
             }
         } else if (rc.getType() == RobotType.LANDSCAPER) {
             myFun = 1; // protect yourself
@@ -155,6 +155,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
+        Strategium.gatherInfo();
         if(rc.getRoundNum() == 1)
             Strategium.gatherInfo();
         if (numMiners == 2) {

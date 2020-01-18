@@ -28,7 +28,7 @@ public class FulfillmentCenterSensor {
             for (int i = 0; i < 8; ++i) {
                 RobotInfo robot = rc.senseRobotAtLocation(
                         rc.getLocation().add(RobotPlayer.dir8[i]));
-                if (robot != null) if (!robot.type.isBuilding() && robot.getType() != RobotType.DELIVERY_DRONE) {
+                if (robot != null) if (!robot.type.isBuilding() && robot.getType() != RobotType.DELIVERY_DRONE  && robot.getSoupCarrying() == 0) {
                     if(adjacentRobotTurnID[i] == robot.getID()) {
                         ++adjacentRobotTurnCount[i];
                     }
@@ -38,9 +38,8 @@ public class FulfillmentCenterSensor {
                     }
                 }
             }
-
             for(int i = 0; i < 8; ++i) {
-                if(adjacentRobotTurnCount[i] == 10) {
+                if(adjacentRobotTurnCount[i] == 15) {
                     FulfillmentCenter.droneBuildingImportance =
                             FulfillmentCenter.DroneBuildingImportance.TAXI_NEEDED;
                 }

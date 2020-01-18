@@ -92,10 +92,11 @@ public class DroneSensor {
                             }
                         }
                     }
-                    if(NearFulfillmentCenter)
+                    boolean isRushMiner = true;
+                    if(robot.getSoupCarrying() > 0)
+                        isRushMiner = false;
+                    if(NearFulfillmentCenter && isRushMiner)
                         potentialTaxiPayload = robot;
-                    else
-                        potentialTaxiPayload = null;
                 }
 
             } else {
