@@ -12,9 +12,10 @@ import static Mark5.RobotPlayer.*;
 
 public class RushMiner {
 
-    static int buildTurn = 0;
     static boolean builtFulfillment = false;
     static boolean followBfs = false;
+    static int numDesignSchools = 0;
+    static int numNetGuns = 0;
 
     static boolean foundEnemyHQ;
 
@@ -98,10 +99,21 @@ public class RushMiner {
 
     public static void buildToAttack() throws GameActionException {
         //System.out.println("BILD TRN: " + buildTurn);
-        if (buildTurn == 0) {
-            if (TwoMinerController.buildDesignCenterNearEnemy())
-                ++buildTurn;
-        } else {
+        RobotInfo[] robots = rc.senseNearbyRobots();
+        numNetGuns = 0;
+        numDesignSchools = 0;
+        for (RobotInfo robot : robots) {
+            if (robot.getType() == RobotType.DESIGN_SCHOOL && robot.getTeam() == Strategium.myTeam) {
+                ++numDesignSchools;
+            }
+            if (robot.getType() == RobotType.NET_GUN && robot.getTeam() == Strategium.myTeam) {
+                ++numNetGuns;
+            }
+        }
+        if (numDesignSchools == 0) {
+            TwoMinerController.buildDesignCenterNearEnemy();
+        }
+        if (numNetGuns < 2) {
             buildNetGunNearEnemy();
         }
     }

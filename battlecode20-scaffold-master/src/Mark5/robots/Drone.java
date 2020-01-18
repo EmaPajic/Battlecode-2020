@@ -30,7 +30,7 @@ public class Drone {
         ENEMY
     }
 
-    public static State state = State.SENTRY;
+    public static State state = State.PREDATOR;
 
     private static Payload payload = Payload.POTENTIAL;
 
@@ -64,10 +64,11 @@ public class Drone {
                 if (Strategium.numDronesMet > 50 || rc.getRoundNum() > 2000) state = State.SWARMER;
                 break;
             case SWARMER:
-                if (Strategium.dronesMetWithLowerID >= Strategium.numDronesMet * 9 / 10) state = State.TAXI;
+                //if (Strategium.dronesMetWithLowerID >= Strategium.numDronesMet * 9 / 10) state = State.TAXI;
                 break;
         }
-
+        System.out.println(state);
+        System.out.println(payload);
         //System.out.println(state);
 
         if (!rc.isReady()) return;
@@ -83,6 +84,7 @@ public class Drone {
                     if(attack(DroneSensor.potentialTaxiPayload))
                         return;
                 }
+                /*
                 if (rc.adjacentLocation(Direction.NORTHEAST).equals(Strategium.HQLocation)) {
                     boolean canMove = false;
                     for (Direction dir : dir8) if(rc.canMove(dir)) canMove = true;
@@ -92,17 +94,15 @@ public class Drone {
                                 if(attack(blocker)) break;
                             }
                         }
-
                 }
+                 */
                 if (Strategium.nearestEnemyUnit != null) if (attack(Strategium.nearestEnemyUnit)) break;
-                if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
+                //if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
                 patrol();
                 break;
             case RUSH_MINER:
-                patrol();
-                break;
             case FRIENDLY_LANDSCAPER:
-                climb();
+                patrol();
                 break;
         }
 
@@ -325,6 +325,7 @@ public class Drone {
                     if (Navigation.goodLandingSpot(rc.adjacentLocation(dir)))
                          {
                             rc.dropUnit(dir);
+                            state = State.SWARMER;
                             payload = Payload.POTENTIAL;
                             return true;
                         }
@@ -338,6 +339,7 @@ public class Drone {
             if (rc.canDropUnit(dir))
                 if (Navigation.aerialDistance(Strategium.HQLocation, rc.adjacentLocation(dir)) > 3) {
                     rc.dropUnit(dir);
+                    state = State.SWARMER;
                     payload = Payload.POTENTIAL;
                     return true;
                 }
