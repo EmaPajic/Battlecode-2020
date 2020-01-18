@@ -1,6 +1,6 @@
 package Mark5.robots;
 
-import Mark5.sensors.MinerSensor;
+
 import Mark5.utils.Lattice;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
@@ -244,7 +244,7 @@ public class TwoMinerController {
                 RobotInfo[] robots = rc.senseNearbyRobots();
                 RobotType makeRobotType = null;
                 System.out.println(robots.length);
-                if(robots.length == 0) {
+                if(robots.length != 0) {
                     for (RobotInfo robot : robots) {
                         // try to defend
                         if (robot.team == Strategium.myTeam) {
@@ -262,6 +262,7 @@ public class TwoMinerController {
 
                             // then if possible attack
                         } else if (robot.team != Strategium.myTeam) {
+
                             if (staticRobots.contains(robot) && robot.type != RobotType.FULFILLMENT_CENTER) {
                                 makeRobotType = RobotType.DESIGN_SCHOOL;
                                 System.out.println("Neprijateljeske zgrade, nije fulfillment centar");
@@ -299,6 +300,7 @@ public class TwoMinerController {
                 System.out.println(makeRobotType);
                 if (makeRobotType != null) {
                     // try to make building
+                    System.out.println("Ovo je robot " + makeRobotType);
                     if (staticRobots.contains(makeRobotType)) {
                         boolean noSameTwoBuildings = true;
                         for (RobotInfo robot2 : robots) {
