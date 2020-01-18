@@ -45,19 +45,22 @@ public class Lattice {
     }
 
     /**
-     * Checks if the lattice is even at the target location
+     * Checks if the lattice is even and safe at the target location
      *
      * @param location the location to check for
-     * @return true if it is even, false otherwise
+     * @param waterLevel the minimum safe elevation
+     * @return true if it is even and safe, false otherwise
      */
-    public static boolean isEven(MapLocation location) {
+    public static boolean isEven(MapLocation location, int waterLevel) {
         int elevation = Strategium.elevation[location.x][location.y];
         for (Direction dir : dir8) {
             MapLocation loc = location.add(dir);
-            if (rc.onTheMap(loc) && isPath(location) && !loc.isAdjacentTo(Strategium.HQLocation) &&
+            if (rc.onTheMap(loc) && isPath(loc) && !loc.isAdjacentTo(Strategium.HQLocation) &&
                     !loc.equals(Strategium.HQLocation))
                 if (Math.abs(Strategium.elevation[loc.x][loc.y] - elevation) > 3 &&
-                        !isAdjacentToWater(loc)) return false;
+                        !isAdjacentToWater(loc) || Strategium.elevation[loc.x][loc.y] < waterLevel) {
+                    return false;
+                }
         }
         return true;
     }
