@@ -34,7 +34,7 @@ public class HQSensor {
                     }
 
                 }
-            totalMiners = max(3 + knownSoup/700, 10) + max((rc.getRoundNum()/200 - 1), 0);
+            totalMiners = min(3 + knownSoup/700, 10) + max((rc.getRoundNum()/200 - 1), 0);
         }
     }
 }
