@@ -19,6 +19,8 @@ public class LandscaperSensor {
         elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
         occupied = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         water = new boolean[rc.getMapWidth()][rc.getMapHeight()];
+        dirSafetyCacheValid = new int[10];
+        dirSafetyCache = new boolean[10];
     }
 
     public static void sense() throws GameActionException {

@@ -66,6 +66,10 @@ public class Strategium {
     public static MapLocation nearestEnemyBuilding = null;
     public static List<MapLocation> overlapLocations = new LinkedList<>();
 
+    public static int[] dirSafetyCacheValid;
+    public static boolean[] dirSafetyCache;
+
+
     public static Random rand;
 
     public static void init() {
@@ -108,8 +112,15 @@ public class Strategium {
     }
 
 
-
     public static boolean canSafelyMove(Direction dir) throws GameActionException {
+        int index = Navigation.index(dir);
+        if(dirSafetyCacheValid[index] == rc.getRoundNum()) return dirSafetyCache[index];
+        dirSafetyCache[index] = updateSafetyCache(dir);
+        dirSafetyCacheValid[index] = rc.getRoundNum();
+        return dirSafetyCache[index];
+    }
+
+    public static boolean updateSafetyCache(Direction dir) throws GameActionException {
         if (!rc.canMove(dir)) return false;
         MapLocation target = rc.adjacentLocation(dir);
         if(rc.sensePollution(target) >= 9600) return false;

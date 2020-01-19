@@ -6,6 +6,7 @@ import battlecode.common.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static Mark5.RobotPlayer.dir8;
 import static Mark5.RobotPlayer.rc;
 
 public class Navigation {
@@ -14,7 +15,7 @@ public class Navigation {
     private static boolean avoiding = false;
     private static Direction lastDirection;
     private static Direction lastAvoidingDirection = Direction.SOUTHEAST;
-    private static MapLocation lastDestination;
+    private static MapLocation lastDestination = new MapLocation(100, 100);
 
     private static int typeMobility(RobotType type) {
         switch (type) {
@@ -64,14 +65,26 @@ public class Navigation {
         return Strategium.elevation[location.x][location.y] > 15;
     }
 
-    private static boolean isOnLine(MapLocation destination) {
-        MapLocation line = destination.translate(-lastIntersection.x, -lastIntersection.y);
-        MapLocation point = rc.getLocation().translate(-lastIntersection.x, -lastIntersection.y);
-        if (line.equals(point)) return true;
-        if (line.x * point.x < 0 || line.y * point.y < 0) return false;
-        if (line.x == 0) return point.x == 0;
-        if (line.y == 0) return point.y == 0;
-        return Math.abs(point.x) == Math.abs(point.y);
+    public static boolean fuzzyNav(MapLocation destination) throws GameActionException {
+        for (Direction dir : dir8)
+            if (rc.adjacentLocation(dir).distanceSquaredTo(destination)
+                    < rc.getLocation().distanceSquaredTo(destination))
+                if (Strategium.canSafelyMove(dir)) {
+                    lastDirection = dir;
+                    rc.move(dir);
+                    return true;
+                }
+        if (rc.getLocation().isAdjacentTo(destination)) {
+            frustration = 0;
+            for (Direction dir : dir8)
+                if (rc.adjacentLocation(dir).isAdjacentTo(destination))
+                    if (Strategium.canSafelyMove(dir)) {
+                        lastDirection = dir;
+                        rc.move(dir);
+                        return true;
+                    }
+        }
+        return false;
     }
 
     /**
@@ -85,113 +98,49 @@ public class Navigation {
      * @throws GameActionException it doesn't
      */
     public static boolean bugPath(MapLocation destination) throws GameActionException {
-        Direction dir = moveTowards(destination);
-        Direction straight = moveTowards(destination);
-        int sections = 0;
-        for(int i = 8; i-- > 0; dir = dir.rotateRight()){
-            if(Strategium.canSafelyMove(dir.rotateRight()) && !Strategium.canSafelyMove(dir)) sections++;
-        }
-
-        if (dir != moveTowards(lastDestination) && destination != lastDestination) {
-            frustration = 0;
+        if(!lastDestination.isAdjacentTo(destination)) {
             avoiding = false;
+            frustration = 0;
         }
 
         lastDestination = destination;
 
-        System.out.println("SEC " + sections);
-
-        if (!avoiding) {
+        if(!avoiding || frustration > 30) {
             lastIntersection = rc.getLocation();
-            lastDirection = dir;
-            if (Strategium.canSafelyMove(dir)) {
-                rc.move(dir);
+            if (fuzzyNav(destination)) {
                 return true;
             }
-            MapLocation obstacle = rc.adjacentLocation(dir);
-            if (rc.canSenseLocation(obstacle)) {
-                RobotInfo robot = rc.senseRobotAtLocation(obstacle);
-                if (robot != null) {
-                    if (robot.team == Strategium.myTeam && robot.ID > rc.getID() && !robot.type.isBuilding() &&
-                            frustration < typeMobility(robot.type)) {
-                        frustration += 10;
-                        return false;
-                    }
-                }
-            }
-
         }
 
-        System.out.println(dir + " " + lastDirection);
-        System.out.println(aerialDistance(destination) + " " + aerialDistance(lastIntersection, destination) + " " + lastIntersection);
+        avoiding = true;
+        frustration++;
 
-        if (avoiding && dir == lastDirection &&
-                aerialDistance(destination) <= aerialDistance(lastIntersection, destination)) {
-            if (Strategium.canSafelyMove(dir)) {
+        if(rc.getLocation().distanceSquaredTo(destination) <= lastIntersection.distanceSquaredTo(destination)) {
+            if (fuzzyNav(destination)) {
                 avoiding = false;
                 lastIntersection = rc.getLocation();
-                rc.move(dir);
                 return true;
             }
         }
 
-        frustration++;
-        dir = lastAvoidingDirection.opposite().rotateLeft();
-        System.out.println(dir + " " + frustration);
-
-        int i;
-        for (i = 0; Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++) {
-            if (i == 7) {
+        Direction dir = lastDirection.opposite().rotateLeft();
+        int i = 0;
+        for(; Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++){
+            if(i == 8) {
                 avoiding = false;
-                rc.move(lastAvoidingDirection);
-                return true;
+                return (fuzzyNav(destination));
             }
         }
-        avoiding = true;
-        for (; !Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++) {
-            rc.setIndicatorLine(rc.getLocation(), rc.adjacentLocation(dir), 255, 0, 0);
-            if (i == 8) {
 
+        for(; !Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++){
+            if(i == 8) {
                 return false;
             }
         }
-
-        if (avoiding &&
-                rc.getLocation().distanceSquaredTo(destination) <= lastIntersection.distanceSquaredTo(destination)) {
-            if (Strategium.canSafelyMove(straight)) {
-                avoiding = false;
-                lastIntersection = rc.getLocation();
-                rc.move(straight);
-                return true;
-            } else if (sections>1 && straight == lastDirection){
-                System.out.println("HOP");
-                lastAvoidingDirection = lastAvoidingDirection.opposite();
-                lastIntersection = rc.getLocation();
-
-                dir = lastAvoidingDirection.opposite().rotateLeft();
-                System.out.println(dir + " " + frustration);
-
-                for (i = 0; Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++) {
-                    if (i == 7) {
-                        avoiding = false;
-                        rc.move(lastAvoidingDirection);
-                        return true;
-                    }
-                }
-                avoiding = true;
-                for (; !Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++) {
-                    if (i == 8) {
-
-                        return false;
-                    }
-                }
-
-            }
-        }
-
-        lastAvoidingDirection = dir;
         rc.move(dir);
+        lastDirection = dir;
         return true;
+
     }
 
 
@@ -471,6 +420,30 @@ public class Navigation {
         if (x < 0) x = 0;
         if (y < 0) y = 0;
         return new MapLocation(x, y);
+    }
+
+    public static int index(Direction dir){
+        switch (dir){
+            case NORTH:
+                return 0;
+            case NORTHEAST:
+                return 1;
+            case EAST:
+                return 2;
+            case SOUTHEAST:
+                return 3;
+            case SOUTH:
+                return 4;
+            case SOUTHWEST:
+                return 5;
+            case WEST:
+                return 6;
+            case NORTHWEST:
+                return 7;
+            case CENTER:
+                return 9;
+        }
+        return -1;
     }
 
 }

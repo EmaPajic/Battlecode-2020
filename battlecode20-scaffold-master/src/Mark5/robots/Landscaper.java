@@ -122,7 +122,7 @@ public class Landscaper {
                 return true;
             }
             return false;
-        }
+        }/*
         if (rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit) {
             Direction dir = Lattice.bestDigDirection();
             if (dir != null)
@@ -135,15 +135,16 @@ public class Landscaper {
         if (rc.canDepositDirt(dir)) {
             rc.depositDirt(dir);
             return true;
-        }
+        }*/
         return false;
     }
 
     private static boolean patrol() throws GameActionException {
         //System.out.println(Clock.getBytecodeNum());
-        int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 500);
-        if (waterLevel > 12) waterLevel = 12;
-        if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y]) {
+        int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 1000);
+        if (waterLevel > 25) waterLevel = 12;
+        if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y] &&
+                !Lattice.isPit(rc.getLocation())) {
             if (rc.canDepositDirt(Direction.CENTER)) {
 
                 rc.depositDirt(Direction.CENTER);
@@ -228,7 +229,7 @@ public class Landscaper {
             if (!rc.onTheMap(location)) continue;
             if (Lattice.isPath(location))
                 if (!Lattice.isEven(location, waterLevel)) {
-
+                    rc.setIndicatorDot(location, 255, 0, 0);
                     if (rc.canMove(dir)) {
                         if (Strategium.HQLocation != null) {
                             if (Navigation.aerialDistance(Strategium.HQLocation, bestWaypoint) >=

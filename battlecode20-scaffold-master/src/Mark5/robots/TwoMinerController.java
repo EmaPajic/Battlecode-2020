@@ -296,7 +296,7 @@ public class TwoMinerController {
                 // stavi da pravi design school u ovom else-u dole ako ima mogucnost a nema ga u okolini baze
                 // situacija kada ima okolnih nasih robota a ima mogucnost da pravi nije pokrivena
                 // if soup < 1000 make vaporator
-                if (rc.getTeamSoup() < 1000) {
+                if (rc.getTeamSoup() < 700) {
                     makeRobotType = RobotType.VAPORATOR;
                     //System.println("Imamo dovoljno novca za Vaporator");
                 } else {
@@ -315,6 +315,8 @@ public class TwoMinerController {
             if (rc.getTeamSoup() >= makeRobotType.cost)
                 for (Direction dir : dir8)
                     if (rc.canBuildRobot(makeRobotType, dir))
+                        if(makeRobotType != RobotType.VAPORATOR ||
+                                Strategium.elevation[rc.adjacentLocation(dir).x][rc.adjacentLocation(dir).y] > 5)
                         if (Lattice.isBuildingSite(rc.adjacentLocation(dir))) {
                             rc.buildRobot(makeRobotType, dir);
                             return;

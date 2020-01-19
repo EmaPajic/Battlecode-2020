@@ -25,6 +25,8 @@ public class DroneSensor {
         explored = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         robotsMet = new boolean[GameConstants.MAX_ROBOT_ID];
         occupied = new boolean[rc.getMapWidth()][rc.getMapHeight()];
+        dirSafetyCacheValid = new int[10];
+        dirSafetyCache = new boolean[10];
 
     }
 
