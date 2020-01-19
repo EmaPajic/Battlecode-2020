@@ -32,10 +32,10 @@ public class LandscaperSensor {
         enemyDrones.clear();
         buriedFriendlyBuildings.clear();
 
-        int xMin = rc.getLocation().x - 4;
-        int yMin = rc.getLocation().y - 4;
-        int xMax = rc.getLocation().x + 4;
-        int yMax = rc.getLocation().y + 4;
+        int xMin = rc.getLocation().x - 2;
+        int yMin = rc.getLocation().y - 2;
+        int xMax = rc.getLocation().x + 2;
+        int yMax = rc.getLocation().y + 2;
         for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++)
             for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
 
@@ -115,7 +115,7 @@ public class LandscaperSensor {
 
                     for(Direction dir : dir8){
                         MapLocation location = friendly.location.add(dir);
-                        if(location.isAdjacentTo(enemy))
+                        if(location.isAdjacentTo(enemy) && !occupied[location.x][location.y])
                             overlapLocations.add(location);
                     }
                 }

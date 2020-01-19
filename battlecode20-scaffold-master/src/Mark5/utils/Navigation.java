@@ -13,7 +13,7 @@ public class Navigation {
 
     private static MapLocation lastIntersection;
     private static boolean avoiding = false;
-    private static Direction lastDirection;
+    private static Direction lastDirection = Direction.NORTH;
     private static Direction lastAvoidingDirection = Direction.SOUTHEAST;
     private static MapLocation lastDestination = new MapLocation(100, 100);
 

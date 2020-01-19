@@ -20,7 +20,7 @@ public class Landscaper {
         if (!Strategium.overlapLocations.contains(rc.getLocation()))
             for (MapLocation location : Strategium.overlapLocations) {
                 if (rc.getLocation().isAdjacentTo(location))
-                    if (rc.canMove(Navigation.moveTowards(location))) {
+                    if (Strategium.canSafelyMove(Navigation.moveTowards(location))) {
                         rc.move(Navigation.moveTowards(location));
                         return;
                     }
@@ -28,17 +28,19 @@ public class Landscaper {
 
 
         for (Direction dir : dir8) {
-            if (rc.adjacentLocation(dir).equals(Strategium.nearestBuriedFriendlyBuilding))
+            if (rc.adjacentLocation(dir).equals(Strategium.nearestBuriedFriendlyBuilding)) {
                 if (rc.canDigDirt(dir)) {
                     rc.digDirt(dir);
                     return;
                 }
+            }
 
-            if (rc.adjacentLocation(dir).equals(Strategium.nearestEnemyBuilding))
+            if (rc.adjacentLocation(dir).equals(Strategium.nearestEnemyBuilding)) {
                 if (rc.canDepositDirt(dir)) {
                     rc.depositDirt(dir);
                     return;
                 }
+            }
 
         }
 
@@ -47,6 +49,16 @@ public class Landscaper {
 
         if (Strategium.nearestEnemyBuilding != null)
             if (attack(Strategium.nearestEnemyBuilding)) return;
+
+        if (Navigation.aerialDistance(Strategium.enemyHQLocation) <= 2) {
+            if (demolish()) return;
+        }
+
+        if (Strategium.nearestBuriedFriendlyBuilding != null)
+            if (Navigation.bugPath(Strategium.nearestBuriedFriendlyBuilding)) return;
+
+        if (Strategium.nearestEnemyBuilding != null)
+            if (Navigation.bugPath(Strategium.nearestBuriedFriendlyBuilding)) return;
 
         //System.out.println("DREIN");
 
@@ -80,9 +92,10 @@ public class Landscaper {
                             rc.depositDirt(dir);
                             return true;
                         }
+            return true;
 
         }
-        return Navigation.bugPath(location);
+        return false;
     }
 
     private static boolean attack(MapLocation location) throws GameActionException {
@@ -102,9 +115,10 @@ public class Landscaper {
                         rc.digDirt(dir);
                         return true;
                     }
+            return true;
 
         }
-        return Navigation.bugPath(location);
+        return false;
     }
 
     private static boolean drain(MapLocation location) throws GameActionException {
@@ -113,12 +127,14 @@ public class Landscaper {
         if (waterLevel - Strategium.elevation[location.x][location.y] < 50) {
             if (rc.canDepositDirt(rc.getLocation().directionTo(location))) {
                 rc.depositDirt(rc.getLocation().directionTo(location));
+                rc.setIndicatorDot(location, 255, 0, 0);
                 return true;
             }
             Direction dir = Lattice.bestDigDirection();
             if (dir == null) return false;
             if (rc.canDigDirt(dir)) {
                 rc.digDirt(dir);
+                rc.setIndicatorDot(rc.adjacentLocation(dir), 0, 0, 255);
                 return true;
             }
             return false;
@@ -140,9 +156,12 @@ public class Landscaper {
     }
 
     private static boolean patrol() throws GameActionException {
+        if (Lattice.isPit(rc.getLocation()) && waypoint != null) {
+            if (Navigation.bugPath(waypoint)) return true;
+        }
         //System.out.println(Clock.getBytecodeNum());
         int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 1000);
-        if (waterLevel > 25) waterLevel = 12;
+        if (waterLevel > 25) waterLevel = 25;
         if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y] &&
                 !Lattice.isPit(rc.getLocation())) {
             if (rc.canDepositDirt(Direction.CENTER)) {
@@ -222,14 +241,13 @@ public class Landscaper {
         }
 
         MapLocation bestWaypoint = null;
-        if (rc.getLocation().equals(waypoint)) waypoint = null;
+        if (rc.getLocation().equals(waypoint) || Navigation.frustration > 20) waypoint = null;
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
             if (Lattice.isPath(location))
                 if (!Lattice.isEven(location, waterLevel)) {
-                    rc.setIndicatorDot(location, 255, 0, 0);
                     if (rc.canMove(dir)) {
                         if (Strategium.HQLocation != null) {
                             if (Navigation.aerialDistance(Strategium.HQLocation, bestWaypoint) >=
@@ -252,22 +270,17 @@ public class Landscaper {
 
         if (waypoint == null) {
             waypoint = new MapLocation(
-                    Strategium.rand.nextInt(rc.getMapWidth()), Strategium.rand.nextInt(rc.getMapHeight()));
+                    Strategium.rand.nextInt(rc.getMapWidth() / 2) * 2 + 1,
+                    Strategium.rand.nextInt(rc.getMapHeight() / 2) * 2 + 1);
         }
 
 
-        for (Direction dir : dir8) {
-            MapLocation location = rc.adjacentLocation(dir);
-            if (Lattice.isPath(location))
-                if (Navigation.aerialDistance(waypoint) > Navigation.aerialDistance(waypoint, location))
-                    if (rc.canMove(dir)) {
-                        rc.move(dir);
-                        return true;
-                    }
-        }
+        return Navigation.bugPath(waypoint);
 
+    }
+
+    public static boolean demolish() {
         return false;
-
     }
 
 }

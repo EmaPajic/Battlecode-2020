@@ -29,7 +29,7 @@ public class DesignSchool {
             }
 
         } else if (RobotType.VAPORATOR.cost + RobotType.LANDSCAPER.cost <= rc.getTeamSoup() ||
-                   numLandscapers < 3) {
+                (numLandscapers < 3 && rc.getTeamSoup() > 2* RobotType.LANDSCAPER.cost)) {
             for (Direction dir : dir8) {
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     ++numLandscapers;

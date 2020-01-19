@@ -98,12 +98,16 @@ public class Lattice {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
             if (isAdjacentToWater(location)) continue;
-            if (isPit(location)) return dir;
+            if (isPit(location) &&
+                    (!Strategium.water[location.x][location.y] || Strategium.elevation[location.x][location.y] < -100))
+                return dir;
         }
         for (Direction dir : Direction.allDirections()) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
-            if (isPit(location)) return dir;
+            if (isAdjacentToWater(location)) continue;
+            if ((!Strategium.water[location.x][location.y] || Strategium.elevation[location.x][location.y] < -100))
+                return dir;
         }
         return null;
     }
