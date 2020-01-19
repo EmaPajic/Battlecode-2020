@@ -1,6 +1,8 @@
 package Mark5.utils;
 
 import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
+import battlecode.common.Team;
 import battlecode.common.Transaction;
 
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ public class Blockchain {
     }
 
     static void addAuth(int[] message, int type){
-        message[3] = rc.getID();
+        message[3] = rc.getID() + (rc.getTeam() == Team.B ? GameConstants.MAX_ROBOT_ID : 0);
         message[4] = (rc.getRoundNum() & ((1 << 16) - 1)) | (type << 24);
         int checksum = 0;
         for (int i = 0; i < 7; i++) if (i != 4){
@@ -47,6 +49,7 @@ public class Blockchain {
         int[] message = transaction.getMessage();
         if(message.length != 7) return false;
         if((message[4] & ((1 << 16) - 1)) > parsingProgress) return false;
+        if(message[3] > GameConstants.MAX_ROBOT_ID ^ rc.getTeam() == Team.B) return false;
         int checksum = 0;
         for (int i = 0; i < 7; i++) if (i != 4){
             checksum ^= message[i] & 255;

@@ -103,12 +103,6 @@ public class Lattice {
         for (Direction dir : Direction.allDirections()) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
-            if (isAdjacentToWater(location)) continue;
-            if (isPath(location)) return dir;
-        }
-        for (Direction dir : Direction.allDirections()) {
-            MapLocation location = rc.adjacentLocation(dir);
-            if (!rc.onTheMap(location)) continue;
             if (isPit(location)) return dir;
         }
         return null;
@@ -121,6 +115,8 @@ public class Lattice {
      * @return true if it is adjacent to water, false otherwise
      */
     public static boolean isAdjacentToWater(MapLocation location) {
+        if(Strategium.water[location.x][location.y]) return false;
+        if(Strategium.nearestWater == null) return false;
         for (Direction dir : dir8) {
             MapLocation loc = location.add(dir);
             if (rc.onTheMap(loc))
