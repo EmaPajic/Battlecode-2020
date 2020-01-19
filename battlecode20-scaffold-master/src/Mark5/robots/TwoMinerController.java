@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import static Mark5.RobotPlayer.*;
+import static java.lang.Integer.min;
+import static java.util.Collections.swap;
 
 public class TwoMinerController {
 
@@ -34,6 +36,7 @@ public class TwoMinerController {
     static ArrayList<MapLocation> searchRouteVisited;
 
     static MapLocation currentTarget;
+    public static int currentTargetIndex;
     static public ArrayList<RobotType> staticRobots;
     static public RobotType lastMadeRobotType;
     static public boolean triedToBuildRefinery;
@@ -44,15 +47,36 @@ public class TwoMinerController {
 
 
     static void findRoute() {
-        for (int currX = 4; currX <= rc.getMapWidth() - 6; currX++) {
-            if (currX % 5 == 0) {
-                for (int currY = 4; currY <= rc.getMapHeight() - 6; currY++) {
-                    if (currY % 5 == 0) {
-                        searchRoute.add(new MapLocation(currX, currY));
+        int stepX = (rc.getMapWidth() - 10) / 3;
+        int stepY = (rc.getMapWidth() - 10) / 3;
+        for (int currX = 4; currX <= rc.getMapWidth() - 1; currX += stepX) {
+            for (int currY = 4; currY <= rc.getMapHeight() - 1; currY += stepY) {
+                searchRoute.add(new MapLocation(currX, currY));
+            }
+        }
 
-                    }
+    }
+
+    public static void randomizeBit() {
+        for(int i = 0; i < min(searchRoute.size() - 2, 2); ++i) {
+            for(int j = i + 1; j < min(searchRoute.size(), i + 3); ++j) {
+                if(Strategium.rand.nextInt() % 3 < 2)
+                    swap(searchRoute, i, j);
+            }
+        }
+    }
+
+    public static void nearestNeighbor() {
+        for(int i = 1; i < searchRoute.size() - 1; ++i) {
+            int bestIndex = -1;
+            int bestDistance = 1000;
+            for(int j = i + 1; j < searchRoute.size(); ++j) {
+                if(Navigation.aerialDistance(searchRoute.get(i), searchRoute.get(j)) < bestDistance) {
+                    bestIndex = j;
+                    bestDistance = Navigation.aerialDistance(searchRoute.get(i), searchRoute.get(j));
                 }
             }
+            swap(searchRoute, i + 1, bestIndex);
         }
     }
 
@@ -71,6 +95,8 @@ public class TwoMinerController {
             searchRouteVisited.add(hqLocation);
         }
         searchRoute.sort(new LocationComparator());
+        randomizeBit();
+        nearestNeighbor();
         currentTarget = searchRoute.get(0); // get the first location from sorted locations which are closest to HQ
         //System.println("Init je potrosio: " + (Clock.getBytecodeNum() - startByteCodes));
 
@@ -80,9 +106,8 @@ public class TwoMinerController {
     public static void updateTarget() {
         if (!searchRoute.isEmpty()) {
             Navigation.frustration = 0;
-            searchRoute.remove(currentTarget);
-            searchRouteVisited.add(currentTarget);
-            currentTarget = searchRoute.get(0); // get the first elem
+            currentTargetIndex = (currentTargetIndex + 1) % searchRoute.size();
+            currentTarget = searchRoute.get(currentTargetIndex); // get the first elem
         }
     }
 
