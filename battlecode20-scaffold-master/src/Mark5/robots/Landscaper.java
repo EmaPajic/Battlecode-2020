@@ -96,6 +96,15 @@ public class Landscaper {
     private static boolean attack(MapLocation location) throws GameActionException {
         if (rc.getLocation().isAdjacentTo(location)) {
 
+            if(Strategium.enemyHQLocation != null) {
+                if(Navigation.aerialDistance(rc.getLocation(), Strategium.enemyHQLocation) == 1) {
+                    if(rc.canDigDirt(Direction.CENTER)) {
+                        rc.digDirt(Direction.CENTER);
+                        return true;
+                    }
+                }
+            }
+
             for (Direction dir : Direction.allDirections())
                 if (!rc.adjacentLocation(dir).equals(location))
                     if (Lattice.isPit(rc.adjacentLocation(dir)))
