@@ -17,7 +17,8 @@ public class Lattice {
      * @return true if it is a pit, false otherwise
      */
     public static boolean isPit(MapLocation location) {
-        return location.x % 2 == 0 && location.y % 2 == 0 || Strategium.elevation[location.x][location.y] < -100
+        return (location.x % 2 == Strategium.HQLocation.x % 2 &&
+                location.y % 2 == Strategium.HQLocation.y % 2) || Strategium.elevation[location.x][location.y] < -100
                 && !location.equals(Strategium.HQLocation);
     }
 
@@ -28,9 +29,8 @@ public class Lattice {
      * @return true if it is a path, false otherwise
      */
     public static boolean isPath(MapLocation location) {
-
-        return ((location.x + location.y) % 2 == 1 /*|| location.isAdjacentTo(Strategium.HQLocation)*/) &&
-                !location.equals(Strategium.HQLocation);
+        return (location.x + location.y + Strategium.HQLocation.x + Strategium.HQLocation.y) % 2 == 1
+        || location.isAdjacentTo(Strategium.HQLocation);
     }
 
     /**
@@ -41,7 +41,8 @@ public class Lattice {
      * @return true if it is a building site, false otherwise
      */
     public static boolean isBuildingSite(MapLocation location) {
-        return location.x % 2 == 1 && location.y % 2 == 1 && !location.isAdjacentTo(Strategium.HQLocation);
+        return location.x % 2 != Strategium.HQLocation.x % 2 && location.y % 2 != Strategium.HQLocation.y % 2
+                && !location.isAdjacentTo(Strategium.HQLocation);
     }
 
     /**
