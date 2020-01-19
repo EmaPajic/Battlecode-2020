@@ -115,6 +115,7 @@ public class LandscaperSensor {
 
                     for(Direction dir : dir8){
                         MapLocation location = friendly.location.add(dir);
+                        if(rc.onTheMap(location))
                         if(location.isAdjacentTo(enemy) && !occupied[location.x][location.y])
                             overlapLocations.add(location);
                     }

@@ -18,8 +18,8 @@ public class Lattice {
      */
     public static boolean isPit(MapLocation location) {
         return (location.x % 2 == Strategium.HQLocation.x % 2 &&
-                location.y % 2 == Strategium.HQLocation.y % 2) || Strategium.elevation[location.x][location.y] < -100
-                && !location.equals(Strategium.HQLocation);
+                location.y % 2 == Strategium.HQLocation.y % 2 && !location.equals(Strategium.HQLocation)) ||
+                Strategium.elevation[location.x][location.y] < -1000;
     }
 
     /**
@@ -29,8 +29,8 @@ public class Lattice {
      * @return true if it is a path, false otherwise
      */
     public static boolean isPath(MapLocation location) {
-        return (location.x + location.y + Strategium.HQLocation.x + Strategium.HQLocation.y) % 2 == 1
-        || location.isAdjacentTo(Strategium.HQLocation);
+        return ((location.x + location.y + Strategium.HQLocation.x + Strategium.HQLocation.y) % 2 == 1
+        || location.isAdjacentTo(Strategium.HQLocation)) && !location.equals(Strategium.HQLocation);
     }
 
     /**
@@ -56,8 +56,7 @@ public class Lattice {
         int elevation = Strategium.elevation[location.x][location.y];
         for (Direction dir : dir8) {
             MapLocation loc = location.add(dir);
-            if (rc.onTheMap(loc) && isPath(loc) && !loc.isAdjacentTo(Strategium.HQLocation) &&
-                    !loc.equals(Strategium.HQLocation))
+            if (rc.onTheMap(loc) && isPath(loc) && !loc.equals(Strategium.HQLocation))
                 if (Math.abs(Strategium.elevation[loc.x][loc.y] - elevation) > 3 &&
                         !isAdjacentToWater(loc) || Strategium.elevation[loc.x][loc.y] < waterLevel) {
                     return false;
@@ -99,6 +98,7 @@ public class Lattice {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
             if (isAdjacentToWater(location)) continue;
+            System.out.println(dir + " JE PIT: " + isPit(location));
             if (isPit(location) &&
                     (!Strategium.water[location.x][location.y] || Strategium.elevation[location.x][location.y] < -100))
                 return dir;

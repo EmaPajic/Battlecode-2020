@@ -157,10 +157,12 @@ public class Landscaper {
         //System.out.println(Clock.getBytecodeNum());
         int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 1000);
         if (waterLevel > 25) waterLevel = 25;
+
+        System.out.println("WATER:" + waterLevel);
+
         if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y] &&
                 !Lattice.isPit(rc.getLocation())) {
             if (rc.canDepositDirt(Direction.CENTER)) {
-
                 rc.depositDirt(Direction.CENTER);
                 return true;
             }
@@ -173,13 +175,17 @@ public class Landscaper {
             return false;
         }
 
+        System.out.println("PIT: " + Lattice.isPit(rc.getLocation()));
+        System.out.println("PATH: " + Lattice.isPath(rc.getLocation()));
+        System.out.println("BLD SITE: " + Lattice.isBuildingSite(rc.getLocation()));
+
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
             if (Lattice.isPath(location))
                 if (waterLevel > Strategium.elevation[location.x][location.y]) {
+                    rc.setIndicatorDot(location, 255, 255, 0);
                     if (rc.canDepositDirt(dir)) {
-
                         rc.depositDirt(dir);
                         return true;
                     }
@@ -221,7 +227,6 @@ public class Landscaper {
         if (rc.getDirtCarrying() == RobotType.LANDSCAPER.dirtLimit) {
             Direction dir = Lattice.bestDepositDirection();
             if (rc.canDepositDirt(dir)) {
-
                 rc.depositDirt(dir);
                 return true;
             }
@@ -229,8 +234,8 @@ public class Landscaper {
 
         if (rc.getDirtCarrying() == 0) {
             Direction dir = Lattice.bestDigDirection();
+            System.out.println("DIG: " + dir);
             if (rc.canDigDirt(dir)) {
-
                 rc.digDirt(dir);
                 return true;
             }
@@ -273,7 +278,7 @@ public class Landscaper {
                     Strategium.rand.nextInt(rc.getMapHeight() / 2) * 2 + 1);
         }
 
-
+        rc.setIndicatorLine(rc.getLocation(), waypoint, 255, 255, 255);
         return Navigation.bugPath(waypoint);
 
     }
