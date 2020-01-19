@@ -1,5 +1,6 @@
 package Mark5.robots;
 
+import Mark5.sensors.FulfillmentCenterSensor;
 import Mark5.utils.Strategium;
 import Mark5.RobotPlayer;
 import battlecode.common.*;
@@ -30,7 +31,8 @@ public class FulfillmentCenter {
                 }
                 break;
             case PERIODIC_BUILDING:
-                if (numDrones < 5 && rc.getTeamSoup() > 650)
+                if (numDrones < 5 && (rc.getTeamSoup() > 650 ||
+                        FulfillmentCenterSensor.enemyLandscapersNearby && !FulfillmentCenterSensor.enemyNetGunsNearby))
                     for (Direction dir : dir8) {
                         if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
                             ++numDrones;

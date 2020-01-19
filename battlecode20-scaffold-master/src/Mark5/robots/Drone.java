@@ -292,7 +292,7 @@ public class Drone {
                             if (Navigation.aerialDistance(robot.getLocation(), rc.adjacentLocation(dir)) <= 4) {
                                 rc.dropUnit(dir);
                                 payload = Payload.POTENTIAL;
-                                state = State.SWARMER;
+                                state = State.PREDATOR;
                                 return true;
                             }
             }

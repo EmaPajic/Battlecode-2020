@@ -11,6 +11,7 @@ import battlecode.common.RobotType;
 import java.util.Iterator;
 import java.util.Map;
 
+import static Mark5.RobotPlayer.myFun;
 import static Mark5.RobotPlayer.rc;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -48,24 +49,25 @@ public class MinerSensor {
                     elevation[i][j] = rc.senseElevation(location);
                     water[i][j] = rc.senseFlooding(location);
                     occupied[i][j] = false;
-                    visibleSoup += rc.senseSoup(location);
-                    if (rc.senseSoup(location) > 0) {
-                        //explored[i][j] = true;
-                        if (!soup[i][j]) {
-                            knownSoup++;
-                            soup[i][j] = true;
-                            if (Navigation.aerialDistance(rc.getLocation(), i, j) <
-                                    Navigation.aerialDistance(rc.getLocation(), nearestSoup))
-                                nearestSoup = new MapLocation(i, j);
+                    if(myFun != 4) {
+                        visibleSoup += rc.senseSoup(location);
+                        if (rc.senseSoup(location) > 0) {
+                            //explored[i][j] = true;
+                            if (!soup[i][j]) {
+                                knownSoup++;
+                                soup[i][j] = true;
+                                if (Navigation.aerialDistance(rc.getLocation(), i, j) <
+                                        Navigation.aerialDistance(rc.getLocation(), nearestSoup))
+                                    nearestSoup = new MapLocation(i, j);
+                            }
+
+                        } else if (soup[i][j]) {
+                            soup[i][j] = false;
+                            knownSoup--;
+                            if (nearestSoup != null)
+                                if (nearestSoup.x == i && nearestSoup.y == j) nearestSoup = null;
                         }
-
-                    } else if (soup[i][j]) {
-                        soup[i][j] = false;
-                        knownSoup--;
-                        if (nearestSoup != null)
-                            if (nearestSoup.x == i && nearestSoup.y == j) nearestSoup = null;
                     }
-
                 }
 
             }
