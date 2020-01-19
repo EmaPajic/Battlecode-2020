@@ -31,7 +31,7 @@ public class FulfillmentCenter {
                 }
                 break;
             case PERIODIC_BUILDING:
-                if (numDrones < 3 && (rc.getTeamSoup() > 650 ||
+                if (numDrones < 5 && (rc.getTeamSoup() > 650 ||
                         FulfillmentCenterSensor.enemyLandscapersNearby && !FulfillmentCenterSensor.enemyNetGunsNearby))
                     for (Direction dir : dir8) {
                         if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
