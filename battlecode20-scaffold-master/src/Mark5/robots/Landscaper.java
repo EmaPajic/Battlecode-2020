@@ -49,15 +49,11 @@ public class Landscaper {
         if (Strategium.nearestEnemyBuilding != null)
             if (attack(Strategium.nearestEnemyBuilding)) return;
 
-        if (Navigation.aerialDistance(Strategium.enemyHQLocation) <= 2) {
-            if (demolish()) return;
-        }
-
         if (Strategium.nearestBuriedFriendlyBuilding != null)
-            if (Navigation.bugPath(Strategium.nearestBuriedFriendlyBuilding)) return;
+            if (Navigation.fuzzyNav(Strategium.nearestBuriedFriendlyBuilding)) return;
 
         if (Strategium.nearestEnemyBuilding != null)
-            if (Navigation.bugPath(Strategium.nearestEnemyBuilding)) return;
+            if (Navigation.fuzzyNav(Strategium.nearestEnemyBuilding)) return;
 
         //System.out.println("DREIN");
 
@@ -209,7 +205,8 @@ public class Landscaper {
                 MapLocation location = rc.adjacentLocation(dir);
                 if (!rc.onTheMap(location)) continue;
                 if (Lattice.isPath(location) ||
-                        (Lattice.isBuildingSite(location) && !Strategium.occupied[location.x][location.y]))
+                        (Lattice.isBuildingSite(location) && !Strategium.occupied[location.x][location.y])
+                || Navigation.aerialDistance(location, Strategium.enemyHQLocation) < 3)
                     if (Strategium.elevation[location.x][location.y] >
                             3 + Strategium.elevation[rc.getLocation().x][rc.getLocation().y])
                         if (!Lattice.isAdjacentToWater(location)) {
@@ -261,7 +258,10 @@ public class Landscaper {
                 }
         }
 
-        if (bestWaypoint != null) waypoint = bestWaypoint;
+        waypoint = Strategium.enemyHQLocation;
+
+        if (waypoint == null) waypoint = bestWaypoint;
+
 
         if (waypoint == null) {
             waypoint = Strategium.currentEnemyHQTarget;
