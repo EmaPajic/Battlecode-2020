@@ -89,9 +89,10 @@ public class DesignSchoolSensor {
                 switch (robot.type) {
 
                     case HQ:
+                        numThreats += 10;
+                    case FULFILLMENT_CENTER:
                     case NET_GUN:
                     case DESIGN_SCHOOL:
-                    case FULFILLMENT_CENTER:
                     case VAPORATOR:
                     case REFINERY:
                     case LANDSCAPER:
