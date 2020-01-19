@@ -67,7 +67,7 @@ public strictfp class RobotPlayer {
         RobotPlayer.rc = rc;
         if (rc.getType() == RobotType.MINER)
             if (rc.getRoundNum() == 2) {
-                //myFun = 4;
+                myFun = 4;
             }
         Strategium.init();
 
@@ -156,17 +156,15 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
-        Strategium.gatherInfo();
         if(rc.getRoundNum() == 1)
             Strategium.gatherInfo();
 
         if(numMiners < HQSensor.totalMiners)
             for (Direction dir : dir8)
-                if(dir != Direction.SOUTH)
-                    if (tryBuild(RobotType.MINER, dir)) {
-                        ++numMiners;
-                        return;
-                    }
+                if (tryBuild(RobotType.MINER, dir)) {
+                    ++numMiners;
+                    return;
+                }
 
             runNetGun();
 

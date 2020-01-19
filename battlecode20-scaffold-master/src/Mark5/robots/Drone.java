@@ -325,7 +325,7 @@ public class Drone {
                     if (Navigation.goodLandingSpot(rc.adjacentLocation(dir)))
                          {
                             rc.dropUnit(dir);
-                            state = State.SWARMER;
+                            state = State.PREDATOR;
                             payload = Payload.POTENTIAL;
                             return true;
                         }
@@ -339,7 +339,7 @@ public class Drone {
             if (rc.canDropUnit(dir))
                 if (Navigation.aerialDistance(Strategium.HQLocation, rc.adjacentLocation(dir)) > 3) {
                     rc.dropUnit(dir);
-                    state = State.SWARMER;
+                    state = State.PREDATOR;
                     payload = Payload.POTENTIAL;
                     return true;
                 }
