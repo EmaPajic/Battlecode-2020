@@ -23,7 +23,7 @@ public strictfp class RobotPlayer {
     public static MapLocation vaporatorLocation2;
     static int buildstage = 0; // tells miners what to build
 
-    static int myFun = 0;
+    public static int myFun = 0;
     static int numMiners = 0;
     static int numLandscapers = 0;
     static int numDrones = 0;
