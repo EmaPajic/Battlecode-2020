@@ -12,7 +12,6 @@ public class Landscaper {
     private static MapLocation waypoint = null;
 
     public static void run() throws GameActionException {
-        //System.out.println("START");
         Strategium.gatherInfo();
 
         if (!rc.isReady()) return;
@@ -58,7 +57,7 @@ public class Landscaper {
             if (Navigation.bugPath(Strategium.nearestBuriedFriendlyBuilding)) return;
 
         if (Strategium.nearestEnemyBuilding != null)
-            if (Navigation.bugPath(Strategium.nearestBuriedFriendlyBuilding)) return;
+            if (Navigation.bugPath(Strategium.nearestEnemyBuilding)) return;
 
         //System.out.println("DREIN");
 
