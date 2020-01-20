@@ -42,7 +42,7 @@ public class DesignSchool {
             }
 
         } else if (RobotType.VAPORATOR.cost + RobotType.LANDSCAPER.cost <= rc.getTeamSoup() ||
-                (numLandscapers < 3 && rc.getTeamSoup() > 2* RobotType.LANDSCAPER.cost)) {
+                (numLandscapers < 5 && rc.getTeamSoup() > 2* RobotType.LANDSCAPER.cost)) {
             if(Strategium.enemyHQLocation != null) {
                 Direction dirToEnemyHQ = rc.getLocation().directionTo(Strategium.enemyHQLocation);
                 List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToEnemyHQ.opposite()));
