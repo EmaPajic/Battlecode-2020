@@ -78,7 +78,7 @@ public class Lattice {
      * @param location the location to calculate for
      * @return the amount of dirt
      */
-    public static int maxDeposit(MapLocation location) throws GameActionException{
+    public static int maxDeposit(MapLocation location) throws GameActionException {
         if (location.equals(Strategium.HQLocation)) return 0;
         if (isPit(location)) return Integer.MAX_VALUE;
         if (location.isAdjacentTo(Strategium.HQLocation)) return Integer.MAX_VALUE;
@@ -99,14 +99,16 @@ public class Lattice {
      *
      * @return the direction. If there is no suitable direction, returns null.
      */
-    public static Direction bestDigDirection() throws GameActionException{
+    public static Direction bestDigDirection() throws GameActionException {
         for (Direction dir : Direction.allDirections()) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
             if (isAdjacentToWater(location)) continue;
             System.out.println(dir + " JE PIT: " + isPit(location));
             if (isPit(location) &&
-                    (!Strategium.water[location.x][location.y] || Strategium.elevation[location.x][location.y] < -100))
+                    (!Strategium.water[location.x][location.y] ||
+                            Strategium.elevation[location.x][location.y] < -100 ||
+                            rc.getLocation().isAdjacentTo(Strategium.HQLocation)))
                 return dir;
         }
         for (Direction dir : Direction.allDirections()) {
@@ -141,7 +143,7 @@ public class Lattice {
      *
      * @return the direction
      */
-    public static Direction bestDepositDirection() throws GameActionException{
+    public static Direction bestDepositDirection() throws GameActionException {
         int minElevation = Integer.MAX_VALUE;
         Direction bestDir = null;
         if (Strategium.nearestWater != null)
