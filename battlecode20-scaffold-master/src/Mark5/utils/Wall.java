@@ -65,7 +65,7 @@ public class Wall {
         for (int i = wall.length; i-- > 0; ) {
             if (rc.getLocation().isAdjacentTo(wall[i]))
                 if (rc.canSenseLocation(wall[i]))
-                    if (rc.isLocationOccupied(wall[i]) || rc.getRoundNum() > 700)
+                    if (rc.isLocationOccupied(wall[i]) || rc.getRoundNum() > 600)
                         if (rc.senseElevation(wall[i]) < rc.senseElevation(buildSpot))
                             buildSpot = wall[i];
         }

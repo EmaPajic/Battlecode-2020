@@ -68,7 +68,7 @@ public strictfp class RobotPlayer {
         RobotPlayer.rc = rc;
         if (rc.getType() == RobotType.MINER)
             if (rc.getRoundNum() == 2) {
-                //myFun = 4;
+                myFun = 4;
             }
         Strategium.init();
 

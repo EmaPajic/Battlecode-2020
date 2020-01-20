@@ -289,7 +289,8 @@ public class Drone {
                 if (robot != null) if (robot.type == RobotType.HQ && robot.team == Strategium.opponentTeam)
                     for (Direction dir : dir8)
                         if (rc.canDropUnit(dir))
-                            if (Navigation.aerialDistance(robot.getLocation(), rc.adjacentLocation(dir)) <= 4) {
+                            if (Navigation.aerialDistance(robot.getLocation(), rc.adjacentLocation(dir)) <= 4 &&
+                            !rc.senseFlooding(rc.getLocation().add(dir))) {
                                 rc.dropUnit(dir);
                                 payload = Payload.POTENTIAL;
                                 state = State.PREDATOR;
