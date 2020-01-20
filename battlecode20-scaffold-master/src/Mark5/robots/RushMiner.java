@@ -1,5 +1,6 @@
 package Mark5.robots;
 
+import Mark5.sensors.MinerSensor;
 import Mark5.utils.BFS;
 import Mark5.utils.Lattice;
 import Mark5.utils.Navigation;
@@ -16,7 +17,10 @@ public class RushMiner {
     static boolean followBfs = false;
     static int numDesignSchools = 0;
     static int numNetGuns = 0;
-
+    static int numEnemyDrones = 0;
+    static int numEnemyFulfillmentCenters = 0;
+    static boolean waterDanger = false;
+    static int waterLevel = 0;
     static boolean foundEnemyHQ;
 
     public static void run() throws GameActionException {
@@ -28,6 +32,8 @@ public class RushMiner {
         } else if (Strategium.currentEnemyHQTarget == null) {
             Strategium.currentEnemyHQTarget = Strategium.potentialEnemyHQLocations.get(0);
         }
+        waterDanger = false;
+        waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 10);
         rushToEnemyHQ();
     }
 
@@ -60,7 +66,16 @@ public class RushMiner {
             if (goToDir == circumnavigateDir)
                 followBfs = false;
         }
-        if (Strategium.canSafelyMove(goToDir) && !followBfs) {
+        if (MinerSensor.seenWater) {
+            MapLocation loc = rc.getLocation();
+            waterDanger = true;
+            for (int i = 0; i < 4; ++i) {
+                loc = loc.add(goToDir);
+                if (rc.senseElevation(loc) > waterLevel) waterDanger = false;
+            }
+        }
+        if (Strategium.canSafelyMove(goToDir) && !followBfs && !waterDanger) {
+            System.out.println("Danger? " + waterDanger);
             rc.move(goToDir);
         } else {
             //build fulfillment center and wait for drone
@@ -72,12 +87,21 @@ public class RushMiner {
                 circumnavigateDir = BFS.step(Strategium.currentEnemyHQTarget);
             }
             //System.out.println("BFSEND " + circumnavigateDir);
-            if (circumnavigateDir != Direction.CENTER)
-                if (Strategium.canSafelyMove(circumnavigateDir)) {
+            if (circumnavigateDir != Direction.CENTER) {
+                if (MinerSensor.seenWater) {
+                    MapLocation loc = rc.getLocation();
+                    waterDanger = true;
+                    for (int i = 0; i < 4; ++i) {
+                        loc = loc.add(circumnavigateDir);
+                        if (rc.senseElevation(loc) > waterLevel) waterDanger = false;
+                    }
+                }
+                if (Strategium.canSafelyMove(circumnavigateDir) && !waterDanger) {
                     followBfs = true;
                     rc.move(circumnavigateDir);
                     return;
                 }
+            }
             if (!builtFulfillment) {
                     //build
                     for (Direction buildDir : dir8)
@@ -102,6 +126,8 @@ public class RushMiner {
         RobotInfo[] robots = rc.senseNearbyRobots();
         numNetGuns = 0;
         numDesignSchools = 0;
+        numEnemyDrones = 0;
+        numEnemyFulfillmentCenters = 0;
         for (RobotInfo robot : robots) {
             if (robot.getType() == RobotType.DESIGN_SCHOOL && robot.getTeam() == Strategium.myTeam) {
                 ++numDesignSchools;
@@ -109,11 +135,17 @@ public class RushMiner {
             if (robot.getType() == RobotType.NET_GUN && robot.getTeam() == Strategium.myTeam) {
                 ++numNetGuns;
             }
+            if (robot.getType() == RobotType.FULFILLMENT_CENTER && robot.getTeam() == Strategium.opponentTeam) {
+                ++numEnemyFulfillmentCenters;
+            }
+            if (robot.getType() == RobotType.DELIVERY_DRONE && robot.getTeam() == Strategium.opponentTeam) {
+                ++numEnemyDrones;
+            }
         }
         if (numDesignSchools == 0) {
             TwoMinerController.buildDesignCenterNearEnemy();
         }
-        if (numNetGuns < 2) {
+        if (numNetGuns < 1 && numEnemyDrones > 0 || numEnemyFulfillmentCenters > 0) {
             buildNetGunNearEnemy();
         }
     }
@@ -130,7 +162,6 @@ public class RushMiner {
                     }
             }
         }
-        Navigation.bugPath(Strategium.currentEnemyHQTarget);
         return false;
 
     }

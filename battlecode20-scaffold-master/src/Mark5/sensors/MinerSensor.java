@@ -3,10 +3,7 @@ package Mark5.sensors;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import Mark5.utils.Wall;
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
+import battlecode.common.*;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -20,6 +17,7 @@ import static Mark5.utils.Strategium.*;
 
 public class MinerSensor {
     public static int visibleSoup;
+    public static boolean seenWater = false;
 
     public static void init() {
         soup = new boolean[rc.getMapWidth()][rc.getMapHeight()];
@@ -36,11 +34,13 @@ public class MinerSensor {
         enemyDrones.clear();
         nearestEnemyDrone = null;
         visibleSoup = 0;
+        seenWater = false;
 
         int xMin = rc.getLocation().x - 5;
         int yMin = rc.getLocation().y - 5;
         int xMax = rc.getLocation().x + 5;
         int yMax = rc.getLocation().y + 5;
+        int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 10);
         for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++)
             for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
 
@@ -48,6 +48,7 @@ public class MinerSensor {
                 if (rc.canSenseLocation(location)) {
                     elevation[i][j] = rc.senseElevation(location);
                     water[i][j] = rc.senseFlooding(location);
+                    if (water[i][j]) seenWater = true;
                     occupied[i][j] = false;
                     if(myFun != 4) {
                         visibleSoup += rc.senseSoup(location);

@@ -2,12 +2,15 @@ package Mark5;
 
 import Mark5.robots.*;
 import Mark5.sensors.HQSensor;
+import Mark5.utils.Blockchain;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import Mark5.utils.Wall;
 import battlecode.common.*;
 
 import java.util.ArrayList;
+
+import static Mark5.utils.Strategium.turnsAlive;
 
 
 public strictfp class RobotPlayer {
@@ -156,8 +159,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
-        if(rc.getRoundNum() == 1)
-            Strategium.gatherInfo();
+        Strategium.gatherInfo();
 
         if(numMiners < HQSensor.totalMiners)
             for (Direction dir : dir8)
@@ -269,6 +271,9 @@ public strictfp class RobotPlayer {
 
     static void runRefinery() throws GameActionException {
         // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
+        Strategium.gatherInfo();
+        if(turnsAlive == 1)
+        Blockchain.reportRefineryLocation(1);
     }
 
     static void runVaporator() throws GameActionException {
