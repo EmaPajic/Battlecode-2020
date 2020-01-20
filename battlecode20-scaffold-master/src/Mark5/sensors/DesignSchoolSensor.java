@@ -1,6 +1,7 @@
 package Mark5.sensors;
 
 import Mark5.utils.Navigation;
+import Mark5.utils.Strategium;
 import battlecode.common.*;
 
 import java.util.HashSet;
@@ -90,6 +91,7 @@ public class DesignSchoolSensor {
 
                     case HQ:
                         numThreats += 2;
+                        enemyHQLocation = robot.getLocation();
                     case FULFILLMENT_CENTER:
                     case NET_GUN:
                     case DESIGN_SCHOOL:
