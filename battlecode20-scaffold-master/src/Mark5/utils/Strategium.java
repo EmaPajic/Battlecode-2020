@@ -277,6 +277,7 @@ public class Strategium {
                     if (HQLocation != null) break;
                     HQLocation = new MapLocation(message[0], message[1]);
                     updatePotentialEnemyHQLocations();
+                    Wall.init();
                     break;
                 case 42:
                     refineries.add(new MapLocation(message[5], message[6]));

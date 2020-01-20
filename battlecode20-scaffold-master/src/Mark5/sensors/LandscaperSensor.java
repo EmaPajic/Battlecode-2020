@@ -65,8 +65,8 @@ public class LandscaperSensor {
                     case HQ:
                         if (HQLocation == null) {
                             HQLocation = robot.location;
-
                             Strategium.updatePotentialEnemyHQLocations();
+                            Wall.init();
                         }
 
                     case DESIGN_SCHOOL:
