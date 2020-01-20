@@ -19,8 +19,8 @@ public class Lattice {
     public static boolean isPit(MapLocation location) {
         return (location.x % 2 == Strategium.HQLocation.x % 2 &&
                 location.y % 2 == Strategium.HQLocation.y % 2 && !location.equals(Strategium.HQLocation)) ||
-                Strategium.elevation[location.x][location.y] < -1000
-                || Strategium.elevation[location.x][location.y] > 10000;
+                Strategium.elevation[location.x][location.y] < -1000 ||
+                Strategium.elevation[location.x][location.y] > 10000;
     }
 
     /**
@@ -31,7 +31,9 @@ public class Lattice {
      */
     public static boolean isPath(MapLocation location) {
         return ((location.x + location.y + Strategium.HQLocation.x + Strategium.HQLocation.y) % 2 == 1
-        || location.isAdjacentTo(Strategium.HQLocation)) && !location.equals(Strategium.HQLocation);
+                || location.isAdjacentTo(Strategium.HQLocation)) && !location.equals(Strategium.HQLocation) &&
+                Strategium.elevation[location.x][location.y] >= -1000 &&
+                Strategium.elevation[location.x][location.y] <= 10000;
     }
 
     /**
@@ -42,14 +44,16 @@ public class Lattice {
      * @return true if it is a building site, false otherwise
      */
     public static boolean isBuildingSite(MapLocation location) {
-        return location.x % 2 != Strategium.HQLocation.x % 2 && location.y % 2 != Strategium.HQLocation.y % 2
-                && !location.isAdjacentTo(Strategium.HQLocation);
+        return location.x % 2 != Strategium.HQLocation.x % 2 && location.y % 2 != Strategium.HQLocation.y % 2 &&
+                !location.isAdjacentTo(Strategium.HQLocation) &&
+                Strategium.elevation[location.x][location.y] >= -1000 &&
+                Strategium.elevation[location.x][location.y] <= 10000;
     }
 
     /**
      * Checks if the lattice is even and safe at the target location
      *
-     * @param location the location to check for
+     * @param location   the location to check for
      * @param waterLevel the minimum safe elevation
      * @return true if it is even and safe, false otherwise
      */
@@ -58,8 +62,9 @@ public class Lattice {
         for (Direction dir : dir8) {
             MapLocation loc = location.add(dir);
             if (rc.onTheMap(loc) && isPath(loc) && !loc.equals(Strategium.HQLocation))
-                if (Math.abs(Strategium.elevation[loc.x][loc.y] - elevation) > 3 &&
-                        !isAdjacentToWater(loc) || Strategium.elevation[loc.x][loc.y] < waterLevel) {
+                if ((Strategium.elevation[loc.x][loc.y] - elevation > 3 && !loc.isAdjacentTo(Strategium.HQLocation) &&
+                        !isAdjacentToWater(loc)) || Strategium.elevation[loc.x][loc.y] < waterLevel
+                        || elevation - Strategium.elevation[loc.x][loc.y] > 3) {
                     return false;
                 }
         }
@@ -121,8 +126,8 @@ public class Lattice {
      * @return true if it is adjacent to water, false otherwise
      */
     public static boolean isAdjacentToWater(MapLocation location) {
-        if(Strategium.water[location.x][location.y]) return false;
-        if(Strategium.nearestWater == null) return false;
+        if (Strategium.water[location.x][location.y]) return false;
+        if (Strategium.nearestWater == null) return false;
         for (Direction dir : dir8) {
             MapLocation loc = location.add(dir);
             if (rc.onTheMap(loc))

@@ -6,6 +6,7 @@ import battlecode.common.Team;
 import battlecode.common.Transaction;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static Mark5.RobotPlayer.rc;
@@ -13,7 +14,7 @@ import static java.lang.Integer.min;
 
 public class Blockchain {
 
-    static final int[] acceptedTypes = {73};
+    static final int[] acceptedTypes = {73, 42};
     static private int parsingProgress = 1;
     static int opponentTransactionCosts = 0;
     static int opponentTransactions = 0;
@@ -78,11 +79,21 @@ public class Blockchain {
         return true;
     }
 
-    public static void parseBlockchain() throws GameActionException {
-        if (parsingProgress < min(rc.getRoundNum(), 50)) {
+    public static boolean reportRefineryLocation(int fee) throws GameActionException {
+        int[] message = new int[7];
+        message[5] = rc.getLocation().x;
+        message[6] = rc.getLocation().y;
+        addAuth(message, 42);
+        if(!rc.canSubmitTransaction(message, fee)) { return false; }
+        rc.submitTransaction(message, fee);
+        return true;
+    }
+
+    public static void parseBlockchain(LinkedList<Transaction> transactions) throws GameActionException {
+        if (parsingProgress < rc.getRoundNum()) {
             //System.out.println("here?");
             Transaction[] block = rc.getBlock(parsingProgress);
-            for(Transaction transaction : block) if(checkAuth(transaction)) Strategium.transactions.add(transaction);
+            for(Transaction transaction : block) if(checkAuth(transaction)) transactions.add(transaction);
             parsingProgress++;
         }
     }

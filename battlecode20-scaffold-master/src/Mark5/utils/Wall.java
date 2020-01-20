@@ -51,9 +51,11 @@ public class Wall {
     }
 
     public static MapLocation freeSpot() throws GameActionException {
+        if (rc.getRoundNum() < 300) return null;
         for (int i = wall.length; i-- > 0; ) {
             if (rc.canSenseLocation(wall[i]))
-                if (!rc.isLocationOccupied(wall[i]) && rc.senseElevation(wall[i]) < 50) return wall[i];
+                if (!rc.isLocationOccupied(wall[i]) &&
+                        rc.senseElevation(wall[i]) < rc.senseElevation(rc.getLocation()) + 4) return wall[i];
         }
         return null;
     }
@@ -63,9 +65,9 @@ public class Wall {
         for (int i = wall.length; i-- > 0; ) {
             if (rc.getLocation().isAdjacentTo(wall[i]))
                 if (rc.canSenseLocation(wall[i]))
-                    if (rc.isLocationOccupied(wall[i]) || rc.senseElevation(wall[i]) > 20)
-                       if(rc.senseElevation(rc.getLocation()) < rc.senseElevation(buildSpot))
-            buildSpot = wall[i];
+                    if (rc.isLocationOccupied(wall[i]) || rc.getRoundNum() > 700)
+                        if (rc.senseElevation(wall[i]) < rc.senseElevation(buildSpot))
+                            buildSpot = wall[i];
         }
         return buildSpot;
     }

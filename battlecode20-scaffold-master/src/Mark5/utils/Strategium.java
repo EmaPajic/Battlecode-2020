@@ -5,6 +5,7 @@ import Mark5.robots.Drone;
 import Mark5.sensors.*;
 import battlecode.common.*;
 
+import java.awt.*;
 import java.util.*;
 import java.util.*;
 import java.util.List;
@@ -16,7 +17,7 @@ import static java.lang.Math.min;
 public class Strategium {
 
     static boolean upToDate = false;
-    static ArrayList<Transaction> transactions = new ArrayList<>();
+    static LinkedList<Transaction> transactions = new LinkedList<>();
 
     public static MapLocation HQLocation = null;
     public static MapLocation enemyHQLocation = null;
@@ -37,6 +38,7 @@ public class Strategium {
 
     public static boolean[] robotsMet;
     public static int numDronesMet = 0;
+    public static int turnsAlive = 0;
     public static int dronesMetWithLowerID = 0;
     public static RobotInfo nearestLandscaper = null;
 
@@ -194,18 +196,19 @@ public class Strategium {
             return false;
         });
 
-        refineries.removeIf(refinery -> {
-            if (rc.canSenseLocation(refinery)) {
-                try {
-                    RobotInfo info = rc.senseRobotAtLocation(refinery);
-                    if(info == null) return true;
-                    return info.type != RobotType.REFINERY || info.team != myTeam;
-                } catch (GameActionException e) {
-                    e.printStackTrace();
+        if(rc.getType() != RobotType.HQ)
+            refineries.removeIf(refinery -> {
+                if (rc.canSenseLocation(refinery)) {
+                    try {
+                        RobotInfo info = rc.senseRobotAtLocation(refinery);
+                        if(info == null) return true;
+                        return info.type != RobotType.REFINERY || info.team != myTeam;
+                    } catch (GameActionException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-            return false;
-        });
+                return false;
+            });
 
         switch (rc.getType()) {
             case HQ:
@@ -235,16 +238,25 @@ public class Strategium {
     }
 
     public static void gatherInfo(int bytecodesReq) throws GameActionException {
-
+        ++turnsAlive;
         upToDate = false;
 
         sense();
 
-        if (rc.getType() == RobotType.HQ && rc.getRoundNum() == 1) {
-            Blockchain.reportHQLocation(3);
+        if (rc.getType() == RobotType.HQ) {
+
+            if(rc.getRoundNum() == 1)
+                Blockchain.reportHQLocation(3);
+
+            // Search for refineries
+            if(rc.getType() == RobotType.HQ) {
+                Blockchain.parseBlockchain(transactions);
+                parseTransactions();
+            }
+
         } else do {
 
-                Blockchain.parseBlockchain();
+                Blockchain.parseBlockchain(transactions);
                 parseTransactions();
 
         } while (HQLocation == null);
@@ -266,6 +278,9 @@ public class Strategium {
                     HQLocation = new MapLocation(message[0], message[1]);
                     updatePotentialEnemyHQLocations();
                     Wall.init();
+                    break;
+                case 42:
+                    refineries.add(new MapLocation(message[5], message[6]));
                     break;
                 default:
                     break;

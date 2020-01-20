@@ -63,6 +63,7 @@ public class Landscaper {
 
         }
         if (rc.getLocation().isAdjacentTo(Strategium.HQLocation)) {
+            System.out.println("HQ: " + Strategium.HQLocation);
             if (buildTheWall()) return;
         }
 
@@ -195,7 +196,6 @@ public class Landscaper {
             }
             Direction dir = Lattice.bestDigDirection();
             if (rc.canDigDirt(dir)) {
-
                 rc.digDirt(dir);
                 return true;
             }
@@ -214,7 +214,7 @@ public class Landscaper {
                     }
                 }
         }
-        //System.out.println(Clock.getBytecodeNum());
+
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
@@ -233,9 +233,9 @@ public class Landscaper {
             for (Direction dir : dir8) {
                 MapLocation location = rc.adjacentLocation(dir);
                 if (!rc.onTheMap(location)) continue;
-                if (Lattice.isPath(location) ||
-                        (Lattice.isBuildingSite(location) && !Strategium.occupied[location.x][location.y])
-                        || Navigation.aerialDistance(location, Strategium.enemyHQLocation) < 3)
+                if ((Lattice.isPath(location) && !location.isAdjacentTo(Strategium.HQLocation) ||
+                        (Lattice.isBuildingSite(location) && !Strategium.occupied[location.x][location.y])) ||
+                        Navigation.aerialDistance(location, Strategium.enemyHQLocation) < 3)
                     if (Strategium.elevation[location.x][location.y] >
                             3 + Strategium.elevation[rc.getLocation().x][rc.getLocation().y])
                         if (!Lattice.isAdjacentToWater(location)) {
