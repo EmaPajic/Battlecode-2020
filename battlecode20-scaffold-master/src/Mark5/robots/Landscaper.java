@@ -173,8 +173,12 @@ public class Landscaper {
             if (Navigation.bugPath(waypoint)) return true;
         }
 
-        int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 1000);
+        int waterLevel = (int) GameConstants.getWaterLevel(
+                rc.getRoundNum() + 1000
+        );
         if (waterLevel > 25) waterLevel = 25;
+
+        if (rc.getRoundNum() > 2000) waterLevel = 1000;
 
         if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y] &&
                 !Lattice.isPit(rc.getLocation())) {
@@ -237,6 +241,7 @@ public class Landscaper {
 
         if (rc.getDirtCarrying() == RobotType.LANDSCAPER.dirtLimit) {
             Direction dir = Lattice.bestDepositDirection();
+            if(dir != null)
             if (rc.canDepositDirt(dir)) {
                 rc.depositDirt(dir);
                 return true;
@@ -245,6 +250,7 @@ public class Landscaper {
 
         if (rc.getDirtCarrying() == 0) {
             Direction dir = Lattice.bestDigDirection();
+            if(dir != null)
             if (rc.canDigDirt(dir)) {
                 rc.digDirt(dir);
                 return true;
