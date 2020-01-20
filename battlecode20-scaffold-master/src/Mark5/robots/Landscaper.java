@@ -53,15 +53,13 @@ public class Landscaper {
             for (RobotInfo robot : robots) {
                 if(robot.team != Strategium.myTeam && robot.type == RobotType.HQ) {
                     if(attack(robot.location)) return;
-                    else {
-                        Navigation.bugPath(robot.location);
-                        return;
-                    }
+                    if(Navigation.fuzzyNav(robot.location)) return;
                 }
             }
             if(attack(Strategium.nearestEnemyBuilding)) return;
-
         }
+
+
         if (rc.getLocation().isAdjacentTo(Strategium.HQLocation)) {
             System.out.println("HQ: " + Strategium.HQLocation);
             if (buildTheWall()) return;
