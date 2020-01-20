@@ -71,6 +71,7 @@ public class RushMiner {
             waterDanger = true;
             for (int i = 0; i < 4; ++i) {
                 loc = loc.add(goToDir);
+                if (rc.canSenseLocation(loc))
                 if (rc.senseElevation(loc) > waterLevel) waterDanger = false;
             }
         }
@@ -93,6 +94,7 @@ public class RushMiner {
                     waterDanger = true;
                     for (int i = 0; i < 4; ++i) {
                         loc = loc.add(circumnavigateDir);
+                        if (rc.canSenseLocation(loc))
                         if (rc.senseElevation(loc) > waterLevel) waterDanger = false;
                     }
                 }
