@@ -38,7 +38,6 @@ public class Strategium {
 
     public static boolean[] robotsMet;
     public static int numDronesMet = 0;
-    public static int turnsAlive = 0;
     public static int dronesMetWithLowerID = 0;
     public static RobotInfo nearestLandscaper = null;
 
@@ -238,7 +237,6 @@ public class Strategium {
     }
 
     public static void gatherInfo(int bytecodesReq) throws GameActionException {
-        ++turnsAlive;
         upToDate = false;
 
         sense();
@@ -249,10 +247,8 @@ public class Strategium {
                 Blockchain.reportHQLocation(3);
 
             // Search for refineries
-            if(rc.getType() == RobotType.HQ) {
-                Blockchain.parseBlockchain(transactions);
-                parseTransactions();
-            }
+            Blockchain.parseBlockchain(transactions);
+            parseTransactions();
 
         } else do {
 

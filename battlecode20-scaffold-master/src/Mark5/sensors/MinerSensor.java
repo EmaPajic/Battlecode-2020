@@ -36,13 +36,13 @@ public class MinerSensor {
         visibleSoup = 0;
         seenWater = false;
 
-        int xMin = rc.getLocation().x - 5;
-        int yMin = rc.getLocation().y - 5;
-        int xMax = rc.getLocation().x + 5;
-        int yMax = rc.getLocation().y + 5;
+        int xMin = max(0, rc.getLocation().x - 5);
+        int yMin = max(0, rc.getLocation().y - 5);
+        int xMax = min(rc.getLocation().x + 5, rc.getMapWidth() - 1);
+        int yMax = min(rc.getLocation().y + 5, rc.getMapHeight() - 1);
         int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 10);
-        for (int i = max(0, xMin); i <= min(xMax, rc.getMapWidth() - 1); i++)
-            for (int j = max(0, yMin); j <= min(yMax, rc.getMapHeight() - 1); j++) {
+        for (int i = xMin; i <= xMax; ++i)
+            for (int j = yMin; j <= yMax; ++j) {
 
                 MapLocation location = new MapLocation(i, j);
                 if (rc.canSenseLocation(location)) {
@@ -55,7 +55,7 @@ public class MinerSensor {
                         if (rc.senseSoup(location) > 0) {
                             //explored[i][j] = true;
                             if (!soup[i][j]) {
-                                knownSoup++;
+                                ++knownSoup;
                                 soup[i][j] = true;
                                 if (Navigation.aerialDistance(rc.getLocation(), i, j) <
                                         Navigation.aerialDistance(rc.getLocation(), nearestSoup))
@@ -87,8 +87,6 @@ public class MinerSensor {
                         HQLocation = robot.location;
 
                         Strategium.updatePotentialEnemyHQLocations();
-
-                        Wall.init();
 
                     }
 

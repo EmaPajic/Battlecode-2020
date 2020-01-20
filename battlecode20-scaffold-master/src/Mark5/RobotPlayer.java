@@ -10,8 +10,6 @@ import battlecode.common.*;
 
 import java.util.ArrayList;
 
-import static Mark5.utils.Strategium.turnsAlive;
-
 
 public strictfp class RobotPlayer {
     public static RobotController rc;
@@ -272,7 +270,7 @@ public strictfp class RobotPlayer {
     static void runRefinery() throws GameActionException {
         // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
         Strategium.gatherInfo();
-        if(turnsAlive == 1)
+        if(turnCount == 1)
         Blockchain.reportRefineryLocation(1);
     }
 
