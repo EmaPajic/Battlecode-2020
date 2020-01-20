@@ -255,7 +255,8 @@ public class Strategium {
                 Blockchain.parseBlockchain(transactions);
                 parseTransactions();
 
-        } while (HQLocation == null);
+        } while (HQLocation == null); // obrni ovo, tako da ako nije miner , cita blokchain sve dok ne sazna lokaciju baze,
+        // a ako je miner onda citaj non stop sa tim da treba da promenis opseg tj. pokazivac na 50 poslednjih poruka
     }
 
     public static void parseTransactions() throws GameActionException {

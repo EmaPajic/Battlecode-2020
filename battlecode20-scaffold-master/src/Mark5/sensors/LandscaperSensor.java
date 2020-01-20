@@ -123,8 +123,17 @@ public class LandscaperSensor {
             }
 
         for (MapLocation enemy : enemyBuildings)
-            if (Navigation.aerialDistance(enemy) < Navigation.aerialDistance(nearestEnemyBuilding))
+            if(enemyHQLocation != null) {
+                if (Navigation.aerialDistance(enemy) > 1 || Navigation.aerialDistance(enemyHQLocation) <= 1) { // this line is probably unnecessary
+                    nearestEnemyBuilding = enemyHQLocation;
+                    System.out.println("Do baze sam");
+                    break;
+                }
+            }else if (Navigation.aerialDistance(enemy) < Navigation.aerialDistance(nearestEnemyBuilding)){
                 nearestEnemyBuilding = enemy;
+                System.out.println("Baza je daleko");
+            }
+
 
 
 

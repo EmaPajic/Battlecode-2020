@@ -2,6 +2,7 @@ package Mark5.robots;
 
 
 import Mark5.sensors.MinerSensor;
+import Mark5.utils.Blockchain;
 import Mark5.utils.Lattice;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
@@ -214,12 +215,23 @@ public class TwoMinerController {
     public static void control() throws GameActionException {
         Strategium.gatherInfo();
         //System.println("Current target : " + currentTarget);
-        if (rc.canSenseLocation(currentTarget) || Navigation.frustration >= 50) {
-            //System.println("Update target");
-            updateTarget();
-        }
+//        if( Strategium.turnsAlive <= 10){
+////            int[] msgs = new int();
+////            Transation msgs = new Transaction(42, )
+//            if(Strategium.nearestRefinery != Strategium.HQLocation){
+//                currentTarget = Strategium.nearestRefinery;
+//            }
+//
+//        }
 
+        if (rc.canSenseLocation(currentTarget) || Navigation.frustration >= 50) {
+            // trosi 60 bajtkoda
+            updateTarget();
+
+        }
+//        int byteCodeUsed = Clock.getBytecodeNum();
         if (mineAndRefine()) return;
+
         //System.println("Ima dovoljno supe");
 
         boolean enemyBuildingsNearby = false;

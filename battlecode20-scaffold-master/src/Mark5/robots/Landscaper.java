@@ -49,14 +49,17 @@ public class Landscaper {
             if (defend(Strategium.nearestBuriedFriendlyBuilding)) return;
 
         if (Strategium.nearestEnemyBuilding != null) {
-            RobotInfo[] robots = rc.senseNearbyRobots();
-            for (RobotInfo robot : robots) {
-                if(robot.team != Strategium.myTeam && robot.type == RobotType.HQ) {
-                    if(attack(robot.location)) return;
-                    if(Navigation.fuzzyNav(robot.location)) return;
-                }
-            }
+//            RobotInfo[] robots = rc.senseNearbyRobots();
+//            for (RobotInfo robot : robots) {
+//                if(robot.team != Strategium.myTeam && robot.type == RobotType.HQ) {
+//                    if(attack(robot.location)) return;
+//                    if(Navigation.fuzzyNav(robot.location)) return;
+//                }
+//            }
+            // Strategium decides which building should be prioritized, if not in building perimeter
+            // try to reach it
             if(attack(Strategium.nearestEnemyBuilding)) return;
+            else if(Navigation.fuzzyNav(Strategium.nearestEnemyBuilding) ) return;
         }
 
 
@@ -144,13 +147,13 @@ public class Landscaper {
                             rc.digDirt(dir);
                             return true;
                         }
-
             for (Direction dir : Direction.allDirections())
                 if (!rc.adjacentLocation(dir).equals(location))
                     if (rc.canDigDirt(dir)) {
                         rc.digDirt(dir);
                         return true;
                     }
+
             return true;
 
         }
