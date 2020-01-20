@@ -265,6 +265,7 @@ public class Strategium {
                     if (HQLocation != null) break;
                     HQLocation = new MapLocation(message[0], message[1]);
                     updatePotentialEnemyHQLocations();
+                    Wall.init();
                     break;
                 default:
                     break;

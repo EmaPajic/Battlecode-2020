@@ -19,7 +19,8 @@ public class Lattice {
     public static boolean isPit(MapLocation location) {
         return (location.x % 2 == Strategium.HQLocation.x % 2 &&
                 location.y % 2 == Strategium.HQLocation.y % 2 && !location.equals(Strategium.HQLocation)) ||
-                Strategium.elevation[location.x][location.y] < -1000;
+                Strategium.elevation[location.x][location.y] < -1000
+                || Strategium.elevation[location.x][location.y] > 10000;
     }
 
     /**

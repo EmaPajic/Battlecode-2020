@@ -306,8 +306,7 @@ public class Drone {
             case SENTRY:
                 for (Direction dir : dir8)
                     if (rc.canDropUnit(dir))
-                        if (Wall.isOnWall(dir) &&
-                                !rc.adjacentLocation(dir).equals(Strategium.HQLocation.translate(-2, -2))) {
+                        if (!rc.adjacentLocation(dir).equals(Strategium.HQLocation.translate(-2, -2))) {
                         rc.dropUnit(dir);
                         payload = Payload.POTENTIAL;
                         return true;
