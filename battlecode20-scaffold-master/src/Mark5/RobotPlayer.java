@@ -160,12 +160,17 @@ public strictfp class RobotPlayer {
     static void runHQ() throws GameActionException {
         Strategium.gatherInfo();
 
-        if(numMiners < HQSensor.totalMiners) {
+        if(numMiners < HQSensor.totalMiners && rc.getRoundNum() < 600) {
             if(rc.getRoundNum() == 1) {
                 Direction dirToCenter = rc.getLocation().directionTo(
                         new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2));
                 List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToCenter.opposite()));
                 for(Direction dir : towards)
+                    if(tryBuild(RobotType.MINER, dir)) {
+                        ++numMiners;
+                        return;
+                    }
+                for(Direction dir : dir8)
                     if(tryBuild(RobotType.MINER, dir)) {
                         ++numMiners;
                         return;

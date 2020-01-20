@@ -86,6 +86,7 @@ public class Landscaper {
     }
 
     private static boolean buildTheWall() throws GameActionException {
+        if(Wall.reposition()) return true;
         if (rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit) {
             Direction dir = Lattice.bestDigDirection();
             if (rc.canDigDirt(dir)) {
