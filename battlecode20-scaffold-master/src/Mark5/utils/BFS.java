@@ -28,7 +28,7 @@ public class BFS {
         return visitedLocations[location.x][location.y];
     }
 
-    public static Direction step(MapLocation target){
+    public static Direction step(MapLocation target) throws GameActionException {
         LocationNode node;
         for(LocationNode n : stack) rc.setIndicatorLine(n.prev.loc, n.loc, 255, 0, 0);
         if(!stack.isEmpty() && target == bfsTarget){
@@ -51,7 +51,7 @@ public class BFS {
      * @param target the target to find route to
      * @return the direction
      */
-    public static boolean bfs(MapLocation target) {
+    public static boolean bfs(MapLocation target) throws GameActionException {
         //
 
         queue.clear();
@@ -82,8 +82,8 @@ public class BFS {
                     switch (rc.getType()) {
                         case MINER:
                         case LANDSCAPER:
-                            if (Math.abs(Strategium.elevation[x][y] - Strategium.elevation[curr.x][curr.y])
-                                    <= 3 && !Strategium.occupied[x][y] && !Strategium.water[x][y]) {
+                            if (Math.abs(rc.senseElevation(step) - rc.senseElevation(rc.getLocation()))
+                                    <= 3 && !Strategium.occupied[x][y] && !rc.senseFlooding(step)) {
                                 if (Navigation.aerialDistance(target) > Navigation.aerialDistance(step, target)) {
 
                                     stack.add(new LocationNode(step, currHead));
