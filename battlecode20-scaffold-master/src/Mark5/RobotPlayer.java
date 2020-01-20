@@ -9,6 +9,7 @@ import Mark5.utils.Wall;
 import battlecode.common.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public strictfp class RobotPlayer {
@@ -68,7 +69,7 @@ public strictfp class RobotPlayer {
         RobotPlayer.rc = rc;
         if (rc.getType() == RobotType.MINER)
             if (rc.getRoundNum() == 2) {
-                //myFun = 4;
+                myFun = 4;
             }
         Strategium.init();
 
@@ -159,13 +160,32 @@ public strictfp class RobotPlayer {
     static void runHQ() throws GameActionException {
         Strategium.gatherInfo();
 
-        if(numMiners < HQSensor.totalMiners)
+        if(numMiners < HQSensor.totalMiners) {
+            if(rc.getRoundNum() == 1) {
+                Direction dirToCenter = rc.getLocation().directionTo(
+                        new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2));
+                List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToCenter.opposite()));
+                for(Direction dir : towards)
+                    if(tryBuild(RobotType.MINER, dir)) {
+                        ++numMiners;
+                        return;
+                    }
+            }
+            else if(Strategium.nearestSoup != null) {
+                Direction dirToSoup = rc.getLocation().directionTo(Strategium.nearestSoup);
+                List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToSoup.opposite()));
+                for (Direction dir : towards)
+                    if (tryBuild(RobotType.MINER, dir)) {
+                        ++numMiners;
+                        return;
+                    }
+            }
             for (Direction dir : dir8)
                 if (tryBuild(RobotType.MINER, dir)) {
                     ++numMiners;
                     return;
                 }
-
+        }
             runNetGun();
 
     }

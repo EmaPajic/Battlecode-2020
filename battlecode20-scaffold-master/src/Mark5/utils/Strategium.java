@@ -258,7 +258,7 @@ public class Strategium {
         } while (HQLocation == null);
     }
 
-    public static void parseTransactions() {
+    public static void parseTransactions() throws GameActionException {
         if (transactions == null) {
             upToDate = true;
             return;

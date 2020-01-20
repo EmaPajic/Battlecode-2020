@@ -16,11 +16,11 @@ public class Lattice {
      * @param location the location to check for
      * @return true if it is a pit, false otherwise
      */
-    public static boolean isPit(MapLocation location) {
+    public static boolean isPit(MapLocation location) throws GameActionException {
         return (location.x % 2 == Strategium.HQLocation.x % 2 &&
                 location.y % 2 == Strategium.HQLocation.y % 2 && !location.equals(Strategium.HQLocation)) ||
-                Strategium.elevation[location.x][location.y] < -1000 ||
-                Strategium.elevation[location.x][location.y] > 10000;
+                (rc.canSenseLocation(location) && rc.senseElevation(location) < -1000) ||
+                (rc.canSenseLocation(location) && rc.senseElevation(location) > 1000);
     }
 
     /**
@@ -78,7 +78,7 @@ public class Lattice {
      * @param location the location to calculate for
      * @return the amount of dirt
      */
-    public static int maxDeposit(MapLocation location) {
+    public static int maxDeposit(MapLocation location) throws GameActionException{
         if (location.equals(Strategium.HQLocation)) return 0;
         if (isPit(location)) return Integer.MAX_VALUE;
         if (location.isAdjacentTo(Strategium.HQLocation)) return Integer.MAX_VALUE;
@@ -99,7 +99,7 @@ public class Lattice {
      *
      * @return the direction. If there is no suitable direction, returns null.
      */
-    public static Direction bestDigDirection() {
+    public static Direction bestDigDirection() throws GameActionException{
         for (Direction dir : Direction.allDirections()) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
@@ -141,7 +141,7 @@ public class Lattice {
      *
      * @return the direction
      */
-    public static Direction bestDepositDirection() {
+    public static Direction bestDepositDirection() throws GameActionException{
         int minElevation = Integer.MAX_VALUE;
         Direction bestDir = null;
         if (Strategium.nearestWater != null)

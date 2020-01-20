@@ -5,6 +5,7 @@ import Mark5.utils.Strategium;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 
+import static Mark5.RobotPlayer.myFun;
 import static Mark5.RobotPlayer.rc;
 import static Mark5.utils.Strategium.*;
 import static java.lang.Math.max;
@@ -14,9 +15,7 @@ public class HQSensor {
     public static int totalMiners = 0;
 
     public static void init(){
-
-
-
+        soup = new boolean[rc.getMapWidth()][rc.getMapHeight()];
     }
 
     public static void sense() throws GameActionException {
@@ -31,11 +30,14 @@ public class HQSensor {
                     MapLocation location = new MapLocation(i, j);
                     if (rc.canSenseLocation(location)) {
                         knownSoup += rc.senseSoup(location);
-
+                        if (rc.senseSoup(location) > 0) {
+                            if (Navigation.aerialDistance(rc.getLocation(), i, j) <
+                                    Navigation.aerialDistance(rc.getLocation(), nearestSoup))
+                                nearestSoup = new MapLocation(i, j);
+                        }
                     }
-
                 }
         }
-        totalMiners = min(3 + knownSoup/700, 10) + max((rc.getRoundNum()/200 - 1), 0) + Strategium.refineries.size() * 3;
+        totalMiners = min(3 + knownSoup/700, 10) + max((rc.getRoundNum()/200 - 1), 0);// + Strategium.refineries.size() * 3;
     }
 }

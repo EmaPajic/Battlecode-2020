@@ -21,7 +21,7 @@ public class Wall {
     /**
      * Required before using the class. Initializes the wall position. Needs to know the HQ location in order to work.
      */
-    public static void init() {
+    public static void init() throws GameActionException {
         int size = 0;
         for (Direction dir : dir8) if (rc.onTheMap(HQLocation.add(dir)) && !Lattice.isPit(HQLocation.add(dir))) size++;
         wall = new MapLocation[size];
