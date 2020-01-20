@@ -207,7 +207,6 @@ public class Landscaper {
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
-            if (Lattice.isPit(location)) continue;
             if (Lattice.isBuildingSite(location) && !Strategium.occupied[location.x][location.y])
                 if (waterLevel > Strategium.elevation[location.x][location.y] ||
                         Lattice.maxDeposit(location) > 0) {
@@ -222,7 +221,6 @@ public class Landscaper {
             for (Direction dir : dir8) {
                 MapLocation location = rc.adjacentLocation(dir);
                 if (!rc.onTheMap(location)) continue;
-                if (Lattice.isPit(location)) continue;
                 if ((Lattice.isPath(location) && !location.isAdjacentTo(Strategium.HQLocation) ||
                         (Lattice.isBuildingSite(location) && !Strategium.occupied[location.x][location.y])) ||
                         Navigation.aerialDistance(location, Strategium.enemyHQLocation) < 3)
@@ -259,7 +257,6 @@ public class Landscaper {
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
-            if (Lattice.isPit(location)) continue;
             if (Lattice.isPath(location))
                 if (!Lattice.isEven(location, waterLevel)) {
                     if (rc.canMove(dir)) {
