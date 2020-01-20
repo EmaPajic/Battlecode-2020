@@ -58,8 +58,9 @@ public class Lattice {
         for (Direction dir : dir8) {
             MapLocation loc = location.add(dir);
             if (rc.onTheMap(loc) && isPath(loc) && !loc.equals(Strategium.HQLocation))
-                if (Math.abs(Strategium.elevation[loc.x][loc.y] - elevation) > 3 &&
-                        !isAdjacentToWater(loc) || Strategium.elevation[loc.x][loc.y] < waterLevel) {
+                if ((Strategium.elevation[loc.x][loc.y] - elevation > 3 && !loc.isAdjacentTo(Strategium.HQLocation) &&
+                        !isAdjacentToWater(loc)) || Strategium.elevation[loc.x][loc.y] < waterLevel
+                || elevation - Strategium.elevation[loc.x][loc.y] > 3) {
                     return false;
                 }
         }
