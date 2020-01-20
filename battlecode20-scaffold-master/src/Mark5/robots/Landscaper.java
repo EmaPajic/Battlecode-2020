@@ -1,5 +1,6 @@
 package Mark5.robots;
 
+import Mark5.sensors.LandscaperSensor;
 import Mark5.utils.Lattice;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
@@ -47,9 +48,20 @@ public class Landscaper {
         if (Strategium.nearestBuriedFriendlyBuilding != null)
             if (defend(Strategium.nearestBuriedFriendlyBuilding)) return;
 
-        if (Strategium.nearestEnemyBuilding != null)
-            if (attack(Strategium.nearestEnemyBuilding)) return;
+        if (Strategium.nearestEnemyBuilding != null) {
+            RobotInfo[] robots = rc.senseNearbyRobots();
+            for (RobotInfo robot : robots) {
+                if(robot.team != Strategium.myTeam && robot.type == RobotType.HQ) {
+                    if(attack(robot.location)) return;
+                    else {
+                        Navigation.bugPath(robot.location);
+                        return;
+                    }
+                }
+            }
+            if(attack(Strategium.nearestEnemyBuilding)) return;
 
+        }
         if (rc.getLocation().isAdjacentTo(Strategium.HQLocation)) {
             if (buildTheWall()) return;
         }
