@@ -4,10 +4,7 @@ import Mark5.RobotPlayer;
 import Mark5.robots.FulfillmentCenter;
 import Mark5.utils.Strategium;
 import Mark5.utils.Wall;
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
+import battlecode.common.*;
 
 import javax.naming.directory.DirContext;
 
@@ -33,6 +30,9 @@ public class FulfillmentCenterSensor {
     public static boolean friendlyDronesNearby = false;
     public static boolean enemyFulfillmentCenterNearby = false;
     public static boolean friendlyNetGunsNearby = false;
+    public static MapLocation nearestEnemyLandscaperLocation = null;
+    public static MapLocation nearestEnemyMinerLocation = null;
+    public static MapLocation nearestRushMinerLocation = null;
 
     public static void senseNearbyUnits() {
         RobotInfo[] robots = rc.senseNearbyRobots();
@@ -83,9 +83,11 @@ public class FulfillmentCenterSensor {
                         break;
                     case LANDSCAPER:
                         enemyLandscapersNearby = true;
+                        nearestEnemyLandscaperLocation = robot.location;
                         break;
-                    case COW:
                     case MINER:
+                        nearestEnemyMinerLocation = robot.location;
+                    case COW:
                         enemySoftNearby = true;
                         break;
                 }
@@ -113,7 +115,8 @@ public class FulfillmentCenterSensor {
                 }
             }
             for(int i = 0; i < 8; ++i) {
-                if(adjacentRobotTurnCount[i] == 15) {
+                if(adjacentRobotTurnCount[i] == 5) {
+                    nearestRushMinerLocation = rc.getLocation().add(RobotPlayer.dir8[i]);
                     FulfillmentCenter.droneBuildingImportance =
                             FulfillmentCenter.DroneBuildingImportance.TAXI_NEEDED;
                 }

@@ -50,6 +50,43 @@ public class Wall {
 
     }
 
+    public static boolean reposition() throws GameActionException {
+        switch (HQLocation.directionTo(rc.getLocation())) {
+            case SOUTHEAST:
+            case NORTHEAST:
+            case SOUTHWEST:
+            case NORTHWEST:
+                for (int i = wall.length; i-- > 0; )
+                    if (wall[i].x == HQLocation.x || wall[i].y == HQLocation.y)
+                        if (rc.getLocation().isAdjacentTo(wall[i]))
+                            if (rc.canMove(rc.getLocation().directionTo(wall[i]))) {
+                                rc.move(rc.getLocation().directionTo(wall[i]));
+                                return true;
+                            }
+                return false;
+            case NORTH:
+            case EAST:
+            case SOUTH:
+            case WEST:
+                Direction dir = rc.getLocation().directionTo(HQLocation);
+                MapLocation location = rc.getLocation().add(dir).add(dir);
+                if(Strategium.occupied[location.x][location.y]) return false;
+                for (int i = wall.length; i-- > 0; )
+                    if (wall[i].x == HQLocation.x || wall[i].y == HQLocation.y)
+                        if (rc.getLocation().isAdjacentTo(wall[i])) if (Strategium.occupied[wall[i].x][wall[i].y])
+                            for (int j = wall.length; j-- > 0; )
+                                if (wall[j].x == HQLocation.x || wall[j].y == HQLocation.y)
+                                    if (rc.getLocation().isAdjacentTo(wall[j]))
+                                        if (rc.canMove(rc.getLocation().directionTo(wall[j]))) {
+                                            rc.move(rc.getLocation().directionTo(wall[j]));
+                                            return true;
+                                        }
+                return false;
+        }
+        return false;
+
+    }
+
     public static MapLocation freeSpot() throws GameActionException {
         if (rc.getRoundNum() < 300) return null;
         for (int i = wall.length; i-- > 0; ) {
@@ -65,7 +102,7 @@ public class Wall {
         for (int i = wall.length; i-- > 0; ) {
             if (rc.getLocation().isAdjacentTo(wall[i]))
                 if (rc.canSenseLocation(wall[i]))
-                    if (rc.isLocationOccupied(wall[i]) || rc.getRoundNum() > 600)
+                    if (Strategium.robotAt(wall[i]) == RobotType.LANDSCAPER || rc.getRoundNum() > 600)
                         if (rc.senseElevation(wall[i]) < rc.senseElevation(buildSpot))
                             buildSpot = wall[i];
         }

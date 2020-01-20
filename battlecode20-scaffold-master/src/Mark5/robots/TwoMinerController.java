@@ -213,7 +213,9 @@ public class TwoMinerController {
     }
 
     public static void control() throws GameActionException {
+        System.out.println(Clock.getBytecodeNum());
         Strategium.gatherInfo();
+        System.out.println(Clock.getBytecodeNum());
         //System.println("Current target : " + currentTarget);
 //        if( Strategium.turnsAlive <= 10){
 ////            int[] msgs = new int();
@@ -353,7 +355,7 @@ public class TwoMinerController {
                 for (Direction dir : dir8)
                     if (rc.canBuildRobot(makeRobotType, dir))
                         if(makeRobotType != RobotType.VAPORATOR ||
-                                Strategium.elevation[rc.adjacentLocation(dir).x][rc.adjacentLocation(dir).y] > 5)
+                                rc.senseElevation(rc.adjacentLocation(dir)) >= 5)
                         if (Lattice.isBuildingSite(rc.adjacentLocation(dir))) {
                             rc.buildRobot(makeRobotType, dir);
                             return;
@@ -364,7 +366,8 @@ public class TwoMinerController {
             if (Strategium.nearestSoup != null) Navigation.bugPath(Strategium.nearestSoup);
             else Navigation.bugPath(currentTarget);
         } else {
-            Navigation.bugPath(Strategium.nearestRefinery);
+            if(Strategium.nearestRefinery != null) Navigation.bugPath(Strategium.nearestRefinery);
+            else Navigation.bugPath(currentTarget);
         }
     }
 

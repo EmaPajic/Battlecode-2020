@@ -66,6 +66,11 @@ public class Navigation {
     }
 
     public static boolean fuzzyNav(MapLocation destination) throws GameActionException {
+        if (Strategium.canSafelyMove(moveTowards(destination))) {
+            lastDirection = moveTowards(destination);
+            rc.move(moveTowards(destination));
+            return true;
+        }
         for (Direction dir : dir8)
             if (rc.adjacentLocation(dir).distanceSquaredTo(destination)
                     < rc.getLocation().distanceSquaredTo(destination))

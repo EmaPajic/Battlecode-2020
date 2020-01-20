@@ -19,8 +19,8 @@ public class Lattice {
     public static boolean isPit(MapLocation location) throws GameActionException {
         return (location.x % 2 == Strategium.HQLocation.x % 2 &&
                 location.y % 2 == Strategium.HQLocation.y % 2 && !location.equals(Strategium.HQLocation)) ||
-                (rc.canSenseLocation(location) && rc.senseElevation(location) < -1000) ||
-                (rc.canSenseLocation(location) && rc.senseElevation(location) > 1000);
+                (rc.canSenseLocation(location) && rc.senseElevation(location) < -100) ||
+                (rc.canSenseLocation(location) && rc.senseElevation(location) > 500);
     }
 
     /**
@@ -32,8 +32,8 @@ public class Lattice {
     public static boolean isPath(MapLocation location) {
         return ((location.x + location.y + Strategium.HQLocation.x + Strategium.HQLocation.y) % 2 == 1
                 || location.isAdjacentTo(Strategium.HQLocation)) && !location.equals(Strategium.HQLocation) &&
-                Strategium.elevation[location.x][location.y] >= -1000 &&
-                Strategium.elevation[location.x][location.y] <= 10000;
+                Strategium.elevation[location.x][location.y] >= -100 &&
+                Strategium.elevation[location.x][location.y] <= 500;
     }
 
     /**
@@ -43,11 +43,11 @@ public class Lattice {
      * @param location the the location to check for
      * @return true if it is a building site, false otherwise
      */
-    public static boolean isBuildingSite(MapLocation location) {
+    public static boolean isBuildingSite(MapLocation location) throws GameActionException {
         return location.x % 2 != Strategium.HQLocation.x % 2 && location.y % 2 != Strategium.HQLocation.y % 2 &&
                 !location.isAdjacentTo(Strategium.HQLocation) &&
-                Strategium.elevation[location.x][location.y] >= -1000 &&
-                Strategium.elevation[location.x][location.y] <= 10000;
+                rc.senseElevation(location) >= -100 &&
+                rc.senseElevation(location) <= 500;
     }
 
     /**
@@ -78,7 +78,7 @@ public class Lattice {
      * @param location the location to calculate for
      * @return the amount of dirt
      */
-    public static int maxDeposit(MapLocation location) throws GameActionException{
+    public static int maxDeposit(MapLocation location) throws GameActionException {
         if (location.equals(Strategium.HQLocation)) return 0;
         if (isPit(location)) return Integer.MAX_VALUE;
         if (location.isAdjacentTo(Strategium.HQLocation)) return Integer.MAX_VALUE;
@@ -99,14 +99,16 @@ public class Lattice {
      *
      * @return the direction. If there is no suitable direction, returns null.
      */
-    public static Direction bestDigDirection() throws GameActionException{
+    public static Direction bestDigDirection() throws GameActionException {
         for (Direction dir : Direction.allDirections()) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
             if (isAdjacentToWater(location)) continue;
             System.out.println(dir + " JE PIT: " + isPit(location));
             if (isPit(location) &&
-                    (!Strategium.water[location.x][location.y] || Strategium.elevation[location.x][location.y] < -100))
+                    (!Strategium.water[location.x][location.y] ||
+                            Strategium.elevation[location.x][location.y] < -100 ||
+                            rc.getLocation().isAdjacentTo(Strategium.HQLocation)))
                 return dir;
         }
         for (Direction dir : Direction.allDirections()) {
@@ -141,7 +143,7 @@ public class Lattice {
      *
      * @return the direction
      */
-    public static Direction bestDepositDirection() throws GameActionException{
+    public static Direction bestDepositDirection() throws GameActionException {
         int minElevation = Integer.MAX_VALUE;
         Direction bestDir = null;
         if (Strategium.nearestWater != null)

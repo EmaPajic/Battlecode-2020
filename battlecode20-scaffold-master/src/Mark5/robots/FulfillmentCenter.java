@@ -1,9 +1,12 @@
 package Mark5.robots;
 
 import Mark5.sensors.FulfillmentCenterSensor;
+import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import Mark5.RobotPlayer;
 import battlecode.common.*;
+
+import java.util.List;
 
 import static Mark5.RobotPlayer.*;
 
@@ -22,6 +25,14 @@ public class FulfillmentCenter {
         Strategium.gatherInfo();
         switch(droneBuildingImportance) {
             case TAXI_NEEDED:
+                Direction dirToRush = rc.getLocation().directionTo(FulfillmentCenterSensor.nearestRushMinerLocation);
+                List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToRush.opposite()));
+                for(Direction dir : towards)
+                    if(tryBuild(RobotType.DELIVERY_DRONE, dir)) {
+                        ++numDrones;
+                        droneBuildingImportance = DroneBuildingImportance.PERIODIC_BUILDING;
+                        return;
+                    }
                 for (Direction dir : dir8) {
                     if(tryBuild(RobotType.DELIVERY_DRONE, dir)) {
                         ++numDrones;
@@ -32,13 +43,25 @@ public class FulfillmentCenter {
                 break;
             case PERIODIC_BUILDING:
                 if (numDrones < 5 && (rc.getTeamSoup() > 650 ||
-                        FulfillmentCenterSensor.enemyLandscapersNearby && !FulfillmentCenterSensor.enemyNetGunsNearby))
+                        FulfillmentCenterSensor.enemyLandscapersNearby) &&
+                        !FulfillmentCenterSensor.enemyNetGunsNearby) {
+                    if (FulfillmentCenterSensor.nearestEnemyLandscaperLocation != null) {
+                        Direction dirToEnemy =
+                                rc.getLocation().directionTo(FulfillmentCenterSensor.nearestEnemyLandscaperLocation);
+                        towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToEnemy.opposite()));
+                        for (Direction dir : towards)
+                            if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
+                                ++numDrones;
+                                return;
+                            }
+                    }
                     for (Direction dir : dir8) {
                         if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
                             ++numDrones;
                             return;
                         }
                     }
+                }
                 break;
         }
     }

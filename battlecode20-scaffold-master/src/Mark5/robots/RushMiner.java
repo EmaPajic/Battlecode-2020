@@ -147,7 +147,7 @@ public class RushMiner {
         if (numDesignSchools == 0) {
             TwoMinerController.buildDesignCenterNearEnemy();
         }
-        if (numNetGuns < 1 && numEnemyDrones > 0 || numEnemyFulfillmentCenters > 0) {
+        if (numNetGuns < 1 && (numEnemyDrones > 0 || numEnemyFulfillmentCenters > 0)) {
             buildNetGunNearEnemy();
         }
     }

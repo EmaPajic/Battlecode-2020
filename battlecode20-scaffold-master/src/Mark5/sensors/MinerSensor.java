@@ -8,8 +8,7 @@ import battlecode.common.*;
 import java.util.Iterator;
 import java.util.Map;
 
-import static Mark5.RobotPlayer.myFun;
-import static Mark5.RobotPlayer.rc;
+import static Mark5.RobotPlayer.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -22,15 +21,16 @@ public class MinerSensor {
     public static void init() {
         soup = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         //explored = new boolean[rc.getMapWidth()][rc.getMapHeight()];
-        elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
+        //elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
         occupied = new boolean[rc.getMapWidth()][rc.getMapHeight()];
-        water = new boolean[rc.getMapWidth()][rc.getMapHeight()];
+        //water = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         dirSafetyCacheValid = new int[10];
         dirSafetyCache = new boolean[10];
     }
 
     public static void sense() throws GameActionException {
 
+        System.out.println("SENSOR START: " + Clock.getBytecodeNum());
         enemyDrones.clear();
         nearestEnemyDrone = null;
         visibleSoup = 0;
@@ -46,9 +46,9 @@ public class MinerSensor {
 
                 MapLocation location = new MapLocation(i, j);
                 if (rc.canSenseLocation(location)) {
-                    elevation[i][j] = rc.senseElevation(location);
-                    water[i][j] = rc.senseFlooding(location);
-                    if (water[i][j]) seenWater = true;
+                    //elevation[i][j] = rc.senseElevation(location);
+                    //water[i][j] = rc.senseFlooding(location);
+                    if (rc.senseFlooding(location)) seenWater = true;
                     occupied[i][j] = false;
                     if(myFun != 4) {
                         visibleSoup += rc.senseSoup(location);
@@ -57,21 +57,31 @@ public class MinerSensor {
                             if (!soup[i][j]) {
                                 ++knownSoup;
                                 soup[i][j] = true;
-                                if (Navigation.aerialDistance(rc.getLocation(), i, j) <
+                                if (Navigation.aerialDistance(rc.getLocation(), location) <
                                         Navigation.aerialDistance(rc.getLocation(), nearestSoup))
-                                    nearestSoup = new MapLocation(i, j);
+                                    nearestSoup = location;
                             }
 
                         } else if (soup[i][j]) {
                             soup[i][j] = false;
                             knownSoup--;
                             if (nearestSoup != null)
-                                if (nearestSoup.x == i && nearestSoup.y == j) nearestSoup = null;
+                                if (nearestSoup.x == i && nearestSoup.y == j){
+                                    nearestSoup = null;
+                                    for(Direction dir : dir8) {
+                                        if(rc.senseSoup(location.add(dir))>0){
+                                            nearestSoup = location.add(dir);
+                                            break;
+                                        }
+                                    }
+                                }
                         }
                     }
                 }
 
             }
+
+        System.out.println("SCANNER: " + Clock.getBytecodeNum());
 
         RobotInfo[] robots = rc.senseNearbyRobots();
 
@@ -118,7 +128,7 @@ public class MinerSensor {
 
         nearestRefinery = null;
         for (MapLocation refinery : refineries) {
-            if (refinery == HQLocation && Strategium.vaporatorBuilt)
+            if (refinery == HQLocation && rc.getRoundNum() > 600)
                 continue;
             if (Navigation.aerialDistance(nearestRefinery, rc.getLocation()) >
                     Navigation.aerialDistance(refinery, rc.getLocation()))
@@ -138,7 +148,8 @@ public class MinerSensor {
         }
         for (int i = rc.getMapWidth(); i-- > 0; )
             for (int j = rc.getMapHeight(); j-- > 0; )
-                if (soup[i][j] && Navigation.aerialDistance(rc.getLocation(), i, j) <
+                if (soup[i][j])
+                    if(Navigation.aerialDistance(rc.getLocation(), i, j) <
                         Navigation.aerialDistance(rc.getLocation(), nearestSoup)) nearestSoup = new MapLocation(i, j);
     }
 }
