@@ -88,7 +88,12 @@ public class Blockchain {
         rc.submitTransaction(message, fee);
         return true;
     }
-
+    public static void setBlockchainPointer(int nextMsgPointerVal){
+        parsingProgress = nextMsgPointerVal;
+    }
+    public static int getBlockchainPointer(){
+        return parsingProgress;
+    }
     public static void parseBlockchain(LinkedList<Transaction> transactions) throws GameActionException {
         if (parsingProgress < rc.getRoundNum()) {
             //System.out.println("here?");
