@@ -72,6 +72,8 @@ public class Strategium {
 
 
     public static Random rand;
+    // iskreno nisam znao kom bloku polja da ovo polje pridruzim, sometimes i feel like coravi boromir
+    public static int leastAmountOfSoup = 0;
 
     public static void init() {
         myTeam = rc.getTeam();
@@ -255,6 +257,7 @@ public class Strategium {
 //                System.out.println("Baza je " + HQLocation);
                 break;
             case MINER:
+                int numOfEntries = 0;
                 while (!upToDate){
                     if (HQLocation != null) {
                         if (rc.getRoundNum() > 50) Blockchain.parsingProgress = rc.getRoundNum() - 50;
@@ -293,6 +296,7 @@ public class Strategium {
                     Wall.init();
                     break;
                 case 42:
+                    leastAmountOfSoup  = message[2];
                     refineries.add(new MapLocation(message[5], message[6]));
                     break;
                 default:
