@@ -38,6 +38,7 @@ public class HQSensor {
                     }
                 }
         }
-        totalMiners = min(3 + knownSoup/700, 10) + max((rc.getRoundNum()/200 - 1), 0);// + Strategium.refineries.size() * 3;
+        totalMiners = min(3 + knownSoup/700, 10) + max((rc.getRoundNum()/200 - 1), 0) +
+                leastAmountOfSoup/500;
     }
 }

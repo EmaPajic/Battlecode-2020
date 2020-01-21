@@ -246,7 +246,9 @@ public class Strategium {
         switch(rc.getType()){
             case HQ:
                 if(rc.getRoundNum() == 1)
-                    Blockchain.reportHQLocation( 3);
+                    Blockchain.reportHQLocation( 1);
+                Blockchain.parseBlockchain(transactions);
+                parseTransactions();
                 break;
             case LANDSCAPER:
             case DELIVERY_DRONE:
@@ -259,13 +261,10 @@ public class Strategium {
                 break;
             case MINER:
                 while (!upToDate){
-                    if (HQLocation != null) {
-                        if (rc.getRoundNum() - Blockchain.parsingProgress > 1) Blockchain.parsingProgress = max(Blockchain.parsingProgress, rc.getRoundNum() - 50);
-                    }
                     Blockchain.parseBlockchain(transactions);
                     parseTransactions();
 
-                    if(rc.getRoundNum() < Blockchain.parsingProgress + 1){
+                    if(rc.getRoundNum() == Blockchain.parsingProgress){
                         upToDate = true;
 
                     }
@@ -288,13 +287,14 @@ public class Strategium {
 
             switch (Blockchain.getType(message)) {
                 case 73:
+                    Blockchain.parsingProgress = max(Blockchain.parsingProgress, rc.getRoundNum() - 50);
                     if (HQLocation != null) break;
                     HQLocation = new MapLocation(message[0], message[1]);
                     updatePotentialEnemyHQLocations();
                     Wall.init();
                     break;
                 case 42:
-                    leastAmountOfSoup  = message[2];
+                    leastAmountOfSoup  += message[2];
                     refineries.add(new MapLocation(message[5], message[6]));
                     break;
                 default:

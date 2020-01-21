@@ -69,7 +69,7 @@ public strictfp class RobotPlayer {
         RobotPlayer.rc = rc;
         if (rc.getType() == RobotType.MINER)
             if (rc.getRoundNum() == 2) {
-                myFun = 4;
+                //myFun = 4;
             }
         Strategium.init();
 
@@ -185,14 +185,6 @@ public strictfp class RobotPlayer {
                     }
             }
             for (Direction dir : dir8)
-                if (tryBuild(RobotType.MINER, dir)) {
-                    ++numMiners;
-                    return;
-                }
-        } else if (Strategium.leastAmountOfSoup > numMiners*100) { // if we have sufficient amount of soup send more miners
-            Direction dirToSoup = rc.getLocation().directionTo(Strategium.nearestSoup);
-            List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToSoup.opposite()));
-            for (Direction dir : towards)
                 if (tryBuild(RobotType.MINER, dir)) {
                     ++numMiners;
                     return;

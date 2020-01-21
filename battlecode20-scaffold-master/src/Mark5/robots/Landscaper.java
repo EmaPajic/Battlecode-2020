@@ -159,7 +159,7 @@ public class Landscaper {
 
     private static boolean drain(MapLocation location) throws GameActionException {
         int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 100);
-        if (!rc.getLocation().isAdjacentTo(location)) return Navigation.bugPath(location);
+        if (!rc.getLocation().isAdjacentTo(location)) return false;
         if (waterLevel - Strategium.elevation[location.x][location.y] < 50) {
             if (rc.canDepositDirt(rc.getLocation().directionTo(location))) {
                 rc.depositDirt(rc.getLocation().directionTo(location));
