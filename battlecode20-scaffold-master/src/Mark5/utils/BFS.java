@@ -75,15 +75,12 @@ public class BFS {
             currHead = queue.remove(0);
             for (Direction dir : dir8) {
                 MapLocation step = currHead.loc.add(dir);
-                MapLocation curr = currHead.loc;
-                int x = step.x;
-                int y = step.y;
                 if (rc.canSenseLocation(step)) if(!visited(step)) {
                     switch (rc.getType()) {
                         case MINER:
                         case LANDSCAPER:
                             if (Math.abs(rc.senseElevation(step) - rc.senseElevation(rc.getLocation()))
-                                    <= 3 && !Strategium.occupied[x][y] && !rc.senseFlooding(step)) {
+                                    <= 3 && !Strategium.occupied[step.x][step.y] && !rc.senseFlooding(step)) {
                                 if (Navigation.aerialDistance(target) > Navigation.aerialDistance(step, target)) {
 
                                     stack.add(new LocationNode(step, currHead));
@@ -99,7 +96,7 @@ public class BFS {
                             }
                             break;
                         case DELIVERY_DRONE:
-                            if(!Strategium.occupied[x][y]) {
+                            if(!Strategium.occupied[step.x][step.y]) {
                                 if (Navigation.aerialDistance(target) > Navigation.aerialDistance(step, target)) {
 
                                     stack.add(new LocationNode(step, currHead));
