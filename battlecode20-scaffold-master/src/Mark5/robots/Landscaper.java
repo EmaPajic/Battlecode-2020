@@ -1,10 +1,7 @@
 package Mark5.robots;
 
 import Mark5.sensors.LandscaperSensor;
-import Mark5.utils.Lattice;
-import Mark5.utils.Navigation;
-import Mark5.utils.Strategium;
-import Mark5.utils.Wall;
+import Mark5.utils.*;
 import battlecode.common.*;
 
 import static Mark5.RobotPlayer.dir8;
@@ -59,32 +56,31 @@ public class Landscaper {
             // Strategium decides which building should be prioritized, if not in building perimeter
             // try to reach it
             if(attack(Strategium.nearestEnemyBuilding)) return;
-            else if(Navigation.fuzzyNav(Strategium.nearestEnemyBuilding) ) return;
         }
 
 
-        if (rc.getLocation().isAdjacentTo(Strategium.HQLocation)) {
+        if (rc.getLocation().isAdjacentTo(Strategium.HQLocation) && rc.getRoundNum() > 300) {
             System.out.println("HQ: " + Strategium.HQLocation);
             if (buildTheWall()) return;
         }
 
-        if (Strategium.nearestBuriedFriendlyBuilding != null)
-            if (Navigation.fuzzyNav(Strategium.nearestBuriedFriendlyBuilding)) return;
+        if (LandscaperSensor.combatWaypoint != null) {
+                Direction dir = BFS.step(LandscaperSensor.combatWaypoint);
+                if (Strategium.canSafelyMove(dir)) {
+                    rc.move(dir);
+                    return;
+                }
 
-        if (Strategium.nearestEnemyBuilding != null)
-            if (Navigation.fuzzyNav(Strategium.nearestEnemyBuilding)) return;
+        }
 
         //System.out.println("DREIN");
 
         if (Strategium.nearestWater != null)
-            if (rc.getLocation().isAdjacentTo(Strategium.nearestWater))
-                if (drain(Strategium.nearestWater)) return;
+            if (drain(Strategium.nearestWater)) return;
 
         //System.out.println("PATROL");
 
-        if (patrol()) return;
-
-        if (Strategium.nearestWater != null) drain(Strategium.nearestWater);
+        patrol();
 
     }
 
@@ -201,11 +197,11 @@ public class Landscaper {
                 return true;
             }
             Direction dir = Lattice.bestDigDirection();
+            if(dir != null)
             if (rc.canDigDirt(dir)) {
                 rc.digDirt(dir);
                 return true;
             }
-            return false;
         }
 
         for (Direction dir : dir8) {
@@ -293,7 +289,7 @@ public class Landscaper {
                 }
         }
 
-        waypoint = Strategium.enemyHQLocation;
+        waypoint = LandscaperSensor.combatWaypoint;
 
         if (rc.canSenseLocation(Strategium.HQLocation))
             waypoint = Wall.freeSpot();

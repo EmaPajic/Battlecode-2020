@@ -247,6 +247,7 @@ public class Strategium {
             case HQ:
                 if(rc.getRoundNum() == 1)
                     Blockchain.reportHQLocation( 3);
+                break;
             case LANDSCAPER:
             case DELIVERY_DRONE:
                 while (HQLocation == null){
@@ -257,19 +258,19 @@ public class Strategium {
 //                System.out.println("Baza je " + HQLocation);
                 break;
             case MINER:
-                int numOfEntries = 0;
                 while (!upToDate){
+
                     if (HQLocation != null) {
-                        if (rc.getRoundNum() > 50) Blockchain.parsingProgress = rc.getRoundNum() - 50;
+                        if (rc.getRoundNum() - Blockchain.parsingProgress > 1) Blockchain.parsingProgress = max(Blockchain.parsingProgress, rc.getRoundNum() - 50);
                     }
                     Blockchain.parseBlockchain(transactions);
                     parseTransactions();
 
-                    if(rc.getRoundNum() <= Blockchain.parsingProgress){
+                    if(rc.getRoundNum() < Blockchain.parsingProgress + 1){
                         upToDate = true;
-//                        System.out.println("procitao sam sveeeee!");
-//                        System.out.println("nearest refinery " + nearestRefinery);
+
                     }
+
 
                 }
                 break;

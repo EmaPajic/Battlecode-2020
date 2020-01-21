@@ -14,6 +14,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 public class LandscaperSensor {
+    public static MapLocation combatWaypoint;
 
     public static void init() {
         elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
@@ -28,6 +29,7 @@ public class LandscaperSensor {
         nearestBuriedFriendlyBuilding = null;
         nearestEnemyBuilding = null;
         nearestWater = null;
+        combatWaypoint = null;
         overlapLocations.clear();
         enemyDrones.clear();
         buriedFriendlyBuildings.clear();
@@ -45,10 +47,13 @@ public class LandscaperSensor {
                     water[i][j] = rc.senseFlooding(location);
                     occupied[i][j] = false;
                     if(rc.senseFlooding(location)){
-                        if(Navigation.aerialDistance(nearestWater) > Navigation.aerialDistance(location) ||
-                                (Navigation.aerialDistance(nearestWater) == Navigation.aerialDistance(location) &&
-                                        elevation[nearestWater.x][nearestWater.y] < elevation[location.x][location.y]))
+                        if(Navigation.aerialDistance(nearestWater) > Navigation.aerialDistance(location)) {
                             nearestWater = location;
+                            continue;
+                        }
+                        if(Navigation.aerialDistance(nearestWater) == Navigation.aerialDistance(location))
+                            if(rc.senseElevation(nearestWater) < rc.senseElevation(location))
+                                nearestWater = location;
                     }
                 }
             }
@@ -79,9 +84,10 @@ public class LandscaperSensor {
                             if (Navigation.aerialDistance(robot) <
                                     Navigation.aerialDistance(nearestBuriedFriendlyBuilding))
                                 nearestBuriedFriendlyBuilding = robot.location;
+
+                            buriedFriendlyBuildings.add(robot);
                         }
 
-                        buriedFriendlyBuildings.add(robot);
 
                         break;
                 }
@@ -99,6 +105,9 @@ public class LandscaperSensor {
                     case REFINERY:
                     case NET_GUN:
                         if (!enemyBuildings.contains(robot.location)) enemyBuildings.add(robot.location);
+                        if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyBuilding)){
+                            nearestEnemyBuilding = robot.location;
+                        }
                         break;
 
                     case DELIVERY_DRONE:
@@ -110,32 +119,37 @@ public class LandscaperSensor {
         }
 
         for(RobotInfo friendly : buriedFriendlyBuildings)
-            {
-                for(MapLocation enemy : enemyBuildings) if(Navigation.aerialDistance(friendly.location, enemy) <= 2) {
-
-                    for(Direction dir : dir8){
-                        MapLocation location = friendly.location.add(dir);
-                        if(rc.onTheMap(location))
-                        if(location.isAdjacentTo(enemy) && !occupied[location.x][location.y])
-                            overlapLocations.add(location);
-                    }
-                }
-            }
-
-        for (MapLocation enemy : enemyBuildings)
-            if(enemyHQLocation != null) {
-                if (Navigation.aerialDistance(enemy) > 1 || Navigation.aerialDistance(enemyHQLocation) <= 1) { // this line is probably unnecessary
-                    nearestEnemyBuilding = enemyHQLocation;
-                    System.out.println("Do baze sam");
+            if(friendly.type == RobotType.HQ && friendly.dirtCarrying > 1){
+                if(rc.getLocation().isAdjacentTo(HQLocation) ||
+                        !rc.getLocation().isAdjacentTo(nearestBuriedFriendlyBuilding)) {
+                    nearestBuriedFriendlyBuilding = HQLocation;
+                    combatWaypoint = HQLocation;
                     break;
                 }
-            }else if (Navigation.aerialDistance(enemy) < Navigation.aerialDistance(nearestEnemyBuilding)){
-                nearestEnemyBuilding = enemy;
-                System.out.println("Baza je daleko");
             }
 
+        if(Navigation.aerialDistance(enemyHQLocation) < 4 &&
+                (Navigation.aerialDistance(nearestEnemyBuilding) > 1 ||
+                        Navigation.aerialDistance(enemyHQLocation) <= 1)) {
+            nearestEnemyBuilding = enemyHQLocation;
+            combatWaypoint = enemyHQLocation;
+        }
+
+        if (combatWaypoint == null)
+            if(Navigation.aerialDistance(nearestBuriedFriendlyBuilding) <
+                    Navigation.aerialDistance(nearestEnemyBuilding))
+                        combatWaypoint = nearestBuriedFriendlyBuilding;
+            else combatWaypoint = nearestEnemyBuilding;
 
 
+
+        if(Navigation.aerialDistance(nearestEnemyBuilding, nearestBuriedFriendlyBuilding) <= 2)
+            for(Direction dir : dir8) {
+                MapLocation location = nearestEnemyBuilding.add(dir);
+                if(!rc.onTheMap(location)) continue;
+                if(location.isAdjacentTo(nearestEnemyBuilding) && !location.equals(nearestEnemyBuilding))
+                    overlapLocations.add(location);
+            }
 
 
 

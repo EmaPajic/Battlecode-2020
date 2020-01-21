@@ -161,22 +161,21 @@ public strictfp class RobotPlayer {
         Strategium.gatherInfo();
 
         if(numMiners < HQSensor.totalMiners && rc.getRoundNum() < 600) {
-            if(rc.getRoundNum() == 1) {
+            if (rc.getRoundNum() == 1) {
                 Direction dirToCenter = rc.getLocation().directionTo(
                         new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2));
                 List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToCenter.opposite()));
-                for(Direction dir : towards)
-                    if(tryBuild(RobotType.MINER, dir)) {
+                for (Direction dir : towards)
+                    if (tryBuild(RobotType.MINER, dir)) {
                         ++numMiners;
                         return;
                     }
-                for(Direction dir : dir8)
-                    if(tryBuild(RobotType.MINER, dir)) {
+                for (Direction dir : dir8)
+                    if (tryBuild(RobotType.MINER, dir)) {
                         ++numMiners;
                         return;
                     }
-            }
-            else if(Strategium.nearestSoup != null) {
+            } else if (Strategium.nearestSoup != null) {
                 Direction dirToSoup = rc.getLocation().directionTo(Strategium.nearestSoup);
                 List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToSoup.opposite()));
                 for (Direction dir : towards)
@@ -191,6 +190,15 @@ public strictfp class RobotPlayer {
                     return;
                 }
         }
+//        } else if (Strategium.leastAmountOfSoup > numMiners*100) { // if we have sufficient amount of soup send more miners
+//            Direction dirToSoup = rc.getLocation().directionTo(Strategium.nearestSoup);
+//            List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToSoup.opposite()));
+//            for (Direction dir : towards)
+//                if (tryBuild(RobotType.MINER, dir)) {
+//                    ++numMiners;
+//                    return;
+//                }
+//        }
             runNetGun();
 
     }
