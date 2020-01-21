@@ -72,6 +72,8 @@ public class Strategium {
 
 
     public static Random rand;
+    // iskreno nisam znao kom bloku polja da ovo polje pridruzim, sometimes i feel like coravi boromir
+    public static int leastAmountOfSoup = 0;
 
     public static void init() {
         myTeam = rc.getTeam();
@@ -241,29 +243,53 @@ public class Strategium {
 
         sense();
 
-        if (rc.getType() == RobotType.HQ) {
+        switch(rc.getType()){
+            case HQ:
+                if(rc.getRoundNum() == 1)
+                    Blockchain.reportHQLocation( 3);
+            case LANDSCAPER:
+            case DELIVERY_DRONE:
+                while (HQLocation == null){
+                    Blockchain.parseBlockchain(transactions);
+                    parseTransactions();
+//                    System.out.println("Baza je " + HQLocation);
+                }
+//                System.out.println("Baza je " + HQLocation);
+            case MINER:
+                int numOfEntries = 0;
+                while (!upToDate){
+                    numOfEntries++;
+                    if(HQLocation != null){
+                        Blockchain.parseBlockchain(transactions);
+                        parseTransactions();
+                    } else {
+                        if(rc.getRoundNum() > 50) Blockchain.setBlockchainPointer(rc.getRoundNum() - 50);
+                        Blockchain.parseBlockchain(transactions);
+                        parseTransactions();
+                    }
 
-            if(rc.getRoundNum() == 1)
-                Blockchain.reportHQLocation(3);
+                    if(rc.getRoundNum() <= Blockchain.getBlockchainPointer()){
+                        upToDate = true;
+//                        System.out.println("procitao sam sveeeee!");
+//                        System.out.println("nearest refinery " + nearestRefinery);
+                    }
 
-            // Search for refineries
-            Blockchain.parseBlockchain(transactions);
-            parseTransactions();
+                }
+                System.out.println("Broj prolazaka kroz while: " + numOfEntries);
+                System.out.println("supa kod rafinerije je : " + Strategium.leastAmountOfSoup);
 
-        } else do {
 
-                Blockchain.parseBlockchain(transactions);
-                parseTransactions();
+                break;
+        }
 
-        } while (HQLocation == null); // obrni ovo, tako da ako nije miner , cita blokchain sve dok ne sazna lokaciju baze,
-        // a ako je miner onda citaj non stop sa tim da treba da promenis opseg tj. pokazivac na 50 poslednjih poruka
+
     }
 
     public static void parseTransactions() throws GameActionException {
-        if (transactions == null) {
-            upToDate = true;
-            return;
-        }
+//        if (transactions == null) {
+//            upToDate = true;
+//            return;
+//        }
 
         while (!transactions.isEmpty()) {
 
@@ -277,6 +303,7 @@ public class Strategium {
                     Wall.init();
                     break;
                 case 42:
+                    leastAmountOfSoup  = message[2];
                     refineries.add(new MapLocation(message[5], message[6]));
                     break;
                 default:

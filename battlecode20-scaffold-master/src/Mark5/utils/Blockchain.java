@@ -1,9 +1,6 @@
 package Mark5.utils;
 
-import battlecode.common.GameActionException;
-import battlecode.common.GameConstants;
-import battlecode.common.Team;
-import battlecode.common.Transaction;
+import battlecode.common.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -79,8 +76,17 @@ public class Blockchain {
         return true;
     }
 
+    public static int reportLocalSoup() throws GameActionException{
+        MapLocation[] soupLocations  =  rc.senseNearbySoup();
+        int totalSoup = 0;
+        for(MapLocation loc : soupLocations){
+            totalSoup += rc.senseSoup(loc);
+        }
+        return totalSoup;
+    }
     public static boolean reportRefineryLocation(int fee) throws GameActionException {
         int[] message = new int[7];
+        message[2] = reportLocalSoup();
         message[5] = rc.getLocation().x;
         message[6] = rc.getLocation().y;
         addAuth(message, 42);
@@ -88,7 +94,12 @@ public class Blockchain {
         rc.submitTransaction(message, fee);
         return true;
     }
-
+    public static void setBlockchainPointer(int nextMsgPointerVal) {
+        parsingProgress = nextMsgPointerVal;
+    }
+    public static int getBlockchainPointer() {
+        return parsingProgress;
+    }
     public static void parseBlockchain(LinkedList<Transaction> transactions) throws GameActionException {
         if (parsingProgress < rc.getRoundNum()) {
             //System.out.println("here?");

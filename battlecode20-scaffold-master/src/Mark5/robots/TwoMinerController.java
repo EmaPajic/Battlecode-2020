@@ -213,28 +213,16 @@ public class TwoMinerController {
     }
 
     public static void control() throws GameActionException {
-        System.out.println(Clock.getBytecodeNum());
         Strategium.gatherInfo();
-        System.out.println(Clock.getBytecodeNum());
-        //System.println("Current target : " + currentTarget);
-//        if( Strategium.turnsAlive <= 10){
-////            int[] msgs = new int();
-////            Transation msgs = new Transaction(42, )
-//            if(Strategium.nearestRefinery != Strategium.HQLocation){
-//                currentTarget = Strategium.nearestRefinery;
-//            }
-//
-//        }
+
 
         if (rc.canSenseLocation(currentTarget) || Navigation.frustration >= 50) {
-            // trosi 60 bajtkoda
+
             updateTarget();
 
         }
-//        int byteCodeUsed = Clock.getBytecodeNum();
         if (mineAndRefine()) return;
 
-        //System.println("Ima dovoljno supe");
 
         boolean enemyBuildingsNearby = false;
         boolean friendlyDesignSchoolNearby = false;

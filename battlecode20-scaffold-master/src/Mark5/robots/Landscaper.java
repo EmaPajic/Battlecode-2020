@@ -130,8 +130,8 @@ public class Landscaper {
 
             if (Strategium.enemyHQLocation != null) {
                 if (Navigation.aerialDistance(rc.getLocation(), Strategium.enemyHQLocation) == 1) {
-                    if (rc.canDigDirt(Direction.CENTER)) {
-                        rc.digDirt(Direction.CENTER);
+                    if (rc.canDigDirt(rc.getLocation().directionTo((Strategium.enemyHQLocation)))) {
+                        rc.digDirt(rc.getLocation().directionTo((Strategium.enemyHQLocation))); // Direction.Center
                         return true;
                     }
                 }

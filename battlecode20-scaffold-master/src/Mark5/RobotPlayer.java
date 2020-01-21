@@ -190,6 +190,14 @@ public strictfp class RobotPlayer {
                     ++numMiners;
                     return;
                 }
+        } else if (Strategium.leastAmountOfSoup > numMiners*100) { // if we have sufficient amount of soup send more miners
+            Direction dirToSoup = rc.getLocation().directionTo(Strategium.nearestSoup);
+            List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToSoup.opposite()));
+            for (Direction dir : towards)
+                if (tryBuild(RobotType.MINER, dir)) {
+                    ++numMiners;
+                    return;
+                }
         }
             runNetGun();
 
