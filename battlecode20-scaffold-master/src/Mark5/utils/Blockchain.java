@@ -15,7 +15,7 @@ import static java.lang.Integer.min;
 public class Blockchain {
 
     static final int[] acceptedTypes = {73, 42};
-    static private int parsingProgress = 1;
+    public static int parsingProgress = 1;
     static int opponentTransactionCosts = 0;
     static int opponentTransactions = 0;
     static int opponentTransactionMinFee = 1000;
@@ -88,12 +88,12 @@ public class Blockchain {
         rc.submitTransaction(message, fee);
         return true;
     }
-    public static void setBlockchainPointer(int nextMsgPointerVal){
-        parsingProgress = nextMsgPointerVal;
-    }
-    public static int getBlockchainPointer(){
-        return parsingProgress;
-    }
+//    public static void setBlockchainPointer(int nextMsgPointerVal){
+//        parsingProgress = nextMsgPointerVal;
+//    }
+//    public static int getBlockchainPointer(){
+//        return parsingProgress;
+//    }
     public static void parseBlockchain(LinkedList<Transaction> transactions) throws GameActionException {
         if (parsingProgress < rc.getRoundNum()) {
             //System.out.println("here?");

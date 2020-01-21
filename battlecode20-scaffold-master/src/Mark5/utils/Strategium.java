@@ -253,25 +253,22 @@ public class Strategium {
 //                    System.out.println("Baza je " + HQLocation);
                 }
 //                System.out.println("Baza je " + HQLocation);
+                break;
             case MINER:
                 while (!upToDate){
-                    if(HQLocation != null){
-                        Blockchain.parseBlockchain(transactions);
-                        parseTransactions();
-                    } else {
-                        if(rc.getRoundNum() > 50) Blockchain.setBlockchainPointer(rc.getRoundNum() - 50);
-                        Blockchain.parseBlockchain(transactions);
-                        parseTransactions();
+                    if (HQLocation != null) {
+                        if (rc.getRoundNum() > 50) Blockchain.parsingProgress = rc.getRoundNum() - 50;
                     }
+                    Blockchain.parseBlockchain(transactions);
+                    parseTransactions();
 
-                    if(rc.getRoundNum() <= Blockchain.getBlockchainPointer()){
+                    if(rc.getRoundNum() <= Blockchain.parsingProgress){
                         upToDate = true;
 //                        System.out.println("procitao sam sveeeee!");
 //                        System.out.println("nearest refinery " + nearestRefinery);
                     }
 
                 }
-
                 break;
         }
 
