@@ -259,7 +259,6 @@ public class Strategium {
                 break;
             case MINER:
                 while (!upToDate){
-
                     if (HQLocation != null) {
                         if (rc.getRoundNum() - Blockchain.parsingProgress > 1) Blockchain.parsingProgress = max(Blockchain.parsingProgress, rc.getRoundNum() - 50);
                     }
@@ -270,8 +269,6 @@ public class Strategium {
                         upToDate = true;
 
                     }
-
-
                 }
                 break;
         }
