@@ -26,6 +26,7 @@ public class Drone {
         POTENTIAL,
         FRIENDLY_LANDSCAPER,
         RUSH_MINER,
+        FRIENDLY_MINER,
         BIOLOGICAL,
         ENEMY
     }
@@ -58,7 +59,8 @@ public class Drone {
         //patrolRange = 3 + (Strategium.numDronesMet - 24) / 8;
         switch (state) {
             case PREDATOR:
-                if (rc.getRoundNum() > 1500) state = State.SWARMER;
+                if (rc.getRoundNum() > 1550 && !rc.isCurrentlyHoldingUnit()) state = State.SWARMER;
+                if (rc.getRoundNum() > 1551 && rc.isCurrentlyHoldingUnit()) state = State.SWARMER;
                 break;
             case SWARMER:
                 //if (Strategium.dronesMetWithLowerID >= Strategium.numDronesMet * 9 / 10) state = State.TAXI;
@@ -101,13 +103,17 @@ public class Drone {
                 }
                  */
                 if (Strategium.nearestEnemyUnit != null) if (attack(Strategium.nearestEnemyUnit)) break;
-                //if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
+                if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
                 patrol();
                 break;
             case RUSH_MINER:
             case FRIENDLY_LANDSCAPER:
+                if(rc.getRoundNum() < 1300)
+                    climb();
                 patrol();
                 break;
+            case FRIENDLY_MINER:
+                climb();
         }
 
 
@@ -126,7 +132,7 @@ public class Drone {
                         return true;
                     case MINER:
                         DroneSensor.potentialTaxiPayload = null;
-                        payload = Payload.RUSH_MINER;
+                        payload = Payload.FRIENDLY_MINER;
                         //state = State.TAXI;
                         return true;
                 }
@@ -177,11 +183,21 @@ public class Drone {
             switch (state) {
                 case PREDATOR:
                     waypoint = null;
-                    if (Strategium.rand.nextInt(100) > 50 || rc.isCurrentlyHoldingUnit()) {
+                    if (rc.isCurrentlyHoldingUnit() || rc.getRoundNum() > 1400) {
                         if (Strategium.enemyHQLocation != null) waypoint = Strategium.enemyHQLocation;
                         else if (!Strategium.potentialEnemyHQLocations.isEmpty())
                             waypoint = Strategium.potentialEnemyHQLocations.get(
                                     Strategium.rand.nextInt(Strategium.potentialEnemyHQLocations.size()));
+                    }
+                    else {
+                        if (rc.canSenseLocation(TwoMinerController.currentTarget)) {
+
+                            TwoMinerController.updateTarget();
+
+                        }
+                        else {
+                            waypoint = TwoMinerController.currentTarget;
+                        }
                     }
 
                     if (waypoint == null)
