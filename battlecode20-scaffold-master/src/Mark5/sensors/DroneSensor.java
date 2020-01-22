@@ -154,7 +154,7 @@ public class DroneSensor {
 
 
 
-        if (!rc.isReady() && nearestWater == null) findWater();
+        if (!rc.isReady() && (nearestWater == null || Navigation.frustration >= 100)) findWater();
 
     }
 

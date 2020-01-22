@@ -146,6 +146,7 @@ public class MinerSensor {
                         MapLocation location = new MapLocation(i, j);
                         if(!rc.canSenseLocation(location)) continue;
                         if(rc.senseFlooding(location)) continue;
+                        if(rc.senseElevation(location) < 8) continue;
                         if(Math.abs(rc.senseElevation(location) - rc.senseElevation(rc.getLocation())) <= 3)
                             if(Lattice.isBuildingSite(location))
                                 if(Navigation.aerialDistance(vacantBuildSpot) > Navigation.aerialDistance(location))

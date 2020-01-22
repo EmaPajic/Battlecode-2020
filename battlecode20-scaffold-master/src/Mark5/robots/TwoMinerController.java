@@ -344,7 +344,7 @@ public class TwoMinerController {
 
             }
             System.out.println(makeRobotType);
-            if (rc.getTeamSoup() >= makeRobotType.cost)
+            if (rc.getTeamSoup() >= makeRobotType.cost && rc.getRoundNum() < 1200)
                 for (Direction dir : dir8)
                     if (rc.canBuildRobot(makeRobotType, dir))
                         if (makeRobotType != RobotType.VAPORATOR ||
@@ -366,10 +366,10 @@ public class TwoMinerController {
         } else {
             if(rc.getRoundNum() % 100 == 1) {
                 buildRadius += 5;
-                int xMin = max(0, rc.getLocation().x - buildRadius);
-                int yMin = max(0, rc.getLocation().y - buildRadius);
-                int xMax = Math.min(rc.getLocation().x + buildRadius, rc.getMapWidth() - 1);
-                int yMax = Math.min(rc.getLocation().y + buildRadius, rc.getMapHeight() - 1);
+                int xMin = max(0, Strategium.HQLocation.x - buildRadius);
+                int yMin = max(0, Strategium.HQLocation.y - buildRadius);
+                int xMax = Math.min(Strategium.HQLocation.x + buildRadius, rc.getMapWidth() - 1);
+                int yMax = Math.min(Strategium.HQLocation.y + buildRadius, rc.getMapHeight() - 1);
                 buildWaypoint =
                         new MapLocation(Strategium.rand.nextInt(xMax - xMin) + xMin,
                                 Strategium.rand.nextInt(yMax - yMin) + yMin);

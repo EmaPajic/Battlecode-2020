@@ -138,7 +138,7 @@ public class Drone {
             payload = target.team == Strategium.opponentTeam ? Payload.ENEMY : Payload.BIOLOGICAL;
             return true;
         }
-        return Navigation.fuzzyNav(target.location);
+        return Navigation.bugPath(target.location);
     }
 
     private static boolean drown() throws GameActionException {
@@ -355,7 +355,7 @@ public class Drone {
         rc.setIndicatorLine(rc.getLocation(), waypoint, 255, 255, 255);
         System.out.println("FRUSTRATION: " + Navigation.frustration);
 
-        return Navigation.fuzzyNav(waypoint);
+        return Navigation.bugPath(waypoint);
 
     }
 

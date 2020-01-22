@@ -135,8 +135,6 @@ public class Strategium {
                 if (rc.senseFlooding(target)) return false;
                 break;
             case DELIVERY_DRONE:
-                if(Navigation.aerialDistance(target, HQLocation) < 2 && Navigation.aerialDistance(HQLocation) >= 2)
-                    return false;
                 switch (Drone.state) {
                     case SWARMER:
                         return true;
