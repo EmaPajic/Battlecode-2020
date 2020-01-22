@@ -1,5 +1,6 @@
 package Mark5.robots;
 
+import Mark5.sensors.FulfillmentCenterSensor;
 import Mark5.sensors.MinerSensor;
 import Mark5.utils.BFS;
 import Mark5.utils.Lattice;
@@ -7,6 +8,7 @@ import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import battlecode.common.*;
 
+import java.util.List;
 import java.util.Map;
 
 import static Mark5.RobotPlayer.*;
@@ -21,6 +23,8 @@ public class RushMiner {
     static int numEnemyFulfillmentCenters = 0;
     static boolean waterDanger = false;
     static int waterLevel = 0;
+    static MapLocation nearestEnemyDroneLoc = null;
+    static MapLocation nearestEnemyFulfillmentCenterLoc = null;
     static boolean foundEnemyHQ;
 
     public static void run() throws GameActionException {
@@ -130,6 +134,7 @@ public class RushMiner {
         numDesignSchools = 0;
         numEnemyDrones = 0;
         numEnemyFulfillmentCenters = 0;
+
         for (RobotInfo robot : robots) {
             if (robot.getType() == RobotType.DESIGN_SCHOOL && robot.getTeam() == Strategium.myTeam) {
                 ++numDesignSchools;
@@ -139,16 +144,28 @@ public class RushMiner {
             }
             if (robot.getType() == RobotType.FULFILLMENT_CENTER && robot.getTeam() == Strategium.opponentTeam) {
                 ++numEnemyFulfillmentCenters;
+                if (nearestEnemyFulfillmentCenterLoc == null)
+                    nearestEnemyFulfillmentCenterLoc = robot.getLocation();
+                else if (Navigation.aerialDistance(robot.getLocation()) <
+                        Navigation.aerialDistance(nearestEnemyFulfillmentCenterLoc)) {
+                    nearestEnemyFulfillmentCenterLoc = robot.getLocation();
+                }
             }
             if (robot.getType() == RobotType.DELIVERY_DRONE && robot.getTeam() == Strategium.opponentTeam) {
                 ++numEnemyDrones;
+                if (nearestEnemyDroneLoc == null)
+                    nearestEnemyDroneLoc = robot.getLocation();
+                else if (Navigation.aerialDistance(robot.getLocation()) <
+                        Navigation.aerialDistance(nearestEnemyDroneLoc)) {
+                    nearestEnemyDroneLoc = robot.getLocation();
+                }
             }
-        }
-        if (numDesignSchools == 0) {
-            TwoMinerController.buildDesignCenterNearEnemy();
         }
         if (numNetGuns < 1 && (numEnemyDrones > 0 || numEnemyFulfillmentCenters > 0)) {
             buildNetGunNearEnemy();
+        }
+        if (numDesignSchools == 0) {
+            TwoMinerController.buildDesignCenterNearEnemy();
         }
     }
 
@@ -156,6 +173,16 @@ public class RushMiner {
 
 
         if (Navigation.aerialDistance(Strategium.currentEnemyHQTarget) <= 4) {
+            Direction dirToEnemy = null;
+            if (nearestEnemyDroneLoc != null)
+                dirToEnemy = rc.getLocation().directionTo(nearestEnemyDroneLoc);
+            else
+                dirToEnemy = rc.getLocation().directionTo(nearestEnemyFulfillmentCenterLoc);
+            List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToEnemy.opposite()));
+            for(Direction dir : towards)
+                if(tryBuild(RobotType.NET_GUN, dir)) {
+                    return true;
+                }
             for (Direction dir : dir8) {
                 if (rc.canBuildRobot(RobotType.NET_GUN, dir) &&
                         Navigation.aerialDistance(rc.getLocation().add(dir), Strategium.currentEnemyHQTarget) <= 3)
