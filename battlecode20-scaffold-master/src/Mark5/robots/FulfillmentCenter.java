@@ -69,23 +69,26 @@ public class FulfillmentCenter {
                     }
 
                 }
-                else if (numDrones < 5 || numDrones < FulfillmentCenterSensor.importantEnemyUnitsNum) {
-                    System.out.println("Nasih jedinica: "+ numDrones + " Protivnickih jedinica: " + FulfillmentCenterSensor.importantEnemyUnitsNum);
+                else if (numDrones < 5 || FulfillmentCenterSensor.dronesNearby <
+                        FulfillmentCenterSensor.importantEnemyUnitsNum) {
+                    System.out.println("Nasih jedinica: "+ FulfillmentCenterSensor.dronesNearby +
+                            " Protivnickih jedinica: " + FulfillmentCenterSensor.importantEnemyUnitsNum);
                     System.out.println("\n Neprijateljskih lendskejpera ima: " + FulfillmentCenterSensor.enemyLandscapersNearby);
                     if ((rc.getTeamSoup() > 650 ||
-                            FulfillmentCenterSensor.enemyLandscapersNearby) &&
+                            (FulfillmentCenterSensor.enemyLandscapersNearby && rc.getTeamSoup() > 300)) &&
                             !FulfillmentCenterSensor.enemyNetGunsNearby) {
                         if (FulfillmentCenterSensor.nearestEnemyLandscaperLocation != null) {
                             Direction dirToEnemy =
                                     rc.getLocation().directionTo(FulfillmentCenterSensor.nearestEnemyLandscaperLocation);
                             towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToEnemy.opposite()));
-                            for (Direction dir : towards)
+                            for (Direction dir : FulfillmentCenterSensor.dirToBuild)
+                                if(towards.contains(dir))
                                 if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
                                     ++numDrones;
                                     return;
                                 }
                         }
-                        for (Direction dir : dir8) {
+                        for (Direction dir : FulfillmentCenterSensor.dirToBuild) {
                             if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
                                 ++numDrones;
                                 return;

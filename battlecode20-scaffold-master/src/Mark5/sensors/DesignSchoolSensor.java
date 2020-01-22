@@ -76,7 +76,7 @@ public class DesignSchoolSensor {
                                     Navigation.aerialDistance(nearestBuriedFriendlyBuilding))
                                 nearestBuriedFriendlyBuilding = robot.location;
                             numThreats++;
-                            if (robot.type == RobotType.HQ) numThreats += 10;
+                            if (robot.type == RobotType.HQ) numThreats += 4;
                             priorityBuildDirections.add(rc.getLocation().directionTo(robot.location));
                         }
                         break;

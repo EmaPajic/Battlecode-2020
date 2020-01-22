@@ -11,6 +11,7 @@ import javax.naming.directory.DirContext;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import static Mark5.RobotPlayer.dir8;
 import static Mark5.RobotPlayer.rc;
@@ -39,10 +40,13 @@ public class FulfillmentCenterSensor {
 
     public static ArrayList<Direction> dirToBuild = new ArrayList<>();
     public static int importantEnemyUnitsNum = 0;
+    public static int dronesNearby;
 
     public static void senseNearbyUnits() {
         dirToBuild.clear();
+        Collections.addAll(dirToBuild, dir8);
         importantEnemyUnitsNum = 0;
+        dronesNearby = 0;
         enemyLandscapersNearby  = false;
 
         RobotInfo[] robots = rc.senseNearbyRobots();
@@ -71,6 +75,7 @@ public class FulfillmentCenterSensor {
 
                     case DELIVERY_DRONE:
                         friendlyDronesNearby = true;
+                        dronesNearby++;
                         break;
 
                 }
@@ -79,11 +84,11 @@ public class FulfillmentCenterSensor {
                 switch (robot.type) {
                     case NET_GUN:
                         for(Direction dir : dir8){
-                            if(Navigation.aerialDistance(rc.getLocation().add(dir), robot.location) > 13){
-                                dirToBuild.add(dir);
+                            if (rc.getLocation().add(dir).distanceSquaredTo(robot.location) <= 15){
+                                dirToBuild.remove(dir);
                             }
                         }
-                        if (rc.getLocation().distanceSquaredTo(robot.location) <= 35) enemyNetGunsNearby = true;
+                        if (rc.getLocation().distanceSquaredTo(robot.location) < 15) enemyNetGunsNearby = true;
                     case HQ:
                     case VAPORATOR:
                     case REFINERY:
@@ -103,10 +108,11 @@ public class FulfillmentCenterSensor {
                         break;
                     case MINER:
                         ++importantEnemyUnitsNum;
+                        enemySoftNearby = true;
                         nearestEnemyMinerLocation = robot.location;
+                        break;
                     case COW:
                         ++importantEnemyUnitsNum;
-                        enemySoftNearby = true;
                         break;
                 }
 

@@ -305,7 +305,7 @@ public class TwoMinerController {
 
         if (!friendlyDesignSchoolNearby) {
             if ((enemyBuildingsNearby || enemyLandscapersNearby || friendlyBuriedBuildingNearby ||
-                    Navigation.aerialDistance(Strategium.HQLocation) <= 3) && rc.getTeamSoup() >= 250)
+                    Navigation.aerialDistance(Strategium.HQLocation) <= 3))
                 makeRobotType = RobotType.DESIGN_SCHOOL;
         }
 
