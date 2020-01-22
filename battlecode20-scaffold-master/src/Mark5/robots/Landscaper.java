@@ -183,12 +183,13 @@ public class Landscaper {
             if (Navigation.bugPath(waypoint)) return true;
         }
 
-        int waterLevel = (int) GameConstants.getWaterLevel(
+        /*int waterLevel = (int) GameConstants.getWaterLevel(
                 rc.getRoundNum() + 1000
         );
         if (waterLevel > 25) waterLevel = 25;
 
-        if (rc.getRoundNum() > 2000) waterLevel = 1000;
+        if (rc.getRoundNum() > 2000) waterLevel = 1000;*/
+        int waterLevel = 8;
 
         if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y] &&
                 !Lattice.isPit(rc.getLocation())) {
@@ -222,10 +223,8 @@ public class Landscaper {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
             if (Lattice.isBuildingSite(location) && !Strategium.occupied[location.x][location.y])
-                if (waterLevel > Strategium.elevation[location.x][location.y] ||
-                        Lattice.maxDeposit(location) > 0) {
+                if (waterLevel > Strategium.elevation[location.x][location.y]) {
                     if (rc.canDepositDirt(dir)) {
-
                         rc.depositDirt(dir);
                         return true;
                     }
