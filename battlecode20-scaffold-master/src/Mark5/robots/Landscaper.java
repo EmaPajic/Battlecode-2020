@@ -190,6 +190,8 @@ public class Landscaper {
 
         if (rc.getRoundNum() > 2000) waterLevel = 1000;*/
         int waterLevel = 8;
+        if (rc.getRoundNum() > 1500) waterLevel = 10000;
+        else if (rc.getRoundNum() < 300) waterLevel = 5;
 
         if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y] &&
                 !Lattice.isPit(rc.getLocation())) {

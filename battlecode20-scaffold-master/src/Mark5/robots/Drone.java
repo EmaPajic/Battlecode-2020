@@ -127,7 +127,7 @@ public class Drone {
             payload = target.team == Strategium.opponentTeam ? Payload.ENEMY : Payload.BIOLOGICAL;
             return true;
         }
-        return Navigation.fuzzyNav(target.location);
+        return Navigation.bugPath(target.location);
     }
 
     private static boolean drown() throws GameActionException {
@@ -155,7 +155,7 @@ public class Drone {
                         return true;
                     }
                 return true;
-            } else return Navigation.fuzzyNav(Strategium.nearestWater);
+            } else return Navigation.bugPath(Strategium.nearestWater);
 
         }
 
@@ -305,7 +305,7 @@ public class Drone {
         rc.setIndicatorLine(rc.getLocation(), waypoint, 255, 255, 255);
         System.out.println("FRUSTRATION: " + Navigation.frustration);
 
-        return Navigation.fuzzyNav(waypoint);
+        return Navigation.bugPath(waypoint);
 
     }
 
@@ -322,7 +322,7 @@ public class Drone {
                 if (Navigation.frustration >= 100) {
                     Navigation.frustration = 0;
                 }
-                return Navigation.fuzzyNav(Strategium.HQLocation);
+                return Navigation.bugPath(Strategium.HQLocation);
             case SWARMER:
                 state = State.TAXI;
             case PREDATOR:
