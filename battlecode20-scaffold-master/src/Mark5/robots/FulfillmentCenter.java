@@ -53,6 +53,7 @@ public class FulfillmentCenter {
                             }
                         }
                     }else if(!FulfillmentCenterSensor.enemyNetGunsNearby){
+                        if(Strategium.enemyHQLocation != null)
                         if(tryBuild(RobotType.DELIVERY_DRONE, rc.getLocation().directionTo(Strategium.enemyHQLocation))){
                             ++numDrones;
                             return;
