@@ -26,8 +26,8 @@ public strictfp class RobotPlayer {
     static int buildstage = 0; // tells miners what to build
 
     public static int myFun = 0;
-    static int numMiners = 0;
-    static int numLandscapers = 0;
+    public static int numMiners = 0;
+    public static int numLandscapers = 0;
     static int numDrones = 0;
     static int landscaperTurns = 0;
 
@@ -160,36 +160,7 @@ public strictfp class RobotPlayer {
     static void runHQ() throws GameActionException {
         Strategium.gatherInfo();
 
-        if(numMiners < HQSensor.totalMiners && rc.getRoundNum() < 600) {
-            if (rc.getRoundNum() == 1) {
-                Direction dirToCenter = rc.getLocation().directionTo(
-                        new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2));
-                List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToCenter.opposite()));
-                for (Direction dir : towards)
-                    if (tryBuild(RobotType.MINER, dir)) {
-                        ++numMiners;
-                        return;
-                    }
-                for (Direction dir : dir8)
-                    if (tryBuild(RobotType.MINER, dir)) {
-                        ++numMiners;
-                        return;
-                    }
-            } else if (Strategium.nearestSoup != null) {
-                Direction dirToSoup = rc.getLocation().directionTo(Strategium.nearestSoup);
-                List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToSoup.opposite()));
-                for (Direction dir : towards)
-                    if (tryBuild(RobotType.MINER, dir)) {
-                        ++numMiners;
-                        return;
-                    }
-            }
-            for (Direction dir : dir8)
-                if (tryBuild(RobotType.MINER, dir)) {
-                    ++numMiners;
-                    return;
-                }
-        }
+        HQ.produceMiners();
 //        } else if (Strategium.leastAmountOfSoup > numMiners*100) { // if we have sufficient amount of soup send more miners
 //            Direction dirToSoup = rc.getLocation().directionTo(Strategium.nearestSoup);
 //            List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToSoup.opposite()));
@@ -200,7 +171,6 @@ public strictfp class RobotPlayer {
 //                }
 //        }
             runNetGun();
-
     }
 
     static boolean builtFulfillmentCenter = false;
