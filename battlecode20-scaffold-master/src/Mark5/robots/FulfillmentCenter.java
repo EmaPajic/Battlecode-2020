@@ -43,27 +43,20 @@ public class FulfillmentCenter {
                 }
                 break;
             case PERIODIC_BUILDING:
+                if(rc.getRoundNum() > 1200){ // nemamo polje koje cuva koliko neprijateljskih lendskejpera imamo u okolini
 
-                if(numDrones >= 5 && rc.getTeamSoup() > 450 ){ // nemamo polje koje cuva koliko neprijateljskih lendskejpera imamo u okolini
-                    RobotInfo[] robots = rc.senseNearbyRobots();
-                    ArrayList<Direction> dirToBuild = new ArrayList<>();
-                    for(Direction dir : dir8) {
-                        for (RobotInfo robot : robots) {
-                            if (robot.type == RobotType.NET_GUN && Navigation.aerialDistance(rc.getLocation().add(dir), robot.location) > 13) {
-                                dirToBuild.add(dir);
-                            }
-
-                        }
-                    }
-                    if(!dirToBuild.isEmpty()) {
-                        for (Direction dir : dirToBuild) {
+                    if(!FulfillmentCenterSensor.dirToBuild.isEmpty()) {
+                        for (Direction dir : FulfillmentCenterSensor.dirToBuild) {
                             if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
                                 ++numDrones;
                                 return;
                             }
                         }
                     }else if(!FulfillmentCenterSensor.enemyNetGunsNearby){
-                        dirToBuild.add(rc.getLocation().directionTo(Strategium.enemyHQLocation));
+                        if(tryBuild(RobotType.DELIVERY_DRONE, rc.getLocation().directionTo(Strategium.enemyHQLocation))){
+                            ++numDrones;
+                            return;
+                        }
                         for(Direction dir : dir8){
                             if(tryBuild(RobotType.DELIVERY_DRONE, dir)){
                                 ++numDrones;
@@ -74,7 +67,7 @@ public class FulfillmentCenter {
                     }
 
                 }
-                else if (numDrones < 5 ) {
+                else if (numDrones < 5 || numDrones < FulfillmentCenterSensor.importantEnemyUnitsNum) {
                     if ((rc.getTeamSoup() > 650 ||
                             FulfillmentCenterSensor.enemyLandscapersNearby) &&
                             !FulfillmentCenterSensor.enemyNetGunsNearby) {
