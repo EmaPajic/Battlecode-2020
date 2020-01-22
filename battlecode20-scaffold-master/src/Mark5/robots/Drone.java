@@ -58,7 +58,8 @@ public class Drone {
         //patrolRange = 3 + (Strategium.numDronesMet - 24) / 8;
         switch (state) {
             case PREDATOR:
-                if (rc.getRoundNum() > 1500) state = State.SWARMER;
+                if (rc.getRoundNum() > 1500 && !rc.isCurrentlyHoldingUnit()) state = State.SWARMER;
+                if (rc.getRoundNum() > 1501 && rc.isCurrentlyHoldingUnit()) state = State.SWARMER;
                 break;
             case SWARMER:
                 //if (Strategium.dronesMetWithLowerID >= Strategium.numDronesMet * 9 / 10) state = State.TAXI;

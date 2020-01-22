@@ -106,8 +106,14 @@ public class DroneSensor {
                             potentialTaxiPayload = robot;
                         break;
                     case LANDSCAPER:
-                        if(Navigation.aerialDistance(robot.location, HQLocation) > 1)
-                            Strategium.nearestLandscaper = robot;
+                        if(Navigation.aerialDistance(robot.location, HQLocation) > 1) {
+                            if(nearestLandscaper == null)
+                                nearestLandscaper = robot;
+                            else
+                                if(Navigation.aerialDistance(nearestLandscaper) > Navigation.aerialDistance(robot)) {
+                                    nearestLandscaper = robot;
+                                }
+                        }
                         break;
                 }
             } else {
