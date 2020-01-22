@@ -19,6 +19,7 @@ public class Drone {
         SENTRY,
         TAXI,
         PREDATOR,
+        LANDSCAPER_GATHERER,
         SWARMER
     }
 
@@ -58,15 +59,22 @@ public class Drone {
         patrolRange = 3 + (Strategium.numDronesMet - 24) / 8;
         switch (state) {
             case SENTRY:
-                if ((Strategium.dronesMetWithLowerID - 4) * 5 < Strategium.numDronesMet) state = State.PREDATOR;
+                if ((Strategium.dronesMetWithLowerID - 4) * 5 > Strategium.numDronesMet) state = State.PREDATOR;
                 break;
             case PREDATOR:
-                if (rc.getRoundNum() > 2000) state = State.SWARMER;
+                if (rc.getRoundNum() > 1500) state = State.SWARMER;
                 break;
             case SWARMER:
                 //if (Strategium.dronesMetWithLowerID >= Strategium.numDronesMet * 9 / 10) state = State.TAXI;
                 break;
         }
+
+        if(!rc.isCurrentlyHoldingUnit() && rc.getRoundNum() > 1300 && rc.getRoundNum() < 1400) {
+            state = State.LANDSCAPER_GATHERER;
+            waypoint = null;
+        }
+        if(rc.getRoundNum() == 1400)
+            state = State.PREDATOR;
         System.out.println(state);
         System.out.println(payload);
         //System.out.println(state);
@@ -80,10 +88,10 @@ public class Drone {
                 drown();
                 break;
             case POTENTIAL:
-                /*if(DroneSensor.potentialTaxiPayload != null) {
-                    if(attack(DroneSensor.potentialTaxiPayload))
-                        return;
-                }*/
+                //if(DroneSensor.potentialTaxiPayload != null) {
+                //    if(attack(DroneSensor.potentialTaxiPayload))
+                //        return;
+                //}
                 /*
                 if (rc.adjacentLocation(Direction.NORTHEAST).equals(Strategium.HQLocation)) {
                     boolean canMove = false;
@@ -116,6 +124,9 @@ public class Drone {
                 switch (target.type) {
                     case LANDSCAPER:
                         payload = Payload.FRIENDLY_LANDSCAPER;
+                        if(state == State.LANDSCAPER_GATHERER) {
+                            state = State.PREDATOR;
+                        }
                         return true;
                     case MINER:
                         DroneSensor.potentialTaxiPayload = null;
@@ -142,9 +153,7 @@ public class Drone {
                 }
         }
 
-        System.out.println("DROWN:" + Strategium.nearestWater);
-        if(Strategium.nearestWater != null)
-            rc.setIndicatorLine(rc.getLocation(), Strategium.nearestWater, 0, 0, 255);
+        //System.out.println("DROWN:" + Strategium.nearestWater);
 
         if (Strategium.nearestWater != null) {
 
@@ -155,7 +164,7 @@ public class Drone {
                         return true;
                     }
                 return true;
-            } else return Navigation.fuzzyNav(Strategium.nearestWater);
+            } else return Navigation.bugPath(Strategium.nearestWater);
 
         }
 
@@ -163,7 +172,6 @@ public class Drone {
     }
 
     private static boolean patrol() throws GameActionException {
-
 
         if (Strategium.HQLocation == null) return false;
 
@@ -251,6 +259,38 @@ public class Drone {
 
 
                     break;
+                case LANDSCAPER_GATHERER:
+                    waypoint = null;
+                    if(Strategium.nearestLandscaper != null)
+                        System.out.println(Strategium.nearestLandscaper.location);
+                    if(!rc.isCurrentlyHoldingUnit()) {
+                        if(Strategium.nearestLandscaper != null) {
+                            if(Navigation.aerialDistance(Strategium.nearestLandscaper.location,
+                                    Strategium.HQLocation) != 1) {
+                                if(Strategium.enemyHQLocation != null) {
+                                    if(Navigation.aerialDistance(Strategium.nearestLandscaper.location,
+                                            Strategium.enemyHQLocation) > 1) {
+                                       if(attack(Strategium.nearestLandscaper))
+                                           return true;
+                                    }
+                                }
+                                else
+                                    if(attack(Strategium.nearestLandscaper))
+                                        return true;
+                            }
+                        }
+                        else {
+                            if (rc.canSenseLocation(TwoMinerController.currentTarget)) {
+
+                                TwoMinerController.updateTarget();
+
+                            }
+                            else {
+                                waypoint = TwoMinerController.currentTarget;
+                            }
+                        }
+                    }
+                    break;
                 case SWARMER:
                     waypoint = null;
 
@@ -286,6 +326,7 @@ public class Drone {
             }
 
         }
+        /*
         RobotInfo[] robots = rc.senseNearbyRobots();
         for(RobotInfo robot : robots) {
             if(rc.isCurrentlyHoldingUnit()) {
@@ -301,7 +342,16 @@ public class Drone {
                             }
             }
         }
-
+         */
+        if(rc.getRoundNum() < 1305 && rc.getRoundNum() > 1300) {
+            List<Direction> exit_the_bug_path= Navigation.moveAwayFrom(Strategium.enemyHQLocation);
+            for(Direction dir : exit_the_bug_path) {
+                if(Strategium.canSafelyMove(dir)) {
+                    rc.move(dir);
+                    return true;
+                }
+            }
+        }
         rc.setIndicatorLine(rc.getLocation(), waypoint, 255, 255, 255);
         System.out.println("FRUSTRATION: " + Navigation.frustration);
 
@@ -322,7 +372,7 @@ public class Drone {
                 if (Navigation.frustration >= 100) {
                     Navigation.frustration = 0;
                 }
-                return Navigation.fuzzyNav(Strategium.HQLocation);
+                return Navigation.bugPath(Strategium.HQLocation);
             case SWARMER:
                 state = State.TAXI;
             case PREDATOR:
