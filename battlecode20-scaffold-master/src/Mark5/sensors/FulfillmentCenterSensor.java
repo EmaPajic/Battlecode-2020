@@ -43,6 +43,7 @@ public class FulfillmentCenterSensor {
     public static void senseNearbyUnits() {
         dirToBuild.clear();
         importantEnemyUnitsNum = 0;
+        enemyLandscapersNearby  = false;
 
         RobotInfo[] robots = rc.senseNearbyRobots();
         //System.println(robots.length);
@@ -131,13 +132,13 @@ public class FulfillmentCenterSensor {
                         }
                 }
             }
-            for(int i = 0; i < 8; ++i) {
-                if(adjacentRobotTurnCount[i] == 5) {
-                    nearestRushMinerLocation = rc.getLocation().add(dir8[i]);
-                    FulfillmentCenter.droneBuildingImportance =
-                            FulfillmentCenter.DroneBuildingImportance.TAXI_NEEDED;
-                }
-            }
+//            for(int i = 0; i < 8; ++i) {
+//                if(adjacentRobotTurnCount[i] == 5) {
+//                    nearestRushMinerLocation = rc.getLocation().add(dir8[i]);
+//                    FulfillmentCenter.droneBuildingImportance =
+//                            FulfillmentCenter.DroneBuildingImportance.TAXI_NEEDED;
+//                }
+//            }
         }
 
     }
