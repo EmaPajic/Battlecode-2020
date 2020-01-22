@@ -138,7 +138,7 @@ public class Drone {
             payload = target.team == Strategium.opponentTeam ? Payload.ENEMY : Payload.BIOLOGICAL;
             return true;
         }
-        return Navigation.bugPath(target.location);
+        return Navigation.fuzzyNav(target.location);
     }
 
     private static boolean drown() throws GameActionException {
@@ -175,7 +175,7 @@ public class Drone {
 
         if (Strategium.HQLocation == null) return false;
 
-        if (waypoint == null || rc.getLocation().equals(waypoint) || Navigation.frustration >= 100) {
+        if (waypoint == null || rc.getLocation().equals(waypoint) || Navigation.frustration >= 30) {
             Navigation.frustration = 0;
             patrolWaypointIndex = (patrolWaypointIndex + 1) % 4;
             if (Strategium.rand.nextInt(100) > 90) patrolWaypointIndex = (patrolWaypointIndex + 1) % 4;
@@ -352,7 +352,10 @@ public class Drone {
                 }
             }
         }
-        return Navigation.bugPath(waypoint);
+        rc.setIndicatorLine(rc.getLocation(), waypoint, 255, 255, 255);
+        System.out.println("FRUSTRATION: " + Navigation.frustration);
+
+        return Navigation.fuzzyNav(waypoint);
 
     }
 
