@@ -1,5 +1,6 @@
 package Mark5.sensors;
 
+import Mark5.utils.Lattice;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import Mark5.utils.Wall;
@@ -17,6 +18,7 @@ import static Mark5.utils.Strategium.*;
 public class MinerSensor {
     public static int visibleSoup;
     public static boolean seenWater = false;
+    public static MapLocation vacantBuildSpot;
 
     public static void init() {
         soup = new boolean[rc.getMapWidth()][rc.getMapHeight()];
@@ -30,11 +32,13 @@ public class MinerSensor {
 
     public static void sense() throws GameActionException {
 
-        System.out.println("SENSOR START: " + Clock.getBytecodeNum());
         enemyDrones.clear();
         nearestEnemyDrone = null;
         visibleSoup = 0;
         seenWater = false;
+        vacantBuildSpot = null;
+
+
 
         int xMin = max(0, rc.getLocation().x - 5);
         int yMin = max(0, rc.getLocation().y - 5);
@@ -46,11 +50,9 @@ public class MinerSensor {
 
                 MapLocation location = new MapLocation(i, j);
                 if (rc.canSenseLocation(location)) {
-                    //elevation[i][j] = rc.senseElevation(location);
-                    //water[i][j] = rc.senseFlooding(location);
                     if (rc.senseFlooding(location)) seenWater = true;
                     occupied[i][j] = false;
-                    if(myFun != 4) {
+                    if(myFun != 4 && rc.getRoundNum() <= 600) {
                         visibleSoup += rc.senseSoup(location);
                         if (rc.senseSoup(location) > 0) {
                             //explored[i][j] = true;
@@ -81,7 +83,6 @@ public class MinerSensor {
 
             }
 
-        System.out.println("SCANNER: " + Clock.getBytecodeNum());
 
         RobotInfo[] robots = rc.senseNearbyRobots();
 
@@ -126,18 +127,35 @@ public class MinerSensor {
         //Wall.checkBaseStatus();
 
 
-        nearestRefinery = null;
-        for (MapLocation refinery : refineries) {
-            if (refinery == HQLocation && rc.getRoundNum() > 600)
-                continue;
-            if (Navigation.aerialDistance(nearestRefinery, rc.getLocation()) >
-                    Navigation.aerialDistance(refinery, rc.getLocation()))
-                nearestRefinery = refinery;
+
+
+        if(myFun != 4 && rc.getRoundNum() <= 600) {
+            nearestRefinery = null;
+            for (MapLocation refinery : refineries) {
+                if (refinery == HQLocation && rc.getRoundNum() > 600)
+                    continue;
+                if (Navigation.aerialDistance(nearestRefinery, rc.getLocation()) >
+                        Navigation.aerialDistance(refinery, rc.getLocation()))
+                    nearestRefinery = refinery;
+            }
+            if (knownSoup > 0 && nearestSoup == null) scanAllSoup();
+        } else {
+            for (int i = xMin; i <= xMax; ++i)
+                for (int j = yMin; j <= yMax; ++j)
+                    if(!occupied[i][j] && (i!=0 || j!=0)) {
+                        MapLocation location = new MapLocation(i, j);
+                        if(!rc.canSenseLocation(location)) continue;
+                        if(rc.senseFlooding(location)) continue;
+                        if(Math.abs(rc.senseElevation(location) - rc.senseElevation(rc.getLocation())) <= 3)
+                            if(Lattice.isBuildingSite(location))
+                                if(Navigation.aerialDistance(vacantBuildSpot) > Navigation.aerialDistance(location))
+                                    vacantBuildSpot = location;
+                    }
         }
 
         potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
 
-        if (knownSoup > 0 && nearestSoup == null) scanAllSoup();
+
 
     }
 
