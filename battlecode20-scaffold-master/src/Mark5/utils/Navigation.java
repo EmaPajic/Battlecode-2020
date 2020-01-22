@@ -57,12 +57,12 @@ public class Navigation {
      */
     public static boolean goodLandingSpot(MapLocation location) {
         if (location == null) return false;
-        if (Strategium.enemyHQLocation == null) return false;
+        //if (Strategium.enemyHQLocation == null) return false;
         if (Strategium.water[location.x][location.y]) return false;
-        if (location.distanceSquaredTo(Strategium.enemyHQLocation) > RobotType.LANDSCAPER.sensorRadiusSquared)
-            return false;
-        if (location.isAdjacentTo(Strategium.enemyHQLocation)) return true;
-        return Strategium.elevation[location.x][location.y] > 15;
+        //if (location.distanceSquaredTo(Strategium.enemyHQLocation) > RobotType.LANDSCAPER.sensorRadiusSquared)
+        //    return false;
+        //if (location.isAdjacentTo(Strategium.enemyHQLocation)) return true;
+        return Strategium.elevation[location.x][location.y] == 8;
     }
 
     public static boolean fuzzyNav(MapLocation destination) throws GameActionException {

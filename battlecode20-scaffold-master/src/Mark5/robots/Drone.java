@@ -26,6 +26,7 @@ public class Drone {
         POTENTIAL,
         FRIENDLY_LANDSCAPER,
         RUSH_MINER,
+        FRIENDLY_MINER,
         BIOLOGICAL,
         ENEMY
     }
@@ -102,13 +103,17 @@ public class Drone {
                 }
                  */
                 if (Strategium.nearestEnemyUnit != null) if (attack(Strategium.nearestEnemyUnit)) break;
-                //if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
+                if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
                 patrol();
                 break;
             case RUSH_MINER:
             case FRIENDLY_LANDSCAPER:
+                if(rc.getRoundNum() < 1300)
+                    climb();
                 patrol();
                 break;
+            case FRIENDLY_MINER:
+                climb();
         }
 
 
@@ -127,7 +132,7 @@ public class Drone {
                         return true;
                     case MINER:
                         DroneSensor.potentialTaxiPayload = null;
-                        payload = Payload.RUSH_MINER;
+                        payload = Payload.FRIENDLY_MINER;
                         //state = State.TAXI;
                         return true;
                 }
