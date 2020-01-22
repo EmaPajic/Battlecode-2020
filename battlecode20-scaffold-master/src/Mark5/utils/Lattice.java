@@ -17,10 +17,13 @@ public class Lattice {
      * @return true if it is a pit, false otherwise
      */
     public static boolean isPit(MapLocation location) throws GameActionException {
-        return (location.x % 2 == Strategium.HQLocation.x % 2 &&
-                location.y % 2 == Strategium.HQLocation.y % 2 && !location.equals(Strategium.HQLocation)) ||
-                (rc.canSenseLocation(location) && rc.senseElevation(location) < -100) ||
-                (rc.canSenseLocation(location) && rc.senseElevation(location) > 500);
+        if (location.x % 2 == Strategium.HQLocation.x % 2 &&
+                location.y % 2 == Strategium.HQLocation.y % 2 && !location.equals(Strategium.HQLocation)) return true;
+        if (rc.canSenseLocation(location)) {
+            if (Math.abs(rc.senseElevation(location) - rc.senseElevation(rc.getLocation())) < 10) return false;
+            return rc.senseElevation(location) < -100 || rc.senseElevation(location) > 500;
+        }
+        return false;
     }
 
     /**
@@ -29,11 +32,10 @@ public class Lattice {
      * @param location the location to check for
      * @return true if it is a path, false otherwise
      */
-    public static boolean isPath(MapLocation location) {
+    public static boolean isPath(MapLocation location) throws GameActionException {
         return ((location.x + location.y + Strategium.HQLocation.x + Strategium.HQLocation.y) % 2 == 1
                 || location.isAdjacentTo(Strategium.HQLocation)) && !location.equals(Strategium.HQLocation) &&
-                Strategium.elevation[location.x][location.y] >= -100 &&
-                Strategium.elevation[location.x][location.y] <= 500;
+                !isPit(location);
     }
 
     /**
@@ -46,8 +48,7 @@ public class Lattice {
     public static boolean isBuildingSite(MapLocation location) throws GameActionException {
         return location.x % 2 != Strategium.HQLocation.x % 2 && location.y % 2 != Strategium.HQLocation.y % 2 &&
                 !location.isAdjacentTo(Strategium.HQLocation) &&
-                rc.senseElevation(location) >= -100 &&
-                rc.senseElevation(location) <= 500;
+                !isPit(location);
     }
 
     /**
@@ -57,7 +58,7 @@ public class Lattice {
      * @param waterLevel the minimum safe elevation
      * @return true if it is even and safe, false otherwise
      */
-    public static boolean isEven(MapLocation location, int waterLevel) {
+    public static boolean isEven(MapLocation location, int waterLevel) throws GameActionException {
         int elevation = Strategium.elevation[location.x][location.y];
         for (Direction dir : dir8) {
             MapLocation loc = location.add(dir);

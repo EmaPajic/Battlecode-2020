@@ -58,10 +58,10 @@ public class Drone {
         patrolRange = 3 + (Strategium.numDronesMet - 24) / 8;
         switch (state) {
             case SENTRY:
-                if ((Strategium.dronesMetWithLowerID - 4) * 5 > Strategium.numDronesMet) state = State.PREDATOR;
+                if ((Strategium.dronesMetWithLowerID - 4) * 5 < Strategium.numDronesMet) state = State.PREDATOR;
                 break;
             case PREDATOR:
-                if (Strategium.numDronesMet > 50 || rc.getRoundNum() > 2000) state = State.SWARMER;
+                if (rc.getRoundNum() > 2000) state = State.SWARMER;
                 break;
             case SWARMER:
                 //if (Strategium.dronesMetWithLowerID >= Strategium.numDronesMet * 9 / 10) state = State.TAXI;
@@ -80,10 +80,10 @@ public class Drone {
                 drown();
                 break;
             case POTENTIAL:
-                if(DroneSensor.potentialTaxiPayload != null) {
+                /*if(DroneSensor.potentialTaxiPayload != null) {
                     if(attack(DroneSensor.potentialTaxiPayload))
                         return;
-                }
+                }*/
                 /*
                 if (rc.adjacentLocation(Direction.NORTHEAST).equals(Strategium.HQLocation)) {
                     boolean canMove = false;
@@ -127,7 +127,7 @@ public class Drone {
             payload = target.team == Strategium.opponentTeam ? Payload.ENEMY : Payload.BIOLOGICAL;
             return true;
         }
-        return Navigation.bugPath(target.location);
+        return Navigation.fuzzyNav(target.location);
     }
 
     private static boolean drown() throws GameActionException {
@@ -142,7 +142,9 @@ public class Drone {
                 }
         }
 
-        //System.out.println("DROWN:" + Strategium.nearestWater);
+        System.out.println("DROWN:" + Strategium.nearestWater);
+        if(Strategium.nearestWater != null)
+            rc.setIndicatorLine(rc.getLocation(), Strategium.nearestWater, 0, 0, 255);
 
         if (Strategium.nearestWater != null) {
 
@@ -153,7 +155,7 @@ public class Drone {
                         return true;
                     }
                 return true;
-            } else return Navigation.bugPath(Strategium.nearestWater);
+            } else return Navigation.fuzzyNav(Strategium.nearestWater);
 
         }
 
@@ -162,9 +164,10 @@ public class Drone {
 
     private static boolean patrol() throws GameActionException {
 
+
         if (Strategium.HQLocation == null) return false;
 
-        if (waypoint == null || rc.getLocation().equals(waypoint) || Navigation.frustration >= 100) {
+        if (waypoint == null || rc.getLocation().equals(waypoint) || Navigation.frustration >= 30) {
             Navigation.frustration = 0;
             patrolWaypointIndex = (patrolWaypointIndex + 1) % 4;
             if (Strategium.rand.nextInt(100) > 90) patrolWaypointIndex = (patrolWaypointIndex + 1) % 4;
@@ -298,7 +301,11 @@ public class Drone {
                             }
             }
         }
-        return Navigation.bugPath(waypoint);
+
+        rc.setIndicatorLine(rc.getLocation(), waypoint, 255, 255, 255);
+        System.out.println("FRUSTRATION: " + Navigation.frustration);
+
+        return Navigation.fuzzyNav(waypoint);
 
     }
 
@@ -315,7 +322,7 @@ public class Drone {
                 if (Navigation.frustration >= 100) {
                     Navigation.frustration = 0;
                 }
-                return Navigation.bugPath(Strategium.HQLocation);
+                return Navigation.fuzzyNav(Strategium.HQLocation);
             case SWARMER:
                 state = State.TAXI;
             case PREDATOR:
