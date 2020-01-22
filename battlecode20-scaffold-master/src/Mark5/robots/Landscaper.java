@@ -219,19 +219,17 @@ public class Landscaper {
         }
 
 
-        /*for (Direction dir : dir8) {
+        for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
             if (Lattice.isBuildingSite(location) && !Strategium.occupied[location.x][location.y])
-                if (waterLevel > Strategium.elevation[location.x][location.y] ||
-                        Lattice.maxDeposit(location) > 0) {
+                if (waterLevel > Strategium.elevation[location.x][location.y]) {
                     if (rc.canDepositDirt(dir)) {
-
                         rc.depositDirt(dir);
                         return true;
                     }
                 }
-        }*/
+        }
         if (!Lattice.isPit(rc.getLocation()))
             for (Direction dir : dir8) {
                 MapLocation location = rc.adjacentLocation(dir);
