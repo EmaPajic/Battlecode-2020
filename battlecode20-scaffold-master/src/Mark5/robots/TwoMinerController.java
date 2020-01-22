@@ -33,11 +33,11 @@ public class TwoMinerController {
         }
     }
 
-    static ArrayList<MapLocation> searchRoute;
+    public static ArrayList<MapLocation> searchRoute;
     static ArrayList<MapLocation> searchRouteVisited;
 
     static MapLocation currentTarget;
-    public static int currentTargetIndex;
+    public static int currentTargetIndex = 0;
     static public ArrayList<RobotType> staticRobots;
     static public RobotType lastMadeRobotType;
     static public boolean triedToBuildRefinery;
