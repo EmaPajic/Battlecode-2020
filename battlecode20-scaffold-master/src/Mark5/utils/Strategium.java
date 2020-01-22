@@ -2,6 +2,7 @@ package Mark5.utils;
 
 import Mark5.robots.DesignSchool;
 import Mark5.robots.Drone;
+import Mark5.robots.TwoMinerController;
 import Mark5.sensors.*;
 import battlecode.common.*;
 
@@ -288,6 +289,8 @@ public class Strategium {
                     Blockchain.parsingProgress = max(Blockchain.parsingProgress, rc.getRoundNum() - 50);
                     if (HQLocation != null) break;
                     HQLocation = new MapLocation(message[0], message[1]);
+                    if(rc.getType() == RobotType.DELIVERY_DRONE)
+                        TwoMinerController.searchRoute.add(0, HQLocation);
                     updatePotentialEnemyHQLocations();
                     Wall.init();
                     break;

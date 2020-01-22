@@ -106,7 +106,7 @@ public strictfp class RobotPlayer {
         } else if (rc.getType() == RobotType.DELIVERY_DRONE) {
             myFun = 1;
         }
-        if (rc.getType() == RobotType.MINER) {
+        if (rc.getType() == RobotType.MINER || rc.getType() == RobotType.DELIVERY_DRONE) {
             TwoMinerController.init();
         }
         System.out.println("I'm a " + rc.getType() + " and I just got created!");

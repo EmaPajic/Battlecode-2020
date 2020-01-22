@@ -1,5 +1,6 @@
 package Mark5.sensors;
 
+import Mark5.robots.TwoMinerController;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import Mark5.utils.Wall;
@@ -76,32 +77,39 @@ public class DroneSensor {
             occupied[robot.location.x][robot.location.y] = true;
 
             if (robot.team == myTeam) {
-
-                if (robot.type == RobotType.HQ) {
-                    if (HQLocation == null) {
-                        HQLocation = robot.location;
-                        Wall.init();
-                        Strategium.updatePotentialEnemyHQLocations();
-                    }
-                } else if(robot.type == RobotType.MINER) {
-                    boolean NearFulfillmentCenter = false;
-                    for(Direction dir : dir8) {
-                        if(rc.canSenseLocation(robot.location.add(dir))) {
-                            RobotInfo maybeFulfillment = rc.senseRobotAtLocation(robot.location.add(dir));
-                            if(maybeFulfillment != null) if(maybeFulfillment.type == RobotType.FULFILLMENT_CENTER &&
-                                                            maybeFulfillment.getTeam() == myTeam) {
-                                NearFulfillmentCenter = true;
-                                break;
+                switch (robot.type) {
+                    case HQ:
+                        if (HQLocation == null) {
+                            HQLocation = robot.location;
+                            TwoMinerController.searchRoute.add(0, HQLocation);
+                            Wall.init();
+                            Strategium.updatePotentialEnemyHQLocations();
+                        }
+                        break;
+                    case MINER:
+                        boolean NearFulfillmentCenter = false;
+                        for (Direction dir : dir8) {
+                            if (rc.canSenseLocation(robot.location.add(dir))) {
+                                RobotInfo maybeFulfillment = rc.senseRobotAtLocation(robot.location.add(dir));
+                                if (maybeFulfillment != null)
+                                    if (maybeFulfillment.type == RobotType.FULFILLMENT_CENTER &&
+                                            maybeFulfillment.getTeam() == myTeam) {
+                                        NearFulfillmentCenter = true;
+                                        break;
+                                    }
                             }
                         }
-                    }
-                    boolean isRushMiner = true;
-                    if(robot.getSoupCarrying() > 0)
-                        isRushMiner = false;
-                    if(NearFulfillmentCenter && isRushMiner)
-                        potentialTaxiPayload = robot;
+                        boolean isRushMiner = true;
+                        if (robot.getSoupCarrying() > 0)
+                            isRushMiner = false;
+                        if (NearFulfillmentCenter && isRushMiner)
+                            potentialTaxiPayload = robot;
+                        break;
+                    case LANDSCAPER:
+                        if(Navigation.aerialDistance(robot.location, HQLocation) > 1)
+                            Strategium.nearestLandscaper = robot;
+                        break;
                 }
-
             } else {
 
                 switch (robot.type) {
