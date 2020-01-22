@@ -135,6 +135,14 @@ public class Landscaper {
                         return true;
                     }
                 }
+                if (Navigation.aerialDistance(rc.getLocation(), Strategium.enemyHQLocation) == 2 &&
+                Math.abs(rc.senseElevation(rc.getLocation().add(Navigation.moveTowards(Strategium.enemyHQLocation))) -
+                        rc.senseElevation(rc.getLocation())) > 3) {
+                    if (rc.canDigDirt(Navigation.moveTowards(Strategium.enemyHQLocation))) {
+                        rc.digDirt(Navigation.moveTowards(Strategium.enemyHQLocation));
+                        return true;
+                    }
+                }
             }
 
             for (Direction dir : Direction.allDirections())
