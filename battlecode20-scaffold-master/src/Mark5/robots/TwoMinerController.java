@@ -40,7 +40,7 @@ public class TwoMinerController {
     static MapLocation currentTarget;
     public static int currentTargetIndex = 0;
     static public ArrayList<RobotType> staticRobots;
-    static public RobotType lastMadeRobotType;
+    static public RobotType lastMadeRobotType = RobotType.DESIGN_SCHOOL;
     static public boolean triedToBuildRefinery;
 
     static boolean currentlyRefining;
@@ -317,7 +317,7 @@ public class TwoMinerController {
             }
 
             if (!friendlyFulfilmentCenterNearby && !enemyNetGunsNearby && !friendlyDronesNearby) {
-                if (makeRobotType == null && (enemyLandscapersNearby)) {
+                if (makeRobotType == null && (enemyLandscapersNearby || enemySoftNearby)) {
                     makeRobotType = RobotType.FULFILLMENT_CENTER;
                 }
             }
