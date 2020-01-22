@@ -24,6 +24,7 @@ public class FulfillmentCenter {
 
     public static void run() throws GameActionException {
         Strategium.gatherInfo();
+        System.out.println(droneBuildingImportance);
         switch(droneBuildingImportance) {
             case TAXI_NEEDED:
                 Direction dirToRush = rc.getLocation().directionTo(FulfillmentCenterSensor.nearestRushMinerLocation);
@@ -68,6 +69,8 @@ public class FulfillmentCenter {
 
                 }
                 else if (numDrones < 5 || numDrones < FulfillmentCenterSensor.importantEnemyUnitsNum) {
+                    System.out.println("Nasih jedinica: "+ numDrones + " Protivnickih jedinica: " + FulfillmentCenterSensor.importantEnemyUnitsNum);
+                    System.out.println("\n Neprijateljskih lendskejpera ima: " + FulfillmentCenterSensor.enemyLandscapersNearby);
                     if ((rc.getTeamSoup() > 650 ||
                             FulfillmentCenterSensor.enemyLandscapersNearby) &&
                             !FulfillmentCenterSensor.enemyNetGunsNearby) {
