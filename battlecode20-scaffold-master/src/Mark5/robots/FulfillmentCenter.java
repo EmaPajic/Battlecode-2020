@@ -70,7 +70,7 @@ public class FulfillmentCenter {
 
                 }
                 else if (numDrones < 5 || FulfillmentCenterSensor.dronesNearby <
-                        FulfillmentCenterSensor.importantEnemyUnitsNum || rc.getRoundNum() % 50 == 0) {
+                        FulfillmentCenterSensor.importantEnemyUnitsNum) {
                     System.out.println("Nasih jedinica: "+ FulfillmentCenterSensor.dronesNearby +
                             " Protivnickih jedinica: " + FulfillmentCenterSensor.importantEnemyUnitsNum);
                     System.out.println("\n Neprijateljskih lendskejpera ima: " + FulfillmentCenterSensor.enemyLandscapersNearby);
