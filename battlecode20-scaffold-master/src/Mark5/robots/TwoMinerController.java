@@ -215,7 +215,7 @@ public class TwoMinerController {
     public static void control() throws GameActionException {
         Strategium.gatherInfo();
         if (rc.getRoundNum() > 600) {
-            if(Navigation.aerialDistance(hqLocation) < 5) {
+            if(Navigation.aerialDistance(hqLocation) > 5) {
                 Navigation.bugPath(hqLocation);
                 return;
             }
