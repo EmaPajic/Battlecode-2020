@@ -55,14 +55,14 @@ public class Navigation {
      * @param location The location to check. It needs to be within the map boundaries.
      * @return true if it is known to be a good landing spot, false otherwise.
      */
-    public static boolean goodLandingSpot(MapLocation location) {
+    public static boolean goodLandingSpot(MapLocation location) throws GameActionException{
         if (location == null) return false;
         //if (Strategium.enemyHQLocation == null) return false;
         if (Strategium.water[location.x][location.y]) return false;
         //if (location.distanceSquaredTo(Strategium.enemyHQLocation) > RobotType.LANDSCAPER.sensorRadiusSquared)
         //    return false;
         //if (location.isAdjacentTo(Strategium.enemyHQLocation)) return true;
-        return Strategium.elevation[location.x][location.y] == 8;
+        return Strategium.elevation[location.x][location.y] >= 8 && !Lattice.isPit(location);
     }
 
     public static boolean fuzzyNav(MapLocation destination) throws GameActionException {

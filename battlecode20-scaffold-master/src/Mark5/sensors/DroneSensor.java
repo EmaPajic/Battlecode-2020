@@ -111,12 +111,11 @@ public class DroneSensor {
                             MapLocation adjacentLoc = robot.location.add(dir);
                             if(rc.canSenseLocation(adjacentLoc)) {
                                 if(rc.senseFlooding(adjacentLoc) ||
-                                        Math.abs(rc.senseElevation(robot.location) - rc.senseElevation(adjacentLoc)) > 3 ||
-                                rc.senseRobotAtLocation(adjacentLoc) != null)
+                                        Math.abs(rc.senseElevation(robot.location) - rc.senseElevation(adjacentLoc)) > 3)
                                     ++cnt;
                             }
                         }
-                        if(cnt >= 6)
+                        if(cnt >= 7)
                             blockedUnit = robot;
                         break;
                     case LANDSCAPER:
@@ -137,8 +136,7 @@ public class DroneSensor {
                             MapLocation adjacentLoc = robot.location.add(dir);
                             if(rc.canSenseLocation(adjacentLoc)) {
                                 if(rc.senseFlooding(adjacentLoc) ||
-                                        Math.abs(rc.senseElevation(robot.location) - rc.senseElevation(adjacentLoc)) > 3 ||
-                                        rc.senseRobotAtLocation(adjacentLoc) != null)
+                                        Math.abs(rc.senseElevation(robot.location) - rc.senseElevation(adjacentLoc)) > 3)
                                     ++cntL;
                             }
                         }
