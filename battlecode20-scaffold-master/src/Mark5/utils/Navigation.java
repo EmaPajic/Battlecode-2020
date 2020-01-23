@@ -1,5 +1,6 @@
 package Mark5.utils;
 
+import Mark5.robots.Drone;
 import Mark5.utils.Strategium;
 import battlecode.common.*;
 
@@ -62,6 +63,8 @@ public class Navigation {
         //if (location.distanceSquaredTo(Strategium.enemyHQLocation) > RobotType.LANDSCAPER.sensorRadiusSquared)
         //    return false;
         //if (location.isAdjacentTo(Strategium.enemyHQLocation)) return true;
+        if(Navigation.aerialDistance(Strategium.HQLocation, location) == 1 && Drone.payload == Drone.Payload.FRIENDLY_LANDSCAPER)
+            return true;
         return Strategium.elevation[location.x][location.y] >= 8 && !Lattice.isPit(location);
     }
 

@@ -24,7 +24,7 @@ public class Drone {
         SWARMER
     }
 
-    private enum Payload {
+    public enum Payload {
         POTENTIAL,
         FRIENDLY_LANDSCAPER,
         RUSH_MINER,
@@ -35,7 +35,7 @@ public class Drone {
 
     public static State state = State.PREDATOR;
 
-    private static Payload payload = Payload.POTENTIAL;
+    public static Payload payload = Payload.POTENTIAL;
 
     private static int patrolRange = 3;
     private static int numOfDefensiveDrones = 16;
@@ -124,7 +124,7 @@ public class Drone {
             }
         }
 
-        numOfDefensiveDrones = 16;
+        numOfDefensiveDrones = 4;
         if(Strategium.dronesMetWithLowerID < (rc.getRoundNum() < 1200 ? 1 : numOfDefensiveDrones)) state = State.SENTRY;
 
         System.out.println(state);
