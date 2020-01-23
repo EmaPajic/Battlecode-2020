@@ -298,6 +298,8 @@ public class Strategium {
                     leastAmountOfSoup  += message[2];
                     refineries.add(new MapLocation(message[5], message[6]));
                     break;
+                case 17:
+                    Strategium.enemyHQLocation = new MapLocation(message[0], message[1]);
                 default:
                     break;
             }
