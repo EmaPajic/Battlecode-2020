@@ -51,28 +51,54 @@ public class Drone {
         return null;
     }
 
+    public static boolean isCrunchingTime() {
+        if(Strategium.enemyHQLocation == null)
+            return false;
+        if(!rc.canSenseLocation(Strategium.enemyHQLocation))
+            return false;
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() < 1505 && !rc.isCurrentlyHoldingUnit())
+            return true;
+        if(rc.getRoundNum() > 1502 && rc.getRoundNum() < 1507 && rc.isCurrentlyHoldingUnit())
+            return true;
+        if(rc.getRoundNum() > 1550 && rc.getRoundNum() < 1555 && !rc.isCurrentlyHoldingUnit())
+            return true;
+        if(rc.getRoundNum() > 1552 && rc.getRoundNum() < 1557 && rc.isCurrentlyHoldingUnit())
+            return true;
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 100 > 50 && rc.getRoundNum() % 100 < 55 &&
+           !rc.isCurrentlyHoldingUnit())
+            return true;
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 100 > 52 && rc.getRoundNum() % 100 < 57 &&
+                rc.isCurrentlyHoldingUnit())
+            return true;
+        return false;
+    }
+
+    public static boolean isPayloadGatheringTime() {
+        if(!rc.isCurrentlyHoldingUnit() && rc.getRoundNum() > 1300 && rc.getRoundNum() < 1400)
+            return true;
+        return false;
+    }
 
     public static void run() throws GameActionException {
 
         Strategium.gatherInfo();
 
         //patrolRange = 3 + (Strategium.numDronesMet - 24) / 8;
-        switch (state) {
-            case PREDATOR:
-                if (rc.getRoundNum() > 1550 && !rc.isCurrentlyHoldingUnit()) state = State.SWARMER;
-                if (rc.getRoundNum() > 1551 && rc.isCurrentlyHoldingUnit()) state = State.SWARMER;
-                break;
-            case SWARMER:
-                //if (Strategium.dronesMetWithLowerID >= Strategium.numDronesMet * 9 / 10) state = State.TAXI;
-                break;
+        if(isCrunchingTime())
+            state = State.SWARMER;
+        else
+            state = State.PREDATOR;
+
+        if(state != State.SWARMER) {
+            if(isPayloadGatheringTime()) {
+                state = State.LANDSCAPER_GATHERER;
+                waypoint = null;
+            }
+            else {
+                state = State.PREDATOR;
+            }
         }
 
-        if(!rc.isCurrentlyHoldingUnit() && rc.getRoundNum() > 1300 && rc.getRoundNum() < 1400) {
-            state = State.LANDSCAPER_GATHERER;
-            waypoint = null;
-        }
-        if(rc.getRoundNum() == 1400)
-            state = State.PREDATOR;
         System.out.println(state);
         System.out.println(payload);
         //System.out.println(state);
@@ -108,12 +134,12 @@ public class Drone {
                 break;
             case RUSH_MINER:
             case FRIENDLY_LANDSCAPER:
+            case FRIENDLY_MINER:
                 if(rc.getRoundNum() < 1300)
                     climb();
-                patrol();
+                else
+                    patrol();
                 break;
-            case FRIENDLY_MINER:
-                climb();
         }
 
 
@@ -296,15 +322,6 @@ public class Drone {
             }
         }
          */
-        if(rc.getRoundNum() < 1303 && rc.getRoundNum() > 1300) {
-            List<Direction> exit_the_bug_path= Navigation.moveAwayFrom(Strategium.enemyHQLocation);
-            for(Direction dir : exit_the_bug_path) {
-                if(Strategium.canSafelyMove(dir)) {
-                    rc.move(dir);
-                    return true;
-                }
-            }
-        }
         rc.setIndicatorLine(rc.getLocation(), waypoint, 255, 255, 255);
         System.out.println("FRUSTRATION: " + Navigation.frustration);
 
