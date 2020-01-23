@@ -38,7 +38,8 @@ public class HQSensor {
                     }
                 }
         }
-        totalMiners = min(3 + knownSoup/700, 10) + max((rc.getRoundNum()/200 - 1), 0) +
+        totalMiners = min(3 + knownSoup/700, 10) +
                 leastAmountOfSoup/500;
+        if(rc.getRoundNum() > 550) totalMiners += 3;
     }
 }

@@ -249,15 +249,7 @@ public class Strategium {
                 Blockchain.parseBlockchain(transactions);
                 parseTransactions();
                 break;
-            case LANDSCAPER:
-            case DELIVERY_DRONE:
-                while (HQLocation == null){
-                    Blockchain.parseBlockchain(transactions);
-                    parseTransactions();
-//                    System.out.println("Baza je " + HQLocation);
-                }
-//                System.out.println("Baza je " + HQLocation);
-                break;
+
             case MINER:
                 while (!upToDate){
                     Blockchain.parseBlockchain(transactions);
@@ -268,6 +260,14 @@ public class Strategium {
 
                     }
                 }
+                break;
+            default:
+                while (HQLocation == null){
+                    Blockchain.parseBlockchain(transactions);
+                    parseTransactions();
+//                    System.out.println("Baza je " + HQLocation);
+                }
+//                System.out.println("Baza je " + HQLocation);
                 break;
         }
 

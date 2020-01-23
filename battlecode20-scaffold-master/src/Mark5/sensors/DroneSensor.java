@@ -37,7 +37,8 @@ public class DroneSensor {
         enemyDrones.clear();
         alliedDrones.clear();
         nearestEnemyDrone = null;
-        nearestEnemyUnit = null;
+        if(nearestEnemyUnit != null)
+            if(rc.canSenseLocation(nearestEnemyUnit.location)) nearestEnemyUnit = null;
         blockedUnit = null;
         blockingUnit = null;
         nearestLandscaper = null;

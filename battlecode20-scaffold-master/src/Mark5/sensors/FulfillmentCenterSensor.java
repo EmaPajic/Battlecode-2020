@@ -48,6 +48,7 @@ public class FulfillmentCenterSensor {
         importantEnemyUnitsNum = 0;
         dronesNearby = 0;
         enemyLandscapersNearby  = false;
+        enemyNetGunsNearby = false;
 
         RobotInfo[] robots = rc.senseNearbyRobots();
         //System.println(robots.length);
@@ -82,6 +83,7 @@ public class FulfillmentCenterSensor {
             } else {
 
                 switch (robot.type) {
+                    case HQ:
                     case NET_GUN:
                         for(Direction dir : dir8){
                             if (rc.getLocation().add(dir).distanceSquaredTo(robot.location) <= 15){
@@ -89,7 +91,7 @@ public class FulfillmentCenterSensor {
                             }
                         }
                         if (rc.getLocation().distanceSquaredTo(robot.location) < 15) enemyNetGunsNearby = true;
-                    case HQ:
+
                     case VAPORATOR:
                     case REFINERY:
                     case DESIGN_SCHOOL:

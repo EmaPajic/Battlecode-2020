@@ -50,6 +50,13 @@ public class TwoMinerController {
     static int buildRadius = 0;
     static MapLocation buildWaypoint;
 
+    static MapLocation nearestNetGun = null;
+    static MapLocation nearestDesignSchool = null;
+    static MapLocation nearestFulfillmentCenter = null;
+    static boolean haveVaporator = false;
+
+    static int factoriesBuilt;
+
 
 
     static void findRoute() {
@@ -221,12 +228,17 @@ public class TwoMinerController {
         Strategium.gatherInfo();
 
 
-        if (rc.canSenseLocation(currentTarget) || Navigation.frustration >= 50) {
+        if(rc.getRoundNum() <= 600) {
+            if (rc.canSenseLocation(currentTarget) || Navigation.frustration >= 50) {
 
-            updateTarget();
+                updateTarget();
 
+            }
+
+            if (mineAndRefine()) return;
         }
-        if (mineAndRefine()) return;
+
+        System.out.println("Nisam crko");
 
 
         boolean enemyBuildingsNearby = false;
@@ -244,26 +256,45 @@ public class TwoMinerController {
         RobotInfo[] robots = rc.senseNearbyRobots();
         //System.println(robots.length);
 
+        if(nearestDesignSchool != null)
+            if(rc.canSenseLocation(nearestDesignSchool)) nearestDesignSchool = null;
+
+        if(nearestFulfillmentCenter != null)
+            if(rc.canSenseLocation(nearestFulfillmentCenter)) nearestFulfillmentCenter = null;
+
+        if(nearestNetGun != null)
+            if(rc.canSenseLocation(nearestNetGun)) nearestNetGun = null;
+
         for (RobotInfo robot : robots) {
             if (robot.team == Strategium.myTeam) {
 
                 switch (robot.type) {
                     case DESIGN_SCHOOL:
                         friendlyDesignSchoolNearby = true;
+                        if(rc.senseElevation(robot.location) >= 8 || rc.getRoundNum() <= 600)
+                        if(Navigation.aerialDistance(nearestDesignSchool) > Navigation.aerialDistance(robot))
+                            nearestDesignSchool = robot.location;
                         break;
 
                     case FULFILLMENT_CENTER:
                         friendlyFulfilmentCenterNearby = true;
-
-                    case HQ:
-                    case VAPORATOR:
-                    case REFINERY:
+                        if(rc.senseElevation(robot.location) >= 8 || rc.getRoundNum() <= 600)
+                        if(Navigation.aerialDistance(nearestFulfillmentCenter) > Navigation.aerialDistance(robot))
+                            nearestFulfillmentCenter = robot.location;
                         if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
                         break;
 
+                    case VAPORATOR:
+                        haveVaporator = true;
+                    case REFINERY:
+
+
+                    case HQ:
                     case NET_GUN:
                         if (rc.getLocation().distanceSquaredTo(robot.location) <= 15) friendlyNetGunsNearby = true;
                         if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
+                        if (Navigation.aerialDistance(nearestNetGun) > Navigation.aerialDistance(robot))
+                            nearestNetGun = robot.location;
                         break;
 
                     case DELIVERY_DRONE:
@@ -274,9 +305,10 @@ public class TwoMinerController {
             } else {
 
                 switch (robot.type) {
+                    case HQ:
                     case NET_GUN:
                         if (rc.getLocation().distanceSquaredTo(robot.location) <= 35) enemyNetGunsNearby = true;
-                    case HQ:
+
                     case VAPORATOR:
                     case REFINERY:
                     case DESIGN_SCHOOL:
@@ -303,21 +335,30 @@ public class TwoMinerController {
 
         RobotType makeRobotType = null;
 
-        if (!friendlyDesignSchoolNearby) {
-            if ((enemyBuildingsNearby || enemyLandscapersNearby || friendlyBuriedBuildingNearby ||
-                    Navigation.aerialDistance(Strategium.HQLocation) <= 3))
+        System.out.println(rc.getTeamSoup());
+
+        if (rc.getTeamSoup() > RobotType.DESIGN_SCHOOL.cost + RobotType.LANDSCAPER.cost ||
+                Navigation.aerialDistance(Strategium.HQLocation) <= 3) {
+
+            System.out.println("DOVOLJNO ZA GRADNJU");
+
+        if (Navigation.aerialDistance(nearestDesignSchool) > 8) {
+            if (enemyBuildingsNearby || enemyLandscapersNearby || friendlyBuriedBuildingNearby ||
+                    Navigation.aerialDistance(Strategium.HQLocation) <= 3 ||
+                    (Navigation.aerialDistance(nearestDesignSchool) > 20 && haveVaporator))
                 makeRobotType = RobotType.DESIGN_SCHOOL;
         }
 
-        if (rc.getTeamSoup() > RobotType.LANDSCAPER.cost + RobotType.DESIGN_SCHOOL.cost) {
-
             if (makeRobotType == null && !friendlyNetGunsNearby &&
-                    (enemyDronesNearby || enemyFulfillmentCenterNearby)) {
+                    (enemyDronesNearby || enemyFulfillmentCenterNearby)
+            ) {
                 makeRobotType = RobotType.NET_GUN;
             }
 
-            if (!friendlyFulfilmentCenterNearby && !enemyNetGunsNearby && !friendlyDronesNearby) {
-                if (makeRobotType == null && (enemyLandscapersNearby)) {
+            if (Navigation.aerialDistance(nearestFulfillmentCenter) > 8 &&
+                    !enemyNetGunsNearby && !friendlyDronesNearby) {
+                if (makeRobotType == null && (Navigation.aerialDistance(Strategium.HQLocation) <= 3 ||
+                        (Navigation.aerialDistance(nearestFulfillmentCenter) > 20 && haveVaporator))) {
                     makeRobotType = RobotType.FULFILLMENT_CENTER;
                 }
             }
@@ -328,7 +369,8 @@ public class TwoMinerController {
                 // stavi da pravi design school u ovom else-u dole ako ima mogucnost a nema ga u okolini baze
                 // situacija kada ima okolnih nasih robota a ima mogucnost da pravi nije pokrivena
                 // if soup < 1000 make vaporator
-                if (rc.getTeamSoup() < 700) {
+                makeRobotType = RobotType.VAPORATOR;
+                /*if (rc.getTeamSoup() < 700) {
                     makeRobotType = RobotType.VAPORATOR;
                     //System.println("Imamo dovoljno novca za Vaporator");
                 } else {
@@ -340,7 +382,7 @@ public class TwoMinerController {
                         lastMadeRobotType = RobotType.DESIGN_SCHOOL;
                         makeRobotType = RobotType.DESIGN_SCHOOL;
                     }
-                }
+                }*/
 
             }
             System.out.println(makeRobotType);
@@ -354,6 +396,9 @@ public class TwoMinerController {
                                 return;
                             }
         }
+
+        if(Strategium.nearestEnemyDrone != null && !friendlyNetGunsNearby)
+            if(Navigation.fuzzyNav(nearestNetGun)) return;
 
         if (rc.getRoundNum() <= 600) {
             if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {

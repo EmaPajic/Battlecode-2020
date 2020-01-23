@@ -1,5 +1,6 @@
 package Mark5.sensors;
 
+import Mark5.utils.Lattice;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import battlecode.common.*;
@@ -18,6 +19,8 @@ public class DesignSchoolSensor {
     public static Set<Direction> priorityBuildDirections = new HashSet<>();
     public static int numLandscapers = 0;
     public static int numThreats = 0;
+    public static boolean netGunNearby;
+    public static boolean droneNearby;
 
     public static void init() {
 
@@ -40,12 +43,14 @@ public class DesignSchoolSensor {
         int yMin = rc.getLocation().y - 4;
         int xMax = rc.getLocation().x + 4;
         int yMax = rc.getLocation().y + 4;
+        if(HQLocation != null)
         for (int i = min(xMin, 0); i <= max(xMax, rc.getMapWidth() - 1); i++)
             for (int j = min(yMin, 0); j <= max(yMax, rc.getMapHeight() - 1); j++) {
 
                 MapLocation location = new MapLocation(i, j);
                 if (rc.canSenseLocation(location))
-                    if (rc.senseFlooding(location)) {
+                    if (rc.senseFlooding(location))
+                        if(!Lattice.isPit(location)){
                         if (Navigation.aerialDistance(nearestWater) > Navigation.aerialDistance(location))
                             nearestWater = location;
                         numThreats++;
@@ -67,6 +72,7 @@ public class DesignSchoolSensor {
 
                     case HQ:
                     case NET_GUN:
+                        if(robot.location.distanceSquaredTo(rc.getLocation()) <= 15) netGunNearby = true;
                     case DESIGN_SCHOOL:
                     case FULFILLMENT_CENTER:
                     case VAPORATOR:
@@ -100,6 +106,9 @@ public class DesignSchoolSensor {
                     case LANDSCAPER:
                         ++numThreats;
                         priorityBuildDirections.add(rc.getLocation().directionTo(robot.location));
+                        break;
+                    case DELIVERY_DRONE:
+                        droneNearby = true;
                 }
 
             }

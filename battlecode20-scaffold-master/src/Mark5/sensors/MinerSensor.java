@@ -140,17 +140,18 @@ public class MinerSensor {
             }
             if (knownSoup > 0 && nearestSoup == null) scanAllSoup();
         } else {
-            for (int i = xMin; i <= xMax; ++i)
-                for (int j = yMin; j <= yMax; ++j)
+            if(xMin % 2 == HQLocation.x % 2) xMin++;
+            if(yMin % 2 == HQLocation.y % 2) yMin++;
+            for (int i = xMin; i <= xMax; i+=2)
+                for (int j = yMin; j <= yMax; j+=2)
                     if(!occupied[i][j] && (i!=0 || j!=0)) {
                         MapLocation location = new MapLocation(i, j);
                         if(!rc.canSenseLocation(location)) continue;
                         if(rc.senseFlooding(location)) continue;
                         if(rc.senseElevation(location) < 8) continue;
                         if(Math.abs(rc.senseElevation(location) - rc.senseElevation(rc.getLocation())) <= 3)
-                            if(Lattice.isBuildingSite(location))
-                                if(Navigation.aerialDistance(vacantBuildSpot) > Navigation.aerialDistance(location))
-                                    vacantBuildSpot = location;
+                            if(Navigation.aerialDistance(vacantBuildSpot) > Navigation.aerialDistance(location))
+                                vacantBuildSpot = location;
                     }
         }
 

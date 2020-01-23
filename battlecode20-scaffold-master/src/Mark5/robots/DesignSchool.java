@@ -18,8 +18,10 @@ public class DesignSchool {
 
     public static void run() throws GameActionException {
         Strategium.gatherInfo();
+
+        if(DesignSchoolSensor.droneNearby && !DesignSchoolSensor.netGunNearby) return;
         
-        if (DesignSchoolSensor.numThreats > DesignSchoolSensor.numLandscapers + numLandscapers) {
+        if (DesignSchoolSensor.numThreats > DesignSchoolSensor.numLandscapers) {
             if(Strategium.enemyHQLocation != null) {
                 Direction dirToEnemyHQ = rc.getLocation().directionTo(Strategium.enemyHQLocation);
                 List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToEnemyHQ.opposite()));
