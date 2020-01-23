@@ -112,7 +112,11 @@ public class DroneSensor {
                         if (NearFulfillmentCenter && isRushMiner)
                             potentialTaxiPayload = robot;
                         */
-
+                        if(enemyHQLocation != null) {
+                            if(Navigation.aerialDistance(robot.location, enemyHQLocation) <= 2) {
+                                break;
+                            }
+                        }
                         if(nearestMiner == null)
                             nearestMiner = robot;
                         else
@@ -134,6 +138,11 @@ public class DroneSensor {
                             blockedUnit = robot;
                         break;
                     case LANDSCAPER:
+                        if(enemyHQLocation != null) {
+                            if(Navigation.aerialDistance(robot.location, enemyHQLocation) <= 2) {
+                                break;
+                            }
+                        }
                         if(Navigation.aerialDistance(robot.location, HQLocation) > 1) {
                             if(nearestLandscaper == null)
                                 nearestLandscaper = robot;
