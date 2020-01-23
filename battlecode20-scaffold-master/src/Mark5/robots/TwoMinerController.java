@@ -393,6 +393,7 @@ public class TwoMinerController {
                         if (makeRobotType != RobotType.VAPORATOR ||
                                 rc.senseElevation(rc.adjacentLocation(dir)) >= 5)
                             if (Lattice.isBuildingSite(rc.adjacentLocation(dir))) {
+                                if(rc.getRoundNum() <= 600 || rc.senseElevation(rc.adjacentLocation(dir)) >= 5)
                                 rc.buildRobot(makeRobotType, dir);
                                 return;
                             }
