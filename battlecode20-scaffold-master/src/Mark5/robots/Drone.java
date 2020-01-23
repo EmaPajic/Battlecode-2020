@@ -124,7 +124,7 @@ public class Drone {
             }
         }
 
-        numOfDefensiveDrones = 16;
+        numOfDefensiveDrones = 4;
         if(Strategium.dronesMetWithLowerID < (rc.getRoundNum() < 1200 ? 1 : numOfDefensiveDrones)) state = State.SENTRY;
 
         System.out.println(state);

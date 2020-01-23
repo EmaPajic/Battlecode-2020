@@ -230,7 +230,7 @@ public class TwoMinerController {
 
     public static boolean buildNetGunNearEnemy() throws GameActionException {
 
-        if (Navigation.aerialDistance(Strategium.enemyHQLocation) <= 2) {
+
             for (Direction dir : dir8) {
                 if (rc.canBuildRobot(RobotType.NET_GUN, dir) &&
                         Navigation.aerialDistance(rc.getLocation().add(dir), Strategium.currentEnemyHQTarget) <= 3)
@@ -238,7 +238,6 @@ public class TwoMinerController {
                         return true;
                     }
             }
-        }
         return false;
     }
 

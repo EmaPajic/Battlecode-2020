@@ -43,7 +43,7 @@ public class DesignSchoolSensor {
         int yMin = rc.getLocation().y - 4;
         int xMax = rc.getLocation().x + 4;
         int yMax = rc.getLocation().y + 4;
-        if(HQLocation != null)
+        if(HQLocation != null && rc.senseElevation(rc.getLocation()) < 5)
         for (int i = min(xMin, 0); i <= max(xMax, rc.getMapWidth() - 1); i++)
             for (int j = min(yMin, 0); j <= max(yMax, rc.getMapHeight() - 1); j++) {
 
