@@ -257,7 +257,7 @@ public class Strategium {
             case DELIVERY_DRONE:
             case LANDSCAPER:
                 while (!upToDate && HQLocation != null){
-                    Blockchain.parsingProgress = max(Blockchain.parsingProgress, rc.getRoundNum() - 50);
+                    Blockchain.parsingProgress = max(Blockchain.parsingProgress, rc.getRoundNum() - 5);
                     Blockchain.parseBlockchain(transactions);
                     parseTransactions();
 
@@ -305,6 +305,8 @@ public class Strategium {
                 case 17:
                     if (Strategium.enemyHQLocation != null) break;
                     Strategium.enemyHQLocation = new MapLocation(message[0], message[1]);
+                    enemyNetGuns.add(Strategium.enemyHQLocation);
+                    enemyBuildings.add(Strategium.enemyHQLocation);
                 default:
                     break;
             }

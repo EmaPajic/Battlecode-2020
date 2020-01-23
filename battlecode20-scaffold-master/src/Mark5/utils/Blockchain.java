@@ -11,7 +11,7 @@ import static java.lang.Integer.min;
 
 public class Blockchain {
 
-    static final int[] acceptedTypes = {73, 42};
+    static final int[] acceptedTypes = {73, 42, 17};
     public static int parsingProgress = 1;
     static int opponentTransactionCosts = 0;
     static int opponentTransactions = 0;
