@@ -17,6 +17,7 @@ public class Blockchain {
     static int opponentTransactions = 0;
     static int opponentTransactionMinFee = 1000;
     static int opponentTransactionMaxFee = 0;
+    static int[] lastTurnSent = new int[GameConstants.MAX_ROBOT_ID + 1];
 
     static int getType(Transaction transaction){
         return (transaction.getMessage()[4] >> 24) & 255;
@@ -48,6 +49,12 @@ public class Blockchain {
         if(message.length != 7) return false;
         if((message[4] & ((1 << 16) - 1)) > parsingProgress) return false;
         if(message[3] > GameConstants.MAX_ROBOT_ID ^ rc.getTeam() == Team.B) return false;
+        if((message[4] & ((1 << 16) - 1)) <= lastTurnSent[message[3] % GameConstants.MAX_ROBOT_ID]){
+            System.out.println("NICE TRY");
+            System.out.println(message[4] & ((1 << 16) - 1));
+            System.out.println(lastTurnSent[message[3] % GameConstants.MAX_ROBOT_ID]);
+            return false;
+        }
         int checksum = 0;
         for (int i = 0; i < 7; i++) if (i != 4){
             checksum ^= message[i] & 255;
@@ -56,12 +63,15 @@ public class Blockchain {
             checksum ^= (message[i] >> 24) & 255;
         }
         for (int type : acceptedTypes) if(((message[4] >> 24) & 255) == type)
-            return (message[4] & (255 << 16)) == (~(checksum << 16) & (255 << 16));
+            if ((message[4] & (255 << 16)) == (~(checksum << 16) & (255 << 16))){
+                lastTurnSent[message[3] % GameConstants.MAX_ROBOT_ID] = message[4] & (1 << 16 - 1);
+                return true;
+            }
 
-        opponentTransactionCosts += transaction.getCost();
-        opponentTransactions++;
-        if (transaction.getCost() > opponentTransactionMaxFee) opponentTransactionMaxFee = transaction.getCost();
-        if (transaction.getCost() < opponentTransactionMinFee) opponentTransactionMinFee = transaction.getCost();
+        //opponentTransactionCosts += transaction.getCost();
+        //opponentTransactions++;
+        //if (transaction.getCost() > opponentTransactionMaxFee) opponentTransactionMaxFee = transaction.getCost();
+        //if (transaction.getCost() < opponentTransactionMinFee) opponentTransactionMinFee = transaction.getCost();
 
         return false;
     }
