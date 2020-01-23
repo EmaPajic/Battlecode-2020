@@ -279,17 +279,6 @@ public class Drone {
                     }
                     break;
                 case SWARMER:
-                    if(rc.canSenseLocation(Strategium.enemyHQLocation)) {
-                        if(Strategium.nearestLandscaper != null) {
-                            if(Navigation.aerialDistance(Strategium.nearestLandscaper.location,
-                                    Strategium.enemyHQLocation) == 2 &&
-                                    rc.senseElevation(Strategium.nearestLandscaper.location) < 200) {
-                                if(rc.canPickUpUnit(Strategium.nearestLandscaper.ID))
-                                    rc.pickUpUnit(Strategium.nearestLandscaper.ID);
-                                break;
-                            }
-                        }
-                    }
                     waypoint = null;
 
                     if (Strategium.enemyHQLocation != null) waypoint = Strategium.enemyHQLocation;
