@@ -66,18 +66,18 @@ public class Drone {
             return false;
         if(!rc.canSenseLocation(Strategium.enemyHQLocation))
             return false;
-        if(rc.getRoundNum() > 1500 && rc.getRoundNum() < 1505 && !rc.isCurrentlyHoldingUnit())
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() <= 1510 && !rc.isCurrentlyHoldingUnit())
             return true;
-        if(rc.getRoundNum() > 1502 && rc.getRoundNum() < 1507 && rc.isCurrentlyHoldingUnit())
+        if(rc.getRoundNum() > 1502 && rc.getRoundNum() <= 1512 && rc.isCurrentlyHoldingUnit())
             return true;
-        if(rc.getRoundNum() > 1550 && rc.getRoundNum() < 1555 && !rc.isCurrentlyHoldingUnit())
+        if(rc.getRoundNum() > 1550 && rc.getRoundNum() <= 1560 && !rc.isCurrentlyHoldingUnit())
             return true;
-        if(rc.getRoundNum() > 1552 && rc.getRoundNum() < 1557 && rc.isCurrentlyHoldingUnit())
+        if(rc.getRoundNum() > 1552 && rc.getRoundNum() <= 1562 && rc.isCurrentlyHoldingUnit())
             return true;
-        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 100 > 50 && rc.getRoundNum() % 100 < 55 &&
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 100 > 50 && rc.getRoundNum() % 100 <= 60 &&
            !rc.isCurrentlyHoldingUnit())
             return true;
-        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 100 > 52 && rc.getRoundNum() % 100 < 57 &&
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 100 > 52 && rc.getRoundNum() % 100 <= 62 &&
                 rc.isCurrentlyHoldingUnit())
             return true;
         return false;
