@@ -263,7 +263,7 @@ public class TwoMinerController {
             if(rc.canSenseLocation(nearestFulfillmentCenter)) nearestFulfillmentCenter = null;
 
         if(nearestNetGun != null)
-            if(rc.canSenseLocation(nearestNetGun)) nearestNetGun = null;
+            if(rc.canSenseLocation(nearestNetGun)) nearestNetGun = Strategium.HQLocation;
 
         for (RobotInfo robot : robots) {
             if (robot.team == Strategium.myTeam) {
@@ -271,14 +271,14 @@ public class TwoMinerController {
                 switch (robot.type) {
                     case DESIGN_SCHOOL:
                         friendlyDesignSchoolNearby = true;
-                        if(rc.senseElevation(robot.location) >= 8 || rc.getRoundNum() <= 600)
+                        if(rc.senseElevation(robot.location) >= 5 || rc.getRoundNum() <= 600)
                         if(Navigation.aerialDistance(nearestDesignSchool) > Navigation.aerialDistance(robot))
                             nearestDesignSchool = robot.location;
                         break;
 
                     case FULFILLMENT_CENTER:
                         friendlyFulfilmentCenterNearby = true;
-                        if(rc.senseElevation(robot.location) >= 8 || rc.getRoundNum() <= 600)
+                        if(rc.senseElevation(robot.location) >= 5 || rc.getRoundNum() <= 600)
                         if(Navigation.aerialDistance(nearestFulfillmentCenter) > Navigation.aerialDistance(robot))
                             nearestFulfillmentCenter = robot.location;
                         if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
@@ -287,7 +287,8 @@ public class TwoMinerController {
                     case VAPORATOR:
                         haveVaporator = true;
                     case REFINERY:
-
+                        if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
+                        break;
 
                     case HQ:
                     case NET_GUN:
@@ -397,7 +398,13 @@ public class TwoMinerController {
                             }
         }
 
-        if(Strategium.nearestEnemyDrone != null && !friendlyNetGunsNearby)
+        if(Strategium.nearestEnemyDrone != null) rc.setIndicatorLine(rc.getLocation(),
+                Strategium.nearestEnemyDrone.location,
+                255, 0, 0);
+
+        if(nearestNetGun != null) rc.setIndicatorLine(rc.getLocation(), nearestNetGun, 0, 255, 0);
+
+        if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8)
             if(Navigation.fuzzyNav(nearestNetGun)) return;
 
         if (rc.getRoundNum() <= 600) {

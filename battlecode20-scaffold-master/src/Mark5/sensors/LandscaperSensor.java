@@ -12,6 +12,7 @@ import static java.lang.Math.min;
 
 public class LandscaperSensor {
     public static MapLocation combatWaypoint;
+    public static MapLocation nearestNetGun;
 
     public static void init() {
         elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
@@ -22,14 +23,16 @@ public class LandscaperSensor {
     }
 
     public static void sense() throws GameActionException {
+        if(nearestNetGun == null && HQLocation != null) nearestNetGun = HQLocation;
 
         nearestBuriedFriendlyBuilding = null;
         nearestEnemyBuilding = null;
         nearestWater = null;
         combatWaypoint = null;
         overlapLocations.clear();
-        enemyDrones.clear();
         buriedFriendlyBuildings.clear();
+        enemyDrones.clear();
+        nearestEnemyDrone = null;
 
         int xMin = rc.getLocation().x - 2;
         int yMin = rc.getLocation().y - 2;
@@ -70,12 +73,15 @@ public class LandscaperSensor {
                             Strategium.updatePotentialEnemyHQLocations();
                             Wall.init();
                         }
+                    case NET_GUN:
+                        if(Navigation.aerialDistance(nearestNetGun) > Navigation.aerialDistance(robot))
+                            nearestNetGun = robot.location;
 
                     case DESIGN_SCHOOL:
                     case FULFILLMENT_CENTER:
                     case VAPORATOR:
                     case REFINERY:
-                    case NET_GUN:
+
 
                         if (robot.dirtCarrying > 0 && !Lattice.isAdjacentToWater(robot.location)) {
                             if (Navigation.aerialDistance(robot) <
@@ -110,6 +116,8 @@ public class LandscaperSensor {
 
                     case DELIVERY_DRONE:
                         enemyDrones.add(robot);
+                        if(Navigation.aerialDistance(nearestEnemyDrone) > Navigation.aerialDistance(robot))
+                            nearestEnemyDrone = robot;
                 }
 
             }
