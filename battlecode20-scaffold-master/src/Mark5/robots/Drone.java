@@ -38,7 +38,7 @@ public class Drone {
     private static Payload payload = Payload.POTENTIAL;
 
     private static int patrolRange = 3;
-
+    private static int numOfDefensiveDrones = 16;
     private static int patrolWaypointIndex = 1;
     private static MapLocation waypoint;
 
@@ -124,7 +124,8 @@ public class Drone {
             }
         }
 
-        if(Strategium.dronesMetWithLowerID < (rc.getRoundNum() < 1200 ? 1 : 16)) state = State.SENTRY;
+        numOfDefensiveDrones = 16;
+        if(Strategium.dronesMetWithLowerID < (rc.getRoundNum() < 1200 ? 1 : numOfDefensiveDrones)) state = State.SENTRY;
 
         System.out.println(state);
         System.out.println(payload);
@@ -278,6 +279,17 @@ public class Drone {
                     }
                     break;
                 case SWARMER:
+                    if(rc.canSenseLocation(Strategium.enemyHQLocation)) {
+                        if(Strategium.nearestLandscaper != null) {
+                            if(Navigation.aerialDistance(Strategium.nearestLandscaper.location,
+                                    Strategium.enemyHQLocation) == 2 &&
+                                    rc.senseElevation(Strategium.nearestLandscaper.location) < 200) {
+                                if(rc.canPickUpUnit(Strategium.nearestLandscaper.ID))
+                                    rc.pickUpUnit(Strategium.nearestLandscaper.ID);
+                                break;
+                            }
+                        }
+                    }
                     waypoint = null;
 
                     if (Strategium.enemyHQLocation != null) waypoint = Strategium.enemyHQLocation;
