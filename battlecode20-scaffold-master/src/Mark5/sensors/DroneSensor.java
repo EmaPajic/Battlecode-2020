@@ -43,6 +43,8 @@ public class DroneSensor {
         blockedUnit = null;
         blockingUnit = null;
         nearestLandscaper = null;
+        nearestMiner = null;
+        nearestPayload = null;
 
         int xMin = rc.getLocation().x - 4;
         int yMin = rc.getLocation().y - 4;
@@ -89,6 +91,7 @@ public class DroneSensor {
                         }
                         break;
                     case MINER:
+                        /*
                         boolean NearFulfillmentCenter = false;
                         for (Direction dir : dir8) {
                             if (rc.canSenseLocation(robot.location.add(dir))) {
@@ -106,6 +109,14 @@ public class DroneSensor {
                             isRushMiner = false;
                         if (NearFulfillmentCenter && isRushMiner)
                             potentialTaxiPayload = robot;
+                        */
+
+                        if(nearestMiner == null)
+                            nearestMiner = robot;
+                        else
+                        if(Navigation.aerialDistance(nearestMiner) > Navigation.aerialDistance(robot)) {
+                            nearestMiner = robot;
+                        }
 
                         // test for blockage
                         int cnt = 0;
@@ -188,7 +199,10 @@ public class DroneSensor {
 
         }
 
-
+        if(nearestMiner != null)
+            nearestPayload = nearestMiner;
+        if(nearestLandscaper != null && nearestPayload == null)
+            nearestPayload = nearestLandscaper;
 
 
         if (!rc.isReady() && (nearestWater == null || Navigation.frustration >= 100)) findWater();

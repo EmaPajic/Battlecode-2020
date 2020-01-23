@@ -41,6 +41,8 @@ public class Strategium {
     public static int numDronesMet = 0;
     public static int dronesMetWithLowerID = 0;
     public static RobotInfo nearestLandscaper = null;
+    public static RobotInfo nearestMiner = null;
+    public static RobotInfo nearestPayload = null;
 
     public static MapLocation nearestRefinery = null;
     public static MapLocation nearestSoup = null;

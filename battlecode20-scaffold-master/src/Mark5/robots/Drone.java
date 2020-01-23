@@ -8,6 +8,7 @@ import battlecode.common.*;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static Mark5.RobotPlayer.dir8;
@@ -75,6 +76,20 @@ public class Drone {
 
     public static boolean isPayloadGatheringTime() {
         if(!rc.isCurrentlyHoldingUnit() && rc.getRoundNum() > 1300 && rc.getRoundNum() < 1400)
+            return true;
+        return false;
+    }
+
+    public static boolean goodSwarmingLandingSpot(MapLocation location) throws GameActionException{
+        if(location == null)
+            return false;
+        if(!rc.canSenseLocation(location))
+            return false;
+        if(Strategium.enemyHQLocation != null)
+            return false;
+        if(rc.senseFlooding(location))
+            return false;
+        if(rc.senseElevation(location) >= 8 && Navigation.aerialDistance(Strategium.enemyHQLocation, location) <= 2)
             return true;
         return false;
     }
@@ -209,7 +224,7 @@ public class Drone {
             switch (state) {
                 case PREDATOR:
                     waypoint = null;
-                    if (rc.isCurrentlyHoldingUnit() || rc.getRoundNum() > 1400) {
+                    if ((rc.isCurrentlyHoldingUnit() && payload != Payload.ENEMY) || rc.getRoundNum() > 1400) {
                         if (Strategium.enemyHQLocation != null) waypoint = Strategium.enemyHQLocation;
                         else if (!Strategium.potentialEnemyHQLocations.isEmpty())
                             waypoint = Strategium.potentialEnemyHQLocations.get(
@@ -332,6 +347,16 @@ public class Drone {
     private static boolean climb() throws GameActionException {
         switch (state) {
             case SWARMER:
+                for (Direction dir : dir8)
+                    if (rc.canDropUnit(dir))
+                        if (goodSwarmingLandingSpot(rc.adjacentLocation(dir)))
+                        {
+                            rc.dropUnit(dir);
+                            state = State.SWARMER;
+                            payload = Payload.POTENTIAL;
+                            return true;
+                        }
+                return patrol();
             case PREDATOR:
             case TAXI:
                 for (Direction dir : dir8)
