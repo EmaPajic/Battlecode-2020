@@ -14,6 +14,8 @@ import java.util.Map;
 import static Mark5.RobotPlayer.dir8;
 import static Mark5.RobotPlayer.rc;
 import static Mark5.utils.Strategium.*;
+import static java.lang.Integer.max;
+import static java.lang.Integer.min;
 
 public class DroneSensor {
 
@@ -46,10 +48,10 @@ public class DroneSensor {
         nearestMiner = null;
         nearestPayload = null;
 
-        int xMin = rc.getLocation().x - 4;
-        int yMin = rc.getLocation().y - 4;
-        int xMax = rc.getLocation().x + 4;
-        int yMax = rc.getLocation().y + 4;
+        int xMin = max(0, rc.getLocation().x - 4);
+        int yMin = max(0, rc.getLocation().y - 4);
+        int xMax = min(rc.getLocation().x + 4, rc.getMapWidth() - 1);
+        int yMax = min(rc.getLocation().y + 4, rc.getMapHeight() - 1);
         for (int i = xMin; i <= xMax; i++)
             for (int j = yMin; j <= yMax; j++) {
 
