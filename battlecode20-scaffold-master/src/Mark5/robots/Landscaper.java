@@ -15,6 +15,17 @@ public class Landscaper {
 
         if (!rc.isReady()) return;
 
+        if (rc.getRoundNum() > 1497 && rc.getRoundNum() < 1500) {
+            if (Navigation.aerialDistance(Strategium.enemyHQLocation) <= 5 &&
+            Navigation.aerialDistance(Strategium.enemyHQLocation) > 2) {
+                rc.disintegrate();
+            }
+            if (Navigation.aerialDistance(Strategium.enemyHQLocation) == 2 &&
+            rc.senseElevation(rc.getLocation()) < 300) {
+                rc.disintegrate();
+            }
+        }
+
         if (!Strategium.overlapLocations.contains(rc.getLocation()))
             for (MapLocation location : Strategium.overlapLocations) {
                 if (rc.getLocation().isAdjacentTo(location))
