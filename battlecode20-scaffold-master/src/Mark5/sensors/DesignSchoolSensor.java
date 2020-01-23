@@ -72,7 +72,7 @@ public class DesignSchoolSensor {
 
                     case HQ:
                     case NET_GUN:
-                        if(robot.location.distanceSquaredTo(rc.getLocation()) <= 15) netGunNearby = true;
+                        netGunNearby = true;
                     case DESIGN_SCHOOL:
                     case FULFILLMENT_CENTER:
                     case VAPORATOR:
