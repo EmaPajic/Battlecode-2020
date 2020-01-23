@@ -156,7 +156,9 @@ public class Strategium {
                     default:
                         for (MapLocation gun : enemyNetGuns){
                             if (target.isWithinDistanceSquared(
-                                    gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) return false;
+                                    gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED) &&
+                                    !(rc.getLocation().isWithinDistanceSquared(gun, 5))
+                            ) return false;
                         }
                         return true;
                 }
