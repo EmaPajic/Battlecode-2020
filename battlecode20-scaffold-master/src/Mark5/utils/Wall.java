@@ -70,6 +70,7 @@ public class Wall {
             case WEST:
                 Direction dir = rc.getLocation().directionTo(HQLocation);
                 MapLocation location = rc.getLocation().add(dir).add(dir);
+                if(!rc.onTheMap(location)) return false;
                 if(Strategium.occupied[location.x][location.y]) return false;
                 for (int i = wall.length; i-- > 0; )
                     if (wall[i].x == HQLocation.x || wall[i].y == HQLocation.y)
