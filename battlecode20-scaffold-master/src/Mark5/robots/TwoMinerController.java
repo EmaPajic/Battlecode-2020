@@ -441,7 +441,8 @@ public class TwoMinerController {
             } else {
                 if (Strategium.nearestRefinery != null){
                     if(pastLocation != null && !tryToReturn && hqLocation != null) {
-                        List<Direction> dir = Navigation.moveAwayFrom(rc.getLocation().add(rc.getLocation().directionTo(hqLocation).opposite()));
+                        List<Direction> dir = Navigation.moveAwayFrom(rc.getLocation().add(
+                                rc.getLocation().directionTo(Strategium.nearestRefinery).opposite()));
 
                         System.out.println(dir);
 
