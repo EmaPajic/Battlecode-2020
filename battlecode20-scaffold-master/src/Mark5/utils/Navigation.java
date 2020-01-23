@@ -148,6 +148,52 @@ public class Navigation {
 
     }
 
+    public static boolean rbugPath(MapLocation destination) throws GameActionException {
+        if(!lastDestination.isAdjacentTo(destination)) {
+            avoiding = false;
+            frustration = 0;
+        }
+
+        lastDestination = destination;
+
+        if(!avoiding || frustration > 30) {
+            lastIntersection = rc.getLocation();
+            if (fuzzyNav(destination)) {
+                return true;
+            }
+        }
+
+        avoiding = true;
+        frustration++;
+
+        if(rc.getLocation().distanceSquaredTo(destination) <= lastIntersection.distanceSquaredTo(destination)) {
+            if (fuzzyNav(destination)) {
+                avoiding = false;
+                lastIntersection = rc.getLocation();
+                return true;
+            }
+        }
+
+        Direction dir = lastDirection.opposite().rotateRight();
+        int i = 0;
+        for(; Strategium.canSafelyMove(dir); dir = dir.rotateRight(), i++){
+            if(i == 8) {
+                avoiding = false;
+                return (fuzzyNav(destination));
+            }
+        }
+
+        for(; !Strategium.canSafelyMove(dir); dir = dir.rotateRight(), i++){
+            if(i == 8) {
+                return false;
+            }
+        }
+        rc.move(dir);
+        lastDirection = dir;
+        return true;
+
+    }
+
 
     public static Direction moveTowards(MapLocation target) {
 

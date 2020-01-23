@@ -11,6 +11,7 @@ import battlecode.common.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 import static Mark5.RobotPlayer.*;
 import static java.lang.Integer.min;
@@ -56,6 +57,9 @@ public class TwoMinerController {
     static boolean haveVaporator = false;
 
     static int factoriesBuilt;
+
+    public static MapLocation pastLocation = null;
+    public static boolean tryToReturn = false;
 
 
 
@@ -410,11 +414,49 @@ public class TwoMinerController {
 
         if (rc.getRoundNum() <= 600) {
             if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
+                tryToReturn = false;
+                pastLocation = rc.getLocation();
+
                 if (Strategium.nearestSoup != null) Navigation.bugPath(Strategium.nearestSoup);
                 else Navigation.bugPath(currentTarget);
             } else {
-                if (Strategium.nearestRefinery != null) Navigation.bugPath(Strategium.nearestRefinery);
-                else Navigation.bugPath(currentTarget);
+                if (Strategium.nearestRefinery != null){
+                    if(pastLocation != null && !tryToReturn && hqLocation != null) {
+                        List<Direction> dir = Navigation.moveAwayFrom(rc.getLocation().add(rc.getLocation().directionTo(hqLocation).opposite()));
+
+                        System.out.println(dir);
+
+                        Direction pastDir = pastLocation.directionTo((rc.getLocation()));
+                        System.out.println(pastDir);
+                        System.out.println("Prethodna lok " + pastLocation + "Trenu lokacija" + rc.getLocation());
+                        if(!dir.contains(pastDir) && pastDir != Direction.CENTER) {
+
+                            System.out.println("Hallelujah, country roadds");
+//                            rc.move(pastDir);
+                            tryToReturn = true;
+                            System.out.println(tryToReturn + "pokusao sam ka " + pastDir);
+                            return;
+                        }
+
+                    }
+
+
+                    if(tryToReturn){
+                        pastLocation = rc.getLocation();
+                        Navigation.rbugPath(Strategium.nearestRefinery);
+                    }
+                    else {
+                        pastLocation = rc.getLocation();
+                        Navigation.bugPath(Strategium.nearestRefinery);
+                    }
+
+                }
+                else {
+                    pastLocation = rc.getLocation();
+                    Navigation.bugPath(currentTarget);
+                }
+//                pastLocation = rc.getLocation();
+
             }
         } else {
             if(rc.getRoundNum() % 100 == 1) {
