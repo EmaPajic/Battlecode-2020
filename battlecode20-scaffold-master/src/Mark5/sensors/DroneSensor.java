@@ -87,7 +87,7 @@ public class DroneSensor {
                     case HQ:
                         if (HQLocation == null) {
                             HQLocation = robot.location;
-                            TwoMinerController.searchRoute.add(0, HQLocation);
+                            //TwoMinerController.searchRoute.add(0, HQLocation);
                             Wall.init();
                             Strategium.updatePotentialEnemyHQLocations();
                         }

@@ -296,7 +296,7 @@ public class Strategium {
                     if (HQLocation != null) break;
                     HQLocation = new MapLocation(message[0], message[1]);
                     if(rc.getType() == RobotType.DELIVERY_DRONE)
-                        TwoMinerController.searchRoute.add(0, HQLocation);
+                        //TwoMinerController.searchRoute.add(0, HQLocation);
                     updatePotentialEnemyHQLocations();
                     Wall.init();
                     break;

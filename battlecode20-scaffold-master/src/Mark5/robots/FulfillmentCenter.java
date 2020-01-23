@@ -44,7 +44,8 @@ public class FulfillmentCenter {
                 }
                 break;
             case PERIODIC_BUILDING:
-                if(rc.getRoundNum() > 1200){ // nemamo polje koje cuva koliko neprijateljskih lendskejpera imamo u okolini
+                if((rc.getRoundNum() > 1200 && rc.getRoundNum() <= 1480) ||
+                        (rc.getRoundNum() > 1480 && rc.getTeamSoup() >= 400)){ // nemamo polje koje cuva koliko neprijateljskih lendskejpera imamo u okolini
 
                     if(!FulfillmentCenterSensor.dirToBuild.isEmpty()) {
                         for (Direction dir : FulfillmentCenterSensor.dirToBuild) {
