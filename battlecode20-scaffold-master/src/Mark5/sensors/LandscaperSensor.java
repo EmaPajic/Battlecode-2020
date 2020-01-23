@@ -153,7 +153,7 @@ public class LandscaperSensor {
             for(Direction dir : dir8) {
                 MapLocation location = nearestEnemyBuilding.add(dir);
                 if(!rc.onTheMap(location)) continue;
-                if(location.isAdjacentTo(nearestEnemyBuilding) && !location.equals(nearestEnemyBuilding))
+                if(location.isAdjacentTo(nearestBuriedFriendlyBuilding) && !location.equals(nearestEnemyBuilding))
                     overlapLocations.add(location);
             }
 
