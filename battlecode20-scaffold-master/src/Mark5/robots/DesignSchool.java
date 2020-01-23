@@ -36,6 +36,15 @@ public class DesignSchool {
                     ++numLandscapers;
                     return;
                 }
+            if(Strategium.HQLocation != null) {
+                Direction dirToHQ = rc.getLocation().directionTo(Strategium.HQLocation);
+                List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToHQ.opposite()));
+                for(Direction dir : towards)
+                    if(tryBuild(RobotType.LANDSCAPER, dir)) {
+                        ++numLandscapers;
+                        return;
+                    }
+            }
             for (Direction dir : dir8) {
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     ++numLandscapers;
@@ -48,6 +57,15 @@ public class DesignSchool {
             if(Strategium.enemyHQLocation != null) {
                 Direction dirToEnemyHQ = rc.getLocation().directionTo(Strategium.enemyHQLocation);
                 List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToEnemyHQ.opposite()));
+                for(Direction dir : towards)
+                    if(tryBuild(RobotType.LANDSCAPER, dir)) {
+                        ++numLandscapers;
+                        return;
+                    }
+            }
+            if(Strategium.HQLocation != null) {
+                Direction dirToHQ = rc.getLocation().directionTo(Strategium.HQLocation);
+                List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToHQ.opposite()));
                 for(Direction dir : towards)
                     if(tryBuild(RobotType.LANDSCAPER, dir)) {
                         ++numLandscapers;
