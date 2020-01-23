@@ -51,7 +51,16 @@ public class Drone {
         }
         return null;
     }
+    public static void roam() {
+        if (rc.canSenseLocation(TwoMinerController.currentTarget)) {
 
+            TwoMinerController.updateTarget();
+
+        }
+        else {
+            waypoint = TwoMinerController.currentTarget;
+        }
+    }
     public static boolean isCrunchingTime() {
         if(Strategium.enemyHQLocation == null)
             return false;
@@ -75,7 +84,7 @@ public class Drone {
     }
 
     public static boolean isPayloadGatheringTime() {
-        if(!rc.isCurrentlyHoldingUnit() && rc.getRoundNum() > 1300 && rc.getRoundNum() < 1400)
+        if(rc.getRoundNum() > 1300 && rc.getRoundNum() < 1400)
             return true;
         return false;
     }
@@ -167,9 +176,6 @@ public class Drone {
                 switch (target.type) {
                     case LANDSCAPER:
                         payload = Payload.FRIENDLY_LANDSCAPER;
-                        if(state == State.LANDSCAPER_GATHERER) {
-                            state = State.PREDATOR;
-                        }
                         return true;
                     case MINER:
                         DroneSensor.potentialTaxiPayload = null;
@@ -231,14 +237,7 @@ public class Drone {
                                     Strategium.rand.nextInt(Strategium.potentialEnemyHQLocations.size()));
                     }
                     else {
-                        if (rc.canSenseLocation(TwoMinerController.currentTarget)) {
-
-                            TwoMinerController.updateTarget();
-
-                        }
-                        else {
-                            waypoint = TwoMinerController.currentTarget;
-                        }
+                        roam();
                     }
 
                     if (waypoint == null)
@@ -249,37 +248,49 @@ public class Drone {
                     break;
                 case LANDSCAPER_GATHERER:
                     waypoint = null;
-                    if(Strategium.nearestLandscaper != null)
-                        System.out.println(Strategium.nearestLandscaper.location);
+                    if(Strategium.nearestPayload != null)
+                        System.out.println(Strategium.nearestPayload.location);
                     if(!rc.isCurrentlyHoldingUnit()) {
-                        if(Strategium.nearestLandscaper != null) {
-                            if(Navigation.aerialDistance(Strategium.nearestLandscaper.location,
+                        if(Strategium.nearestPayload != null) {
+                            if(Navigation.aerialDistance(Strategium.nearestPayload.location,
                                     Strategium.HQLocation) != 1) {
                                 if(Strategium.enemyHQLocation != null) {
-                                    if(Navigation.aerialDistance(Strategium.nearestLandscaper.location,
+                                    if(Navigation.aerialDistance(Strategium.nearestPayload.location,
                                             Strategium.enemyHQLocation) > 1) {
-                                       if(attack(Strategium.nearestLandscaper))
+                                       if(attack(Strategium.nearestPayload))
                                            return true;
                                     }
                                 }
                                 else
-                                    if(attack(Strategium.nearestLandscaper))
+                                    if(attack(Strategium.nearestPayload))
                                         return true;
                             }
                         }
                         else {
-                            if (rc.canSenseLocation(TwoMinerController.currentTarget)) {
-
-                                TwoMinerController.updateTarget();
-
-                            }
-                            else {
-                                waypoint = TwoMinerController.currentTarget;
-                            }
+                            roam();
                         }
                     }
                     else {
-                        state = State.PREDATOR;
+                        if(rc.getID() % 5 != 0) {
+                            roam();
+                        }
+                        if(!rc.canSenseLocation(Strategium.HQLocation) &&
+                           rc.getID() % 5 == 0 && payload == Payload.FRIENDLY_LANDSCAPER) {
+                            waypoint = Strategium.HQLocation;
+                            break;
+                        }
+                        for(Direction dir : dir8) {
+                            MapLocation adjacentLoc = Strategium.HQLocation.add(dir);
+                            if(rc.canSenseLocation(adjacentLoc)) {
+                                if (rc.senseRobotAtLocation(adjacentLoc) == null) {
+                                    waypoint = adjacentLoc;
+                                    if(rc.canDropUnit(rc.getLocation().directionTo(adjacentLoc))) {
+                                        rc.dropUnit(rc.getLocation().directionTo(adjacentLoc));
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
                     }
                     break;
                 case SWARMER:
