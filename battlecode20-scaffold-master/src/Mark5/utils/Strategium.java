@@ -19,6 +19,7 @@ public class Strategium {
 
     static boolean upToDate = false;
     static LinkedList<Transaction> transactions = new LinkedList<>();
+    static LinkedList<Transaction> lastTransaction = new LinkedList<>();
 
     public static MapLocation HQLocation = null;
     public static MapLocation enemyHQLocation = null;
@@ -253,7 +254,10 @@ public class Strategium {
                 break;
 
             case MINER:
-                while (!upToDate){
+            case DELIVERY_DRONE:
+            case LANDSCAPER:
+                while (!upToDate && HQLocation != null){
+                    Blockchain.parsingProgress = max(Blockchain.parsingProgress, rc.getRoundNum() - 50);
                     Blockchain.parseBlockchain(transactions);
                     parseTransactions();
 
@@ -262,7 +266,6 @@ public class Strategium {
 
                     }
                 }
-                break;
             default:
                 while (HQLocation == null){
                     Blockchain.parseBlockchain(transactions);
@@ -288,7 +291,6 @@ public class Strategium {
 
             switch (Blockchain.getType(message)) {
                 case 73:
-                    Blockchain.parsingProgress = max(Blockchain.parsingProgress, rc.getRoundNum() - 50);
                     if (HQLocation != null) break;
                     HQLocation = new MapLocation(message[0], message[1]);
                     if(rc.getType() == RobotType.DELIVERY_DRONE)
@@ -301,6 +303,7 @@ public class Strategium {
                     refineries.add(new MapLocation(message[5], message[6]));
                     break;
                 case 17:
+                    if (Strategium.enemyHQLocation != null) break;
                     Strategium.enemyHQLocation = new MapLocation(message[0], message[1]);
                 default:
                     break;
