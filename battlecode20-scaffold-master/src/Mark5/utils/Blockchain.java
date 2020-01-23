@@ -76,6 +76,16 @@ public class Blockchain {
         return true;
     }
 
+    public static boolean reportEnemyHQLocation(int fee) throws GameActionException {
+        int[] message = new int[7];
+        message[0] = Strategium.enemyHQLocation.x;
+        message[1] = Strategium.enemyHQLocation.y;
+        addAuth(message, 17);
+        if(!rc.canSubmitTransaction(message, fee)) { System.out.println("FEJL"); return false; }
+        rc.submitTransaction(message, fee);
+        return true;
+    }
+
     public static int reportLocalSoup() throws GameActionException{
         MapLocation[] soupLocations  =  rc.senseNearbySoup();
         int totalSoup = 0;

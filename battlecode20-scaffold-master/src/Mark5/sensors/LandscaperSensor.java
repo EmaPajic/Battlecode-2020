@@ -1,9 +1,6 @@
 package Mark5.sensors;
 
-import Mark5.utils.Lattice;
-import Mark5.utils.Navigation;
-import Mark5.utils.Strategium;
-import Mark5.utils.Wall;
+import Mark5.utils.*;
 import battlecode.common.*;
 
 import static Mark5.RobotPlayer.dir8;
@@ -98,6 +95,7 @@ public class LandscaperSensor {
                         if (enemyHQLocation == null) {
                             enemyHQLocation = robot.location;
                             potentialEnemyHQLocations.clear();
+                            Blockchain.reportEnemyHQLocation(2);
                         }
                     case DESIGN_SCHOOL:
                     case FULFILLMENT_CENTER:

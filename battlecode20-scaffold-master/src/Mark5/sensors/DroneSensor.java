@@ -1,6 +1,7 @@
 package Mark5.sensors;
 
 import Mark5.robots.TwoMinerController;
+import Mark5.utils.Blockchain;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import Mark5.utils.Wall;
@@ -155,6 +156,7 @@ public class DroneSensor {
                             potentialEnemyHQLocations.clear();
                             enemyNetGuns.add(robot.location);
                             enemyBuildings.add(robot.location);
+                            Blockchain.reportEnemyHQLocation(2);
                         }
                     case NET_GUN:
 

@@ -1,9 +1,6 @@
 package Mark5.sensors;
 
-import Mark5.utils.Lattice;
-import Mark5.utils.Navigation;
-import Mark5.utils.Strategium;
-import Mark5.utils.Wall;
+import Mark5.utils.*;
 import battlecode.common.*;
 
 import java.util.Iterator;
@@ -113,9 +110,12 @@ public class MinerSensor {
                             nearestEnemyDrone = robot;
                         break;
                     case HQ:
-                        potentialEnemyHQLocations.clear();
-                        enemyHQLocation = robot.location;
-                        currentEnemyHQTarget = enemyHQLocation;
+                        if (enemyHQLocation == null) {
+                            potentialEnemyHQLocations.clear();
+                            enemyHQLocation = robot.location;
+                            currentEnemyHQTarget = enemyHQLocation;
+                            Blockchain.reportEnemyHQLocation(2);
+                        }
                         break;
                 }
 
