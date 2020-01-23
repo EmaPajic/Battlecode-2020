@@ -103,7 +103,10 @@ public class Navigation {
      * @throws GameActionException it doesn't
      */
     public static boolean bugPath(MapLocation destination) throws GameActionException {
-        if(!lastDestination.isAdjacentTo(destination)) {
+        if(!lastDestination.isAdjacentTo(destination) || (rc.getType() == RobotType.DELIVERY_DRONE && (
+                rc.getLocation().x == 0 || rc.getLocation().y == 0 || rc.getLocation().x == rc.getMapWidth() - 1 ||
+                rc.getLocation().y == rc.getMapHeight() - 1)
+                )) {
             avoiding = false;
             frustration = 0;
         }

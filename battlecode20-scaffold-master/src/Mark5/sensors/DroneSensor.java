@@ -158,6 +158,13 @@ public class DroneSensor {
                         if(cntL >= 7)
                             blockedUnit = robot;
                         break;
+
+                    case DELIVERY_DRONE:
+                        if(!robotsMet[robot.getID()]){
+                            robotsMet[robot.getID()] = true;
+                            numDronesMet++;
+                            if(robot.getID() < rc.getID()) dronesMetWithLowerID++;
+                        }
                 }
             } else {
 

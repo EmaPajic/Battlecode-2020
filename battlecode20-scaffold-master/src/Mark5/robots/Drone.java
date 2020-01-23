@@ -17,6 +17,7 @@ import static Mark5.RobotPlayer.rc;
 public class Drone {
 
     public enum State {
+        SENTRY,
         TAXI,
         PREDATOR,
         LANDSCAPER_GATHERER,
@@ -123,6 +124,8 @@ public class Drone {
             }
         }
 
+        if(Strategium.dronesMetWithLowerID < (rc.getRoundNum() < 1200 ? 1 : 16)) state = State.SENTRY;
+
         System.out.println(state);
         System.out.println(payload);
         //System.out.println(state);
@@ -187,7 +190,7 @@ public class Drone {
             payload = target.team == Strategium.opponentTeam ? Payload.ENEMY : Payload.BIOLOGICAL;
             return true;
         }
-        return Navigation.fuzzyNav(target.location);
+        return Navigation.bugPath(target.location);
     }
 
     private static boolean drown() throws GameActionException {
@@ -213,7 +216,7 @@ public class Drone {
                         return true;
                     }
                 return true;
-            } else return Navigation.fuzzyNav(Strategium.nearestWater);
+            } else return Navigation.bugPath(Strategium.nearestWater);
 
         }
 
@@ -327,6 +330,25 @@ public class Drone {
                     break;
 
                  */
+                case SENTRY:
+                    if(Navigation.aerialDistance(Strategium.HQLocation) > 2)
+                        return Navigation.bugPath(Strategium.HQLocation);
+                    if(Navigation.aerialDistance(Strategium.HQLocation) < 2) {
+                        List<Direction> dirs = Navigation.moveAwayFrom(Strategium.HQLocation);
+                        for (Direction dir : dirs)
+                            if(Strategium.canSafelyMove(dir)){
+                                rc.move(dir);
+                                return true;
+                            }
+                        return false;
+                    }
+                    Direction dir = Navigation.clockwiseSquare(Strategium.HQLocation);
+                    if(Strategium.canSafelyMove(dir)){
+                        rc.move(dir);
+                        return true;
+                    }
+                    return false;
+
 
             }
 
@@ -351,7 +373,7 @@ public class Drone {
         rc.setIndicatorLine(rc.getLocation(), waypoint, 255, 255, 255);
         System.out.println("FRUSTRATION: " + Navigation.frustration);
 
-        return Navigation.fuzzyNav(waypoint);
+        return Navigation.bugPath(waypoint);
 
     }
 
@@ -369,6 +391,7 @@ public class Drone {
                         }
                 return patrol();
             case PREDATOR:
+            case SENTRY:
             case TAXI:
                 for (Direction dir : dir8)
                     if (rc.canDropUnit(dir))
