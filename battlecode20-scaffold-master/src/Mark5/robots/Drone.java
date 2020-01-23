@@ -274,26 +274,7 @@ public class Drone {
                         }
                     }
                     else {
-                        if(rc.getID() % 5 != 0) {
-                            roam();
-                        }
-                        if(!rc.canSenseLocation(Strategium.HQLocation) &&
-                           rc.getID() % 5 == 0 && payload == Payload.FRIENDLY_LANDSCAPER) {
-                            waypoint = Strategium.HQLocation;
-                            break;
-                        }
-                        for(Direction dir : dir8) {
-                            MapLocation adjacentLoc = Strategium.HQLocation.add(dir);
-                            if(rc.canSenseLocation(adjacentLoc)) {
-                                if (rc.senseRobotAtLocation(adjacentLoc) == null) {
-                                    waypoint = adjacentLoc;
-                                    if(rc.canDropUnit(rc.getLocation().directionTo(adjacentLoc))) {
-                                        rc.dropUnit(rc.getLocation().directionTo(adjacentLoc));
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
+                        roam();
                     }
                     break;
                 case SWARMER:
