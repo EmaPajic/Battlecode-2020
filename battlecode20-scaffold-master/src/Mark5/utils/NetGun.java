@@ -13,7 +13,7 @@ public class NetGun {
     public NetGun(RobotInfo robot){
         location = robot.location;
         id = robot.ID;
-        readyOnRound = rc.getRoundNum() + 9;
+        readyOnRound = rc.getRoundNum() + (int) (robot.getCooldownTurns());
     }
 
     public NetGun(MapLocation location, int id, int readyOnRound){
