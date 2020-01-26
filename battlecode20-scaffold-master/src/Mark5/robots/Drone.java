@@ -163,7 +163,7 @@ public class Drone {
             case RUSH_MINER:
             case FRIENDLY_LANDSCAPER:
             case FRIENDLY_MINER:
-                if(rc.getRoundNum() < 1300)
+                if(rc.getRoundNum() < 1300 || (state == State.SENTRY && payload == Payload.FRIENDLY_LANDSCAPER))
                     climb();
                 else
                     patrol();
