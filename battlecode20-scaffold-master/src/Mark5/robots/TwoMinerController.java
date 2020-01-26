@@ -237,7 +237,8 @@ public class TwoMinerController {
                 updateTarget();
 
             }
-
+            if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8)
+                if(Navigation.fuzzyNav(nearestNetGun)) return;
             if (mineAndRefine()) return;
         }
 
@@ -345,6 +346,11 @@ public class TwoMinerController {
 
         if (aroundEnemyHQ && rc.getRoundNum() > 1500 && enemyDronesNearby && !friendlyNetGunsNearby) {
             buildNetGunNearEnemy();
+        }
+
+        if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8) {
+            if (Strategium.nearestEnemyDrone.currentlyHoldingUnit)
+            if (Navigation.fuzzyNav(nearestNetGun)) return;
         }
 
         if (rc.getTeamSoup() > RobotType.DESIGN_SCHOOL.cost + RobotType.LANDSCAPER.cost ||
