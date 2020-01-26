@@ -313,9 +313,9 @@ public class Drone {
 
                  */
                 case SENTRY:
-                    if(Navigation.aerialDistance(Strategium.HQLocation) > 2)
+                    if(Navigation.aerialDistance(Strategium.HQLocation) > 4)
                         return Navigation.bugPath(Strategium.HQLocation);
-                    if(Navigation.aerialDistance(Strategium.HQLocation) < 2) {
+                    if(Navigation.aerialDistance(Strategium.HQLocation) < 4) {
                         List<Direction> dirs = Navigation.moveAwayFrom(Strategium.HQLocation);
                         for (Direction dir : dirs)
                             if(Strategium.canSafelyMove(dir)){

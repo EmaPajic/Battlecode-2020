@@ -13,6 +13,17 @@ public class DroneSensor {
 
     public static DroneSensor strategium = null;
     public static RobotInfo potentialTaxiPayload = null;
+    private static RobotType targetType;
+
+    private static int priority(RobotType type){
+        switch (type){
+            case COW: return 0;
+            case LANDSCAPER: return 1;
+            case MINER: return 2;
+            case DELIVERY_DRONE: return 3;
+        }
+        return -1;
+    }
 
     public static void init() {
 
@@ -22,6 +33,7 @@ public class DroneSensor {
         occupied = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         dirSafetyCacheValid = new int[10];
         dirSafetyCache = new boolean[10];
+        targetType = RobotType.COW;
 
     }
 
@@ -32,12 +44,16 @@ public class DroneSensor {
         alliedDrones.clear();
         nearestEnemyDrone = null;
         if(nearestEnemyUnit != null)
-            if(rc.canSenseLocation(nearestEnemyUnit.location)) nearestEnemyUnit = null;
+            if(rc.canSenseLocation(nearestEnemyUnit.location)){
+                nearestEnemyUnit = null;
+                targetType = RobotType.COW;
+            }
         blockedUnit = null;
         blockingUnit = null;
         nearestLandscaper = null;
         nearestMiner = null;
         nearestPayload = null;
+
 
         int xMin = max(0, rc.getLocation().x - 4);
         int yMin = max(0, rc.getLocation().y - 4);
@@ -173,13 +189,13 @@ public class DroneSensor {
                         if (enemyHQLocation == null) {
                             enemyHQLocation = robot.location;
                             potentialEnemyHQLocations.clear();
-                            enemyNetGuns.add(robot.location);
+                            enemyNetGuns.add(new NetGun(robot.location, -1, 10));
                             enemyBuildings.add(robot.location);
                             Blockchain.reportEnemyHQLocation(2);
                         }
                     case NET_GUN:
 
-                        if (!enemyNetGuns.contains(robot.location)) enemyNetGuns.add(robot.location);
+                        if (!enemyNetGuns.contains(new NetGun(robot))) enemyNetGuns.add(new NetGun(robot));
 
                     case DESIGN_SCHOOL:
                     case FULFILLMENT_CENTER:
@@ -194,12 +210,26 @@ public class DroneSensor {
                         enemyDrones.add(robot);
                         if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyDrone))
                             nearestEnemyDrone = robot;
+                        if(robot.isCurrentlyHoldingUnit()){
+                            RobotInfo payload = rc.senseRobot(robot.heldUnitID);
+                            if(payload.team != rc.getTeam()) {
+                                if (priority(payload.type) >= priority(targetType))
+                                    if (Navigation.aerialDistance(robot) <
+                                            Navigation.aerialDistance(nearestEnemyUnit)) {
+                                        nearestEnemyUnit = robot;
+                                        targetType = payload.type;
+                                    }
+                            }
+                        }
                         break;
 
                     default:
                         enemyUnits.add(robot);
-                        if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyUnit))
-                            nearestEnemyUnit = robot;
+                        if (priority(robot.type) >= priority(targetType))
+                            if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyUnit)) {
+                                nearestEnemyUnit = robot;
+                                targetType = robot.type;
+                            }
 
                 }
 

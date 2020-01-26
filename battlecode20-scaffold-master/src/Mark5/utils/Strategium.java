@@ -31,7 +31,7 @@ public class Strategium {
     public static Team opponentTeam;
 
     public static List<MapLocation> enemyBuildings = new LinkedList<>();
-    public static List<MapLocation> enemyNetGuns = new LinkedList<>();
+    public static List<NetGun> enemyNetGuns = new LinkedList<>();
     public static List<MapLocation> refineries = new LinkedList<>();
     public static List<RobotInfo> enemyDrones = new LinkedList<>();
     public static List<RobotInfo> enemyUnits = new LinkedList<>();
@@ -142,21 +142,23 @@ public class Strategium {
                         return true;
                     case TAXI:
                         if (!water[target.x][target.y]) return true;
-                        for (MapLocation gun : enemyNetGuns)
+                        for (NetGun gun : enemyNetGuns)
                             if (target.isWithinDistanceSquared(
-                                    gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED)) {
+                                    gun.location, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED) &&
+                            rc.getRoundNum() >= gun.readyOnRound) {
                                 if (enemyHQLocation == null) return false;
-                                int range = target.distanceSquaredTo(gun);
+                                int range = target.distanceSquaredTo(gun.location);
                                 for (RobotInfo drone : alliedDrones)
-                                    if (drone.location.distanceSquaredTo(gun) <= range) return true;
+                                    if (drone.location.isWithinDistanceSquared(gun.location, range)) return true;
                                 return false;
                             }
                         return true;
                     default:
-                        for (MapLocation gun : enemyNetGuns){
+                        for (NetGun gun : enemyNetGuns){
                             if (target.isWithinDistanceSquared(
-                                    gun, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED) &&
-                                    !(rc.getLocation().isWithinDistanceSquared(gun, 5))
+                                    gun.location, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED) &&
+                                    !(rc.getLocation().isWithinDistanceSquared(gun.location, 5)) &&
+                                    rc.getRoundNum() >= gun.readyOnRound
                             ) return false;
                         }
                         return true;
@@ -188,11 +190,11 @@ public class Strategium {
         });
 
         enemyNetGuns.removeIf(gun -> {
-            if (rc.canSenseLocation(gun)) {
+            if (rc.canSenseLocation(gun.location)) {
                 try {
-                    RobotInfo info = rc.senseRobotAtLocation(gun);
+                    RobotInfo info = rc.senseRobotAtLocation(gun.location);
                     if (info == null) return true;
-                    return info.type != RobotType.NET_GUN || info.team != opponentTeam;
+                    return info.getID() != gun.id && gun.id >= 0;
                 } catch (GameActionException e) {
                     e.printStackTrace();
                 }
@@ -306,7 +308,7 @@ public class Strategium {
                 case 17:
                     if (Strategium.enemyHQLocation != null) break;
                     Strategium.enemyHQLocation = new MapLocation(message[0], message[1]);
-                    enemyNetGuns.add(Strategium.enemyHQLocation);
+                    enemyNetGuns.add(new NetGun(Strategium.enemyHQLocation, -1, 10));
                     enemyBuildings.add(Strategium.enemyHQLocation);
                 default:
                     break;

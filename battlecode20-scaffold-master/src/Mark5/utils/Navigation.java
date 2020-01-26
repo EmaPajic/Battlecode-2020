@@ -62,7 +62,7 @@ public class Navigation {
         if (rc.senseFlooding(location)) return false;
         if(Navigation.aerialDistance(Strategium.HQLocation, location) == 1 && Drone.payload == Drone.Payload.FRIENDLY_LANDSCAPER)
             return true;
-        return rc.senseElevation(location) >= 8 && !Lattice.isPit(location);
+        return rc.senseElevation(location) >= 5 && !Lattice.isPit(location);
     }
 
     public static boolean fuzzyNav(MapLocation destination) throws GameActionException {
