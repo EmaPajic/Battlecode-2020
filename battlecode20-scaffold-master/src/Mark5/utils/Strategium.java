@@ -193,8 +193,15 @@ public class Strategium {
             if (rc.canSenseLocation(gun.location)) {
                 try {
                     RobotInfo info = rc.senseRobotAtLocation(gun.location);
-                    if (info == null) return true;
-                    return info.getID() != gun.id && gun.id >= 0;
+                    if (info == null){
+                        Grid.unsafe[gun.location.x / 7 + gun.location.y / 7 * Grid.cols] = false;
+                        return true;
+                    }
+                    if(info.getID() != gun.id && gun.id >= 0){
+                        Grid.unsafe[gun.location.x / 7 + gun.location.y / 7 * Grid.cols] = false;
+                        return true;
+                    }
+                    return false;
                 } catch (GameActionException e) {
                     e.printStackTrace();
                 }

@@ -15,12 +15,16 @@ public class DroneSensor {
     public static RobotInfo potentialTaxiPayload = null;
     private static RobotType targetType;
 
-    private static int priority(RobotType type){
-        switch (type){
-            case COW: return 0;
-            case LANDSCAPER: return 1;
-            case MINER: return 2;
-            case DELIVERY_DRONE: return 3;
+    private static int priority(RobotType type) {
+        switch (type) {
+            case COW:
+                return 0;
+            case LANDSCAPER:
+                return 1;
+            case MINER:
+                return 2;
+            case DELIVERY_DRONE:
+                return 3;
         }
         return -1;
     }
@@ -43,8 +47,8 @@ public class DroneSensor {
         enemyDrones.clear();
         alliedDrones.clear();
         nearestEnemyDrone = null;
-        if(nearestEnemyUnit != null)
-            if(rc.canSenseLocation(nearestEnemyUnit.location)){
+        if (nearestEnemyUnit != null)
+            if (rc.canSenseLocation(nearestEnemyUnit.location)) {
                 nearestEnemyUnit = null;
                 targetType = RobotType.COW;
             }
@@ -63,26 +67,34 @@ public class DroneSensor {
             for (int j = yMin; j <= yMax; j++) {
 
                 MapLocation location = new MapLocation(i, j);
+                int index = j / 7 * Grid.rows + i;
                 if (rc.canSenseLocation(location)) {
+                    if(rc.senseSoup(location) > 0) Grid.interesting[index] = true;
                     elevation[i][j] = rc.senseElevation(location);
                     occupied[i][j] = false;
                     if (rc.senseFlooding(location)) {
+                        if (Navigation.aerialDistance(nearestWater) > Navigation.aerialDistance(location))
+                            nearestWater = location;
                         if (!water[i][j]) {
                             water[i][j] = true;
+                            Grid.flooded[index] = true;
                             foundWater = true;
                         }
-                    } else {
-
+                    } else if (water[i][j]) {
                         water[i][j] = false;
+                        Grid.flooded[index] = false;
                         if (location.equals(nearestWater))
                             nearestWater = null;
-
                     }
+
+
                 }
             }
 
 
         RobotInfo[] robots = rc.senseNearbyRobots();
+
+            int index = 0;
 
         for (RobotInfo robot : robots) {
 
@@ -118,67 +130,65 @@ public class DroneSensor {
                         if (NearFulfillmentCenter && isRushMiner)
                             potentialTaxiPayload = robot;
                         */
-                        if(enemyHQLocation != null) {
-                            if(Navigation.aerialDistance(robot.location, enemyHQLocation) <= 2) {
+                        if (enemyHQLocation != null) {
+                            if (Navigation.aerialDistance(robot.location, enemyHQLocation) <= 2) {
                                 break;
                             }
                         }
-                        if(nearestMiner == null)
+                        if (nearestMiner == null)
                             nearestMiner = robot;
-                        else
-                        if(Navigation.aerialDistance(nearestMiner) > Navigation.aerialDistance(robot)) {
+                        else if (Navigation.aerialDistance(nearestMiner) > Navigation.aerialDistance(robot)) {
                             nearestMiner = robot;
                         }
 
                         // test for blockage
                         int cnt = 0;
-                        for(Direction dir : dir8) {
+                        for (Direction dir : dir8) {
                             MapLocation adjacentLoc = robot.location.add(dir);
-                            if(rc.canSenseLocation(adjacentLoc)) {
-                                if(rc.senseFlooding(adjacentLoc) ||
+                            if (rc.canSenseLocation(adjacentLoc)) {
+                                if (rc.senseFlooding(adjacentLoc) ||
                                         Math.abs(rc.senseElevation(robot.location) - rc.senseElevation(adjacentLoc)) > 3)
                                     ++cnt;
                             }
                         }
-                        if(cnt >= 7)
+                        if (cnt >= 7)
                             blockedUnit = robot;
                         break;
                     case LANDSCAPER:
-                        if(enemyHQLocation != null) {
-                            if(Navigation.aerialDistance(robot.location, enemyHQLocation) <= 2) {
+                        if (enemyHQLocation != null) {
+                            if (Navigation.aerialDistance(robot.location, enemyHQLocation) <= 2) {
                                 break;
                             }
                         }
-                        if(Navigation.aerialDistance(robot.location, HQLocation) > 1) {
-                            if(nearestLandscaper == null)
+                        if (Navigation.aerialDistance(robot.location, HQLocation) > 1) {
+                            if (nearestLandscaper == null)
                                 nearestLandscaper = robot;
-                            else
-                                if(Navigation.aerialDistance(nearestLandscaper) > Navigation.aerialDistance(robot)) {
-                                    nearestLandscaper = robot;
-                                }
+                            else if (Navigation.aerialDistance(nearestLandscaper) > Navigation.aerialDistance(robot)) {
+                                nearestLandscaper = robot;
+                            }
                         }
 
                         // test for blockage
                         int cntL = 0;
-                        if(blockedUnit != null || Navigation.aerialDistance(robot.location, HQLocation) == 1)
+                        if (blockedUnit != null || Navigation.aerialDistance(robot.location, HQLocation) == 1)
                             break;
-                        for(Direction dir : dir8) {
+                        for (Direction dir : dir8) {
                             MapLocation adjacentLoc = robot.location.add(dir);
-                            if(rc.canSenseLocation(adjacentLoc)) {
-                                if(rc.senseFlooding(adjacentLoc) ||
+                            if (rc.canSenseLocation(adjacentLoc)) {
+                                if (rc.senseFlooding(adjacentLoc) ||
                                         Math.abs(rc.senseElevation(robot.location) - rc.senseElevation(adjacentLoc)) > 3)
                                     ++cntL;
                             }
                         }
-                        if(cntL >= 7)
+                        if (cntL >= 7)
                             blockedUnit = robot;
                         break;
 
                     case DELIVERY_DRONE:
-                        if(!robotsMet[robot.getID()]){
+                        if (!robotsMet[robot.getID()]) {
                             robotsMet[robot.getID()] = true;
                             numDronesMet++;
-                            if(robot.getID() < rc.getID()) dronesMetWithLowerID++;
+                            if (robot.getID() < rc.getID()) dronesMetWithLowerID++;
                         }
                 }
             } else {
@@ -195,12 +205,22 @@ public class DroneSensor {
                         }
                     case NET_GUN:
 
-                        if (!enemyNetGuns.contains(new NetGun(robot))) enemyNetGuns.add(new NetGun(robot));
+                        if (!enemyNetGuns.contains(new NetGun(robot))) {
+                            enemyNetGuns.add(new NetGun(robot));
+                        }
+                        Grid.unsafe[robot.location.x / 7 + robot.location.y / 7 * Grid.cols] = true;
 
+                    case REFINERY:
                     case DESIGN_SCHOOL:
+
+                        index = robot.location.x / 7 + robot.location.y / 7 * Grid.cols;
+                        if(Grid.interesting[index] && !Grid.unsafe[index]) Grid.huntingGround[index] = true;
+                        if (!enemyBuildings.contains(robot.location)) enemyBuildings.add(robot.location);
+                        break;
+
                     case FULFILLMENT_CENTER:
                     case VAPORATOR:
-                    case REFINERY:
+
 
                         if (!enemyBuildings.contains(robot.location)) enemyBuildings.add(robot.location);
                         break;
@@ -210,9 +230,9 @@ public class DroneSensor {
                         enemyDrones.add(robot);
                         if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyDrone))
                             nearestEnemyDrone = robot;
-                        if(robot.isCurrentlyHoldingUnit()){
+                        if (robot.isCurrentlyHoldingUnit()) {
                             RobotInfo payload = rc.senseRobot(robot.heldUnitID);
-                            if(payload.team != rc.getTeam()) {
+                            if (payload.team != rc.getTeam()) {
                                 if (priority(payload.type) >= priority(targetType))
                                     if (Navigation.aerialDistance(robot) <
                                             Navigation.aerialDistance(nearestEnemyUnit)) {
@@ -223,7 +243,11 @@ public class DroneSensor {
                         }
                         break;
 
-                    default:
+                    case MINER:
+                        index = robot.location.x / 7 + robot.location.y / 7 * Grid.cols;
+                        if(Grid.interesting[index] && !Grid.unsafe[index]) Grid.huntingGround[index] = true;
+
+                    case LANDSCAPER:
                         enemyUnits.add(robot);
                         if (priority(robot.type) >= priority(targetType))
                             if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyUnit)) {
@@ -237,9 +261,9 @@ public class DroneSensor {
 
         }
 
-        if(nearestMiner != null)
+        if (nearestMiner != null)
             nearestPayload = nearestMiner;
-        if(nearestLandscaper != null && nearestPayload == null)
+        if (nearestLandscaper != null && nearestPayload == null)
             nearestPayload = nearestLandscaper;
 
 
