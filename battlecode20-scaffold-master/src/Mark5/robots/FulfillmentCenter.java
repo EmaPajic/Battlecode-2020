@@ -77,7 +77,7 @@ public class FulfillmentCenter {
                     System.out.println("\n Neprijateljskih lendskejpera ima: " + FulfillmentCenterSensor.enemyLandscapersNearby);
                     if ((rc.getTeamSoup() > 650 ||
                             (FulfillmentCenterSensor.enemyLandscapersNearby && rc.getTeamSoup() > 300) ||
-                            numDrones == 0) &&
+                            numDrones < 2) &&
                             !FulfillmentCenterSensor.enemyNetGunsNearby) {
                         if (FulfillmentCenterSensor.nearestEnemyLandscaperLocation != null) {
                             Direction dirToEnemy =
