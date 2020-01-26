@@ -58,14 +58,11 @@ public class Navigation {
      */
     public static boolean goodLandingSpot(MapLocation location) throws GameActionException{
         if (location == null) return false;
-        //if (Strategium.enemyHQLocation == null) return false;
-        if (Strategium.water[location.x][location.y]) return false;
-        //if (location.distanceSquaredTo(Strategium.enemyHQLocation) > RobotType.LANDSCAPER.sensorRadiusSquared)
-        //    return false;
-        //if (location.isAdjacentTo(Strategium.enemyHQLocation)) return true;
+        if (!rc.canSenseLocation(location)) return false;
+        if (rc.senseFlooding(location)) return false;
         if(Navigation.aerialDistance(Strategium.HQLocation, location) == 1 && Drone.payload == Drone.Payload.FRIENDLY_LANDSCAPER)
             return true;
-        return Strategium.elevation[location.x][location.y] >= 8 && !Lattice.isPit(location);
+        return rc.senseElevation(location) >= 8 && !Lattice.isPit(location);
     }
 
     public static boolean fuzzyNav(MapLocation destination) throws GameActionException {

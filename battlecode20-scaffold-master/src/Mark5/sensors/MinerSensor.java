@@ -1,16 +1,14 @@
 package Mark5.sensors;
 
-import Mark5.utils.*;
+import Mark5.utils.Blockchain;
+import Mark5.utils.Navigation;
+import Mark5.utils.Strategium;
 import battlecode.common.*;
 
-import java.util.Iterator;
-import java.util.Map;
-
 import static Mark5.RobotPlayer.*;
+import static Mark5.utils.Strategium.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-
-import static Mark5.utils.Strategium.*;
 
 public class MinerSensor {
     public static int visibleSoup;
@@ -41,7 +39,7 @@ public class MinerSensor {
         int yMin = max(0, rc.getLocation().y - 5);
         int xMax = min(rc.getLocation().x + 5, rc.getMapWidth() - 1);
         int yMax = min(rc.getLocation().y + 5, rc.getMapHeight() - 1);
-        int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 10);
+
         for (int i = xMin; i <= xMax; ++i)
             for (int j = yMin; j <= yMax; ++j) {
 

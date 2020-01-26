@@ -1,15 +1,7 @@
 package Mark5.sensors;
 
-import Mark5.robots.TwoMinerController;
-import Mark5.utils.Blockchain;
-import Mark5.utils.Navigation;
-import Mark5.utils.Strategium;
-import Mark5.utils.Wall;
+import Mark5.utils.*;
 import battlecode.common.*;
-
-import java.awt.*;
-import java.util.Iterator;
-import java.util.Map;
 
 import static Mark5.RobotPlayer.dir8;
 import static Mark5.RobotPlayer.rc;
@@ -26,7 +18,6 @@ public class DroneSensor {
 
         water = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
-        explored = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         robotsMet = new boolean[GameConstants.MAX_ROBOT_ID + 1];
         occupied = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         dirSafetyCacheValid = new int[10];
@@ -57,7 +48,6 @@ public class DroneSensor {
 
                 MapLocation location = new MapLocation(i, j);
                 if (rc.canSenseLocation(location)) {
-                    explored[i][j] = true;
                     elevation[i][j] = rc.senseElevation(location);
                     occupied[i][j] = false;
                     if (rc.senseFlooding(location)) {
