@@ -3,6 +3,8 @@ package Mark5.utils;
 import Mark5.robots.DesignSchool;
 import Mark5.robots.Drone;
 import Mark5.robots.TwoMinerController;
+import Mark5.utils.Symmetry.*;
+
 import Mark5.sensors.*;
 import battlecode.common.*;
 
@@ -322,36 +324,32 @@ public class Strategium {
     static public void updatePotentialEnemyHQLocations() {
         if (HQLocation == null)
             return;
+        Symmetry.verticalSymmetryEnemyHQLocation = new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y);
+        Symmetry.horizontalSymmetryEnemyHQLocation = new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1);
+        Symmetry.diagonalSymmetryEnemyHQLocation = new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
+                rc.getMapHeight() - HQLocation.y - 1);
         if (Math.abs(rc.getMapWidth() / 2 - HQLocation.x) >
                 Math.abs(rc.getMapHeight() / 2 - HQLocation.y)) {
             if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
-                potentialEnemyHQLocations.add(
-                        new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
+                potentialEnemyHQLocations.add(Symmetry.verticalSymmetryEnemyHQLocation);
 
             if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1 &&
                     HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                potentialEnemyHQLocations.add(
-                        new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
-                                rc.getMapHeight() - HQLocation.y - 1));
+                potentialEnemyHQLocations.add(Symmetry.diagonalSymmetryEnemyHQLocation);
 
             if (HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                potentialEnemyHQLocations.add(
-                        new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1));
+                potentialEnemyHQLocations.add(Symmetry.horizontalSymmetryEnemyHQLocation);
         }
         else {
             if (HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                potentialEnemyHQLocations.add(
-                        new MapLocation(HQLocation.x, rc.getMapHeight() - HQLocation.y - 1));
+                potentialEnemyHQLocations.add(Symmetry.horizontalSymmetryEnemyHQLocation);
 
             if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1 &&
                     HQLocation.y != rc.getMapHeight() - HQLocation.y - 1)
-                potentialEnemyHQLocations.add(
-                        new MapLocation(rc.getMapWidth() - HQLocation.x - 1,
-                                rc.getMapHeight() - HQLocation.y - 1));
+                potentialEnemyHQLocations.add(Symmetry.diagonalSymmetryEnemyHQLocation);
 
             if (HQLocation.x != rc.getMapWidth() - HQLocation.x - 1)
-                potentialEnemyHQLocations.add(
-                        new MapLocation(rc.getMapWidth() - HQLocation.x - 1, HQLocation.y));
+                potentialEnemyHQLocations.add(Symmetry.verticalSymmetryEnemyHQLocation);
         }
         //System.out.println("Potential HQs: " + potentialEnemyHQLocations.toString());
     }
