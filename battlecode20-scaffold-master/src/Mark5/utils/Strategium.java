@@ -2,6 +2,7 @@ package Mark5.utils;
 
 import Mark5.robots.DesignSchool;
 import Mark5.robots.Drone;
+import Mark5.robots.HQ;
 import Mark5.robots.TwoMinerController;
 import Mark5.utils.Symmetry.*;
 
@@ -18,7 +19,6 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 public class Strategium {
-
     static boolean upToDate = false;
     static LinkedList<Transaction> transactions = new LinkedList<>();
     static LinkedList<Transaction> lastTransaction = new LinkedList<>();
@@ -71,10 +71,10 @@ public class Strategium {
     public static MapLocation nearestBuriedFriendlyBuilding = null;
     public static MapLocation nearestEnemyBuilding = null;
     public static List<MapLocation> overlapLocations = new LinkedList<>();
+    public static NetGun lastEnemyNetGunSeen = null;
 
     public static int[] dirSafetyCacheValid;
     public static boolean[] dirSafetyCache;
-
 
     public static Random rand;
     // iskreno nisam znao kom bloku polja da ovo polje pridruzim, sometimes i feel like coravi boromir
@@ -149,7 +149,9 @@ public class Strategium {
                         for (NetGun gun : enemyNetGuns)
                             if (target.isWithinDistanceSquared(
                                     gun.location, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED) &&
-                            rc.getRoundNum() >= gun.readyOnRound) {
+                                    Navigation.aerialDistance(target, gun.location) +
+                                            (gun.readyOnRound - rc.getRoundNum()) * 3 / 2 <= 5
+                            ) {
                                 if (enemyHQLocation == null) return false;
                                 int range = target.distanceSquaredTo(gun.location);
                                 for (RobotInfo drone : alliedDrones)
@@ -161,8 +163,8 @@ public class Strategium {
                         for (NetGun gun : enemyNetGuns){
                             if (target.isWithinDistanceSquared(
                                     gun.location, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED) &&
-                                    !(rc.getLocation().isWithinDistanceSquared(gun.location, 5)) &&
-                                    rc.getRoundNum() >= gun.readyOnRound
+                                    Navigation.aerialDistance(target, gun.location) +
+                                            (gun.readyOnRound - rc.getRoundNum()) * 3 / 2 <= 5
                             ) return false;
                         }
                         return true;
@@ -248,6 +250,24 @@ public class Strategium {
                 break;
         }
 
+        int tmp = Clock.getBytecodeNum();
+        if(Symmetry.nonVerticalCount <= 5) {
+            Symmetry.checkVerticalSymmetry();
+        }
+        if(Symmetry.nonHorizontalCount <= 5) {
+            Symmetry.checkHorizontalSymmetry();
+        }
+        if(HQLocation != null) {
+            potentialEnemyHQLocations.removeIf(location -> {
+                try {
+                    return Symmetry.removeWrongSymmetry(location);
+                } catch (GameActionException e) {
+                    //e.printStackTrace();
+                    return false;
+                }
+            });
+        }
+        System.out.println(Clock.getBytecodeNum() - tmp);
         if(enemyHQLocation != null) currentEnemyHQTarget = enemyHQLocation;
         else if(!potentialEnemyHQLocations.isEmpty()) currentEnemyHQTarget = potentialEnemyHQLocations.get(0);
         potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
@@ -258,11 +278,11 @@ public class Strategium {
         upToDate = false;
 
         sense();
-        System.out.println("SENSED");
-
+        if(rc.getRoundNum() < 4)
+            return;
         switch(rc.getType()){
             case HQ:
-                if(rc.getRoundNum() == 1)
+                if(rc.getRoundNum() == 4)
                     Blockchain.reportHQLocation( 1);
                 Blockchain.parseBlockchain(transactions);
                 parseTransactions();
@@ -270,6 +290,16 @@ public class Strategium {
 
             case MINER:
             case DELIVERY_DRONE:
+                while (!upToDate || HQLocation == null){
+                    if(HQLocation != null)
+                        Blockchain.parsingProgress = max(Blockchain.parsingProgress, rc.getRoundNum() - 50);
+                    Blockchain.parseBlockchain(transactions);
+                    parseTransactions();
+
+                    if(rc.getRoundNum() == Blockchain.parsingProgress){
+                        upToDate = true;
+                    }
+                }
             case LANDSCAPER:
                 while (!upToDate || HQLocation == null){
                     if(HQLocation != null)
@@ -279,7 +309,6 @@ public class Strategium {
 
                     if(rc.getRoundNum() == Blockchain.parsingProgress){
                         upToDate = true;
-
                     }
                 }
             default:
@@ -324,6 +353,12 @@ public class Strategium {
                     Strategium.enemyHQLocation = new MapLocation(message[0], message[1]);
                     enemyNetGuns.add(new NetGun(Strategium.enemyHQLocation, -1, 10));
                     enemyBuildings.add(Strategium.enemyHQLocation);
+                case 98:
+                    MapLocation netGunLoc = new MapLocation(message[0], message[1]);
+                    lastEnemyNetGunSeen = new NetGun(netGunLoc, message[2], message[5]);
+                    if (!enemyNetGuns.contains(lastEnemyNetGunSeen)) {
+                        enemyNetGuns.add(lastEnemyNetGunSeen);
+                    }
                 default:
                     break;
             }

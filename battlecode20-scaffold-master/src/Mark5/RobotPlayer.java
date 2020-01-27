@@ -73,6 +73,7 @@ public strictfp class RobotPlayer {
         if (hqLocation == null) {
             // search surroundings for hq
             RobotInfo[] robots = rc.senseNearbyRobots();
+
             for (RobotInfo robot : robots) {
                 if (robot.type == RobotType.HQ && robot.team == rc.getTeam()) {
                     hqLocation = robot.location;
@@ -109,6 +110,10 @@ public strictfp class RobotPlayer {
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
             turnCount += 1;
+            if(turnCount == 1 && rc.getType() != RobotType.HQ)
+                Blockchain.init();
+            else if(turnCount == 3)
+                Blockchain.init();
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
                 // Here, we've separated the controls into a different method for each RobotType.
