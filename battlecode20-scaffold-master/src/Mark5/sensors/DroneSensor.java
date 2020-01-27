@@ -59,42 +59,46 @@ public class DroneSensor {
         nearestPayload = null;
 
 
-        int xMin = max(0, rc.getLocation().x - 4);
-        int yMin = max(0, rc.getLocation().y - 4);
-        int xMax = min(rc.getLocation().x + 4, rc.getMapWidth() - 1);
-        int yMax = min(rc.getLocation().y + 4, rc.getMapHeight() - 1);
-        for (int i = xMin; i <= xMax; i++)
-            for (int j = yMin; j <= yMax; j++) {
+        if (!rc.isReady()) {
+            int xMin = max(0, rc.getLocation().x - 4);
+            int yMin = max(0, rc.getLocation().y - 4);
+            int xMax = min(rc.getLocation().x + 4, rc.getMapWidth() - 1);
+            int yMax = min(rc.getLocation().y + 4, rc.getMapHeight() - 1);
+            for (int i = xMin; i <= xMax; i++)
+                for (int j = yMin; j <= yMax; j++) {
 
-                MapLocation location = new MapLocation(i, j);
-                int index = j / 7 * Grid.rows + i;
-                if (rc.canSenseLocation(location)) {
-                    if(rc.senseSoup(location) > 0) Grid.interesting[index] = true;
-                    elevation[i][j] = rc.senseElevation(location);
-                    occupied[i][j] = false;
-                    if (rc.senseFlooding(location)) {
-                        if (Navigation.aerialDistance(nearestWater) > Navigation.aerialDistance(location))
-                            nearestWater = location;
-                        if (!water[i][j]) {
-                            water[i][j] = true;
-                            Grid.flooded[index] = true;
-                            foundWater = true;
+                    MapLocation location = new MapLocation(i, j);
+                    int index = j / 7 * Grid.cols + i / 7;
+                    if (rc.canSenseLocation(location)) {
+                        if (rc.senseSoup(location) > 0) Grid.interesting[index] = true;
+                        elevation[i][j] = rc.senseElevation(location);
+                        occupied[i][j] = false;
+                        if (rc.senseFlooding(location)) {
+                            if (Navigation.aerialDistance(nearestWater) > Navigation.aerialDistance(location))
+                                nearestWater = location;
+                            if (!water[i][j]) {
+                                water[i][j] = true;
+                                Grid.flooded[index] = true;
+                                foundWater = true;
+                            }
+                        } else {
+                            if (water[i][j]) {
+                                water[i][j] = false;
+                                Grid.flooded[index] = false;
+                            }
+                            if (location.equals(nearestWater))
+                                nearestWater = null;
                         }
-                    } else if (water[i][j]) {
-                        water[i][j] = false;
-                        Grid.flooded[index] = false;
-                        if (location.equals(nearestWater))
-                            nearestWater = null;
+
+
                     }
-
-
                 }
-            }
+        }
 
 
         RobotInfo[] robots = rc.senseNearbyRobots();
 
-            int index = 0;
+        int index;
 
         for (RobotInfo robot : robots) {
 
@@ -151,7 +155,8 @@ public class DroneSensor {
                                     ++cnt;
                             }
                         }
-                        if (cnt >= 7)
+                        if (cnt >= 7 || (Navigation.aerialDistance(robot.location, HQLocation) < 2 &&
+                                rc.getRoundNum() > 600))
                             blockedUnit = robot;
                         break;
                     case LANDSCAPER:
@@ -214,7 +219,8 @@ public class DroneSensor {
                     case DESIGN_SCHOOL:
 
                         index = robot.location.x / 7 + robot.location.y / 7 * Grid.cols;
-                        if(Grid.interesting[index] && !Grid.unsafe[index]) Grid.huntingGround[index] = true;
+                        System.out.println("LOC: " + robot.location + "IND: " + index);
+                        if (Grid.interesting[index] && !Grid.unsafe[index]) Grid.huntingGround[index] = true;
                         if (!enemyBuildings.contains(robot.location)) enemyBuildings.add(robot.location);
                         break;
 
@@ -245,9 +251,10 @@ public class DroneSensor {
 
                     case MINER:
                         index = robot.location.x / 7 + robot.location.y / 7 * Grid.cols;
-                        if(Grid.interesting[index] && !Grid.unsafe[index]) Grid.huntingGround[index] = true;
+                        if (Grid.interesting[index] && !Grid.unsafe[index]) Grid.huntingGround[index] = true;
 
                     case LANDSCAPER:
+                    case COW:
                         enemyUnits.add(robot);
                         if (priority(robot.type) >= priority(targetType))
                             if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyUnit)) {

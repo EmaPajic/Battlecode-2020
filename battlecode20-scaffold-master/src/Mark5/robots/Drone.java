@@ -1,6 +1,7 @@
 package Mark5.robots;
 
 import Mark5.sensors.DroneSensor;
+import Mark5.utils.Grid;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import Mark5.utils.Wall;
@@ -53,14 +54,8 @@ public class Drone {
         return null;
     }
     public static void roam() {
-        if (rc.canSenseLocation(TwoMinerController.currentTarget)) {
-
-            TwoMinerController.updateTarget();
-
-        }
-        else {
-            waypoint = TwoMinerController.currentTarget;
-        }
+        Grid.update();
+        waypoint = Grid.waypoint;
     }
     public static boolean isCrunchingTime() {
         if(Strategium.enemyHQLocation == null)
@@ -229,12 +224,11 @@ public class Drone {
         if (Strategium.HQLocation == null) return false;
 
         if (waypoint == null || rc.getLocation().equals(waypoint) || Navigation.frustration >= 30) {
-            Navigation.frustration = 0;
 
             switch (state) {
                 case PREDATOR:
                     waypoint = null;
-                    if ((rc.isCurrentlyHoldingUnit() && payload != Payload.ENEMY) || rc.getRoundNum() > 1400) {
+                    if (rc.getRoundNum() > 1400) {
                         if (Strategium.enemyHQLocation != null) waypoint = Strategium.enemyHQLocation;
                         else if (!Strategium.potentialEnemyHQLocations.isEmpty())
                             waypoint = Strategium.potentialEnemyHQLocations.get(

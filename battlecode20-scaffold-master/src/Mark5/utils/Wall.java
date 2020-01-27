@@ -108,6 +108,7 @@ public class Wall {
                         if (rc.senseElevation(wall[i]) < rc.senseElevation(buildSpot))
                             buildSpot = wall[i];
         }
+        rc.setIndicatorDot(buildSpot, 255, 0, 0);
         return buildSpot;
     }
 

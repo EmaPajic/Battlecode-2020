@@ -51,7 +51,8 @@ public class DesignSchoolSensor {
                 if (rc.canSenseLocation(location))
                     if (rc.senseFlooding(location))
                         if(!Lattice.isPit(location)){
-                        if (Navigation.aerialDistance(nearestWater) > Navigation.aerialDistance(location))
+                        if (Navigation.aerialDistance(nearestWater) > Navigation.aerialDistance(location) &&
+                                numThreats < 2)
                             nearestWater = location;
                         numThreats++;
                         priorityBuildDirections.add(rc.getLocation().directionTo(location));

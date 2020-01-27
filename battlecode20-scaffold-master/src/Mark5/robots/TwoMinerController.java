@@ -358,9 +358,10 @@ public class TwoMinerController {
 
             System.out.println("DOVOLJNO ZA GRADNJU");
 
-        if (Navigation.aerialDistance(nearestDesignSchool) > 8) {
+        if (Navigation.aerialDistance(nearestDesignSchool) > 8)
+        if (haveVaporator || Navigation.aerialDistance(Strategium.HQLocation) <= 3){
             if (enemyBuildingsNearby || enemyLandscapersNearby || friendlyBuriedBuildingNearby ||
-                    Navigation.aerialDistance(Strategium.HQLocation) <= 3 ||
+                    /*(Navigation.aerialDistance(Strategium.HQLocation) <= 3  && rc.getRoundNum() > 150)*/ //||
                     (Navigation.aerialDistance(nearestDesignSchool) > 20 && haveVaporator))
                 makeRobotType = RobotType.DESIGN_SCHOOL;
         }
@@ -373,7 +374,7 @@ public class TwoMinerController {
 
             if (Navigation.aerialDistance(nearestFulfillmentCenter) > 8 &&
                     !enemyNetGunsNearby && !friendlyDronesNearby) {
-                if (makeRobotType == null && (Navigation.aerialDistance(Strategium.HQLocation) <= 3 ||
+                if (makeRobotType == null && (Navigation.aerialDistance(Strategium.HQLocation) < 2 ||
                         (Navigation.aerialDistance(nearestFulfillmentCenter) > 20 && haveVaporator))) {
                     makeRobotType = RobotType.FULFILLMENT_CENTER;
                 }
@@ -389,8 +390,10 @@ public class TwoMinerController {
                 for (Direction dir : dir8)
                     if (rc.canBuildRobot(makeRobotType, dir))
                         if (makeRobotType != RobotType.VAPORATOR ||
-                                rc.senseElevation(rc.adjacentLocation(dir)) >= 5)
-                            if (Lattice.isBuildingSite(rc.adjacentLocation(dir))) {
+                                rc.senseElevation(rc.adjacentLocation(dir)) >= 5 || rc.getRoundNum()<150)
+                            if (Lattice.isBuildingSite(rc.adjacentLocation(dir)) ||
+                                    (rc.adjacentLocation(dir).isAdjacentTo(Strategium.HQLocation) &&
+                                            rc.getRoundNum() < 150) && makeRobotType == RobotType.FULFILLMENT_CENTER) {
                                 if(rc.getRoundNum() <= 600 || rc.senseElevation(rc.adjacentLocation(dir)) >= 5)
                                 rc.buildRobot(makeRobotType, dir);
                                 return;

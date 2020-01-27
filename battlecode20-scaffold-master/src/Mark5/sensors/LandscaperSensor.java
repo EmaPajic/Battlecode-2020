@@ -83,7 +83,9 @@ public class LandscaperSensor {
                     case REFINERY:
 
 
-                        if (robot.dirtCarrying > 0 && !Lattice.isAdjacentToWater(robot.location)) {
+                        if (robot.dirtCarrying > 0 && !Lattice.isAdjacentToWater(robot.location) &&
+                                (!robot.location.isAdjacentTo(HQLocation) || rc.getRoundNum() < 300 ||
+                                        robot.location == HQLocation)) {
                             if (Navigation.aerialDistance(robot) <
                                     Navigation.aerialDistance(nearestBuriedFriendlyBuilding))
                                 nearestBuriedFriendlyBuilding = robot.location;

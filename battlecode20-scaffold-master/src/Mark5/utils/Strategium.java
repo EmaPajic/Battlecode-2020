@@ -83,6 +83,7 @@ public class Strategium {
     public static void init() {
         myTeam = rc.getTeam();
         opponentTeam = myTeam == Team.A ? Team.B : Team.A;
+        rand = new Random();
 
         switch (rc.getType()) {
             case HQ:
@@ -92,6 +93,7 @@ public class Strategium {
                 MinerSensor.init();
                 break;
             case DELIVERY_DRONE:
+                Grid.init();
                 DroneSensor.init();
                 break;
             case LANDSCAPER:
@@ -105,7 +107,7 @@ public class Strategium {
                 break;
         }
 
-        rand = new Random();
+
     }
 
     public static RobotType robotAt(MapLocation location) throws GameActionException {
@@ -256,6 +258,7 @@ public class Strategium {
         upToDate = false;
 
         sense();
+        System.out.println("SENSED");
 
         switch(rc.getType()){
             case HQ:
@@ -268,8 +271,9 @@ public class Strategium {
             case MINER:
             case DELIVERY_DRONE:
             case LANDSCAPER:
-                while (!upToDate && HQLocation != null){
-                    Blockchain.parsingProgress = max(Blockchain.parsingProgress, rc.getRoundNum() - 5);
+                while (!upToDate || HQLocation == null){
+                    if(HQLocation != null)
+                        Blockchain.parsingProgress = max(Blockchain.parsingProgress, rc.getRoundNum() - 50);
                     Blockchain.parseBlockchain(transactions);
                     parseTransactions();
 
@@ -309,6 +313,7 @@ public class Strategium {
                         //TwoMinerController.searchRoute.add(0, HQLocation);
                     updatePotentialEnemyHQLocations();
                     Wall.init();
+                    System.out.println("HQ LOCIRAN");
                     break;
                 case 42:
                     leastAmountOfSoup  += message[2];
