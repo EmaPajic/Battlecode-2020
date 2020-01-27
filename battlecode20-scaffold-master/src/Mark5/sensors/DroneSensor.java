@@ -209,9 +209,10 @@ public class DroneSensor {
                             Blockchain.reportEnemyHQLocation(2);
                         }
                     case NET_GUN:
-
-                        if (!enemyNetGuns.contains(new NetGun(robot))) {
-                            enemyNetGuns.add(new NetGun(robot));
+                        lastEnemyNetGunSeen = new NetGun(robot);
+                        if (!enemyNetGuns.contains(lastEnemyNetGunSeen)) {
+                            enemyNetGuns.add(lastEnemyNetGunSeen);
+                            Blockchain.reportEnemyNetGun(1);
                         }
                         Grid.unsafe[robot.location.x / 7 + robot.location.y / 7 * Grid.cols] = true;
 

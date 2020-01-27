@@ -69,6 +69,10 @@ public class Landscaper {
             if(attack(Strategium.nearestEnemyBuilding)) return;
         }
 
+        if(LandscaperSensor.numLandscapersMetWithLowerID < 3 &&
+           rc.getRoundNum() > 300 && rc.getRoundNum() < 400 && !rc.canSenseLocation(Strategium.HQLocation)) {
+            Navigation.fuzzyNav(Strategium.HQLocation);
+        }
 
         if (rc.getLocation().isAdjacentTo(Strategium.HQLocation) && rc.getRoundNum() > 300) {
             System.out.println("HQ: " + Strategium.HQLocation);
