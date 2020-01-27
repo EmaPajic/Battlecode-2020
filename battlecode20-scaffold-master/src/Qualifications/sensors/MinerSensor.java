@@ -13,6 +13,8 @@ import static java.lang.Math.min;
 import static Qualifications.utils.Strategium.*;
 
 public class MinerSensor {
+
+
     public static int visibleSoup;
     public static boolean seenWater = false;
     public static MapLocation vacantBuildSpot;

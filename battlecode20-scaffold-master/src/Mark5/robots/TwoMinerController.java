@@ -257,6 +257,7 @@ public class TwoMinerController {
         boolean enemyFulfillmentCenterNearby = false;
         boolean friendlyNetGunsNearby = false;
         boolean aroundEnemyHQ = false;
+        boolean refineryNearby = false;
 
         RobotInfo[] robots = rc.senseNearbyRobots();
         //System.println(robots.length);
@@ -292,6 +293,7 @@ public class TwoMinerController {
                     case VAPORATOR:
                         haveVaporator = true;
                     case REFINERY:
+                        refineryNearby = true;
                         if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
                         break;
 
@@ -344,12 +346,12 @@ public class TwoMinerController {
 
         System.out.println(rc.getTeamSoup());
 
-        if (aroundEnemyHQ && rc.getRoundNum() > 1500 && enemyDronesNearby && !friendlyNetGunsNearby) {
+        if (aroundEnemyHQ && rc.getRoundNum() > 1300 && enemyDronesNearby && !friendlyNetGunsNearby) {
             buildNetGunNearEnemy();
         }
 
         if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8) {
-            if (Strategium.nearestEnemyDrone.currentlyHoldingUnit)
+            if (!Strategium.nearestEnemyDrone.currentlyHoldingUnit)
             if (Navigation.fuzzyNav(nearestNetGun)) return;
         }
 
@@ -367,8 +369,8 @@ public class TwoMinerController {
         }
 
             if (makeRobotType == null && !friendlyNetGunsNearby &&
-                    (enemyDronesNearby || enemyFulfillmentCenterNearby)
-            ) {
+                    (enemyDronesNearby || enemyFulfillmentCenterNearby) &&
+                    (rc.senseElevation(rc.getLocation()) >= 8 || refineryNearby || MinerSensor.visibleSoup > 20)) {
                 makeRobotType = RobotType.NET_GUN;
             }
 
