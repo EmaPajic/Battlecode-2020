@@ -355,7 +355,7 @@ public class Strategium {
                     enemyBuildings.add(Strategium.enemyHQLocation);
                 case 98:
                     MapLocation netGunLoc = new MapLocation(message[0], message[1]);
-                    lastEnemyNetGunSeen = new NetGun(netGunLoc, message[2], message[3]);
+                    lastEnemyNetGunSeen = new NetGun(netGunLoc, message[2], message[5]);
                     if (!enemyNetGuns.contains(lastEnemyNetGunSeen)) {
                         enemyNetGuns.add(lastEnemyNetGunSeen);
                     }

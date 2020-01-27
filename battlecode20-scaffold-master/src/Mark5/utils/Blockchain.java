@@ -103,7 +103,7 @@ public class Blockchain {
         message[0] = Strategium.lastEnemyNetGunSeen.location.x;
         message[1] = Strategium.lastEnemyNetGunSeen.location.y;
         message[2] = Strategium.lastEnemyNetGunSeen.id;
-        message[3] = Strategium.lastEnemyNetGunSeen.readyOnRound;
+        message[5] = Strategium.lastEnemyNetGunSeen.readyOnRound;
         addAuth(message, 98);
         if(!rc.canSubmitTransaction(message, fee)) { System.out.println("FEJL"); return false; }
         rc.submitTransaction(message, fee);
