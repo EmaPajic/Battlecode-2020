@@ -149,7 +149,9 @@ public class Strategium {
                         for (NetGun gun : enemyNetGuns)
                             if (target.isWithinDistanceSquared(
                                     gun.location, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED) &&
-                            rc.getRoundNum() >= gun.readyOnRound) {
+                                    Navigation.aerialDistance(target, gun.location) +
+                                            (gun.readyOnRound - rc.getRoundNum()) * 3 / 2 <= 5
+                            ) {
                                 if (enemyHQLocation == null) return false;
                                 int range = target.distanceSquaredTo(gun.location);
                                 for (RobotInfo drone : alliedDrones)
@@ -161,8 +163,8 @@ public class Strategium {
                         for (NetGun gun : enemyNetGuns){
                             if (target.isWithinDistanceSquared(
                                     gun.location, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED) &&
-                                    !(rc.getLocation().isWithinDistanceSquared(gun.location, 5)) &&
-                                    rc.getRoundNum() >= gun.readyOnRound
+                                    Navigation.aerialDistance(target, gun.location) +
+                                            (gun.readyOnRound - rc.getRoundNum()) * 3 / 2 <= 5
                             ) return false;
                         }
                         return true;
