@@ -17,11 +17,12 @@ public class Lattice {
      * @return true if it is a pit, false otherwise
      */
     public static boolean isPit(MapLocation location) throws GameActionException {
+        if (location.isAdjacentTo(Strategium.HQLocation))
+            return false;
         if (location.x % 2 == Strategium.HQLocation.x % 2 &&
-                location.y % 2 == Strategium.HQLocation.y % 2 && !location.equals(Strategium.HQLocation)) return true;
-        if (rc.canSenseLocation(location)) {
-            if (Math.abs(rc.senseElevation(location) - rc.senseElevation(rc.getLocation())) < 10) return false;
-            return rc.senseElevation(location) < -100 || rc.senseElevation(location) > 500;
+                location.y % 2 == Strategium.HQLocation.y % 2) return true;
+        if (rc.canSenseLocation(location) && !rc.getLocation().isAdjacentTo(Strategium.HQLocation)) {
+            return Math.abs(rc.senseElevation(location) - rc.senseElevation(rc.getLocation())) > 50;
         }
         return false;
     }

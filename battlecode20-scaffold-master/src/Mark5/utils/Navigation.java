@@ -60,8 +60,8 @@ public class Navigation {
         if (location == null) return false;
         if (!rc.canSenseLocation(location)) return false;
         if (rc.senseFlooding(location)) return false;
-        if(Navigation.aerialDistance(Strategium.HQLocation, location) == 1 && Drone.payload == Drone.Payload.FRIENDLY_LANDSCAPER)
-            return true;
+        if(Navigation.aerialDistance(Strategium.HQLocation, location) == 1)
+                return Drone.payload == Drone.Payload.FRIENDLY_LANDSCAPER;
         return rc.senseElevation(location) >= 5 && !Lattice.isPit(location);
     }
 
