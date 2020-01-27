@@ -2,6 +2,7 @@ package Mark5.utils;
 
 import Mark5.robots.DesignSchool;
 import Mark5.robots.Drone;
+import Mark5.robots.HQ;
 import Mark5.robots.TwoMinerController;
 import Mark5.utils.Symmetry.*;
 
@@ -18,7 +19,6 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 public class Strategium {
-
     static boolean upToDate = false;
     static LinkedList<Transaction> transactions = new LinkedList<>();
     static LinkedList<Transaction> lastTransaction = new LinkedList<>();
@@ -74,7 +74,6 @@ public class Strategium {
 
     public static int[] dirSafetyCacheValid;
     public static boolean[] dirSafetyCache;
-
 
     public static Random rand;
     // iskreno nisam znao kom bloku polja da ovo polje pridruzim, sometimes i feel like coravi boromir
@@ -239,6 +238,24 @@ public class Strategium {
                 break;
         }
 
+        int tmp = Clock.getBytecodeNum();
+        if(Symmetry.nonVerticalCount <= 5) {
+            Symmetry.checkVerticalSymmetry();
+        }
+        if(Symmetry.nonHorizontalCount <= 5) {
+            Symmetry.checkHorizontalSymmetry();
+        }
+        if(HQLocation != null) {
+            potentialEnemyHQLocations.removeIf(location -> {
+                try {
+                    return Symmetry.removeWrongSymmetry(location);
+                } catch (GameActionException e) {
+                    //e.printStackTrace();
+                    return false;
+                }
+            });
+        }
+        System.out.println(Clock.getBytecodeNum() - tmp);
         if(enemyHQLocation != null) currentEnemyHQTarget = enemyHQLocation;
         else if(!potentialEnemyHQLocations.isEmpty()) currentEnemyHQTarget = potentialEnemyHQLocations.get(0);
         potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
@@ -249,10 +266,11 @@ public class Strategium {
         upToDate = false;
 
         sense();
-
+        if(rc.getRoundNum() < 4)
+            return;
         switch(rc.getType()){
             case HQ:
-                if(rc.getRoundNum() == 1)
+                if(rc.getRoundNum() == 4)
                     Blockchain.reportHQLocation( 1);
                 Blockchain.parseBlockchain(transactions);
                 parseTransactions();

@@ -10,15 +10,17 @@ import static Mark5.RobotPlayer.rc;
 import static java.lang.Integer.min;
 
 public class Blockchain {
-
     static final int[] acceptedTypes = {73, 42, 17};
     public static int parsingProgress = 1;
     static int opponentTransactionCosts = 0;
     static int opponentTransactions = 0;
     static int opponentTransactionMinFee = 1000;
     static int opponentTransactionMaxFee = 0;
-    static int[] lastTurnSent = new int[GameConstants.MAX_ROBOT_ID + 1];
+    static int[] lastTurnSent;
 
+    public static void init() {
+         lastTurnSent = new int[GameConstants.MAX_ROBOT_ID + 1];
+    }
     static int getType(Transaction transaction){
         return (transaction.getMessage()[4] >> 24) & 255;
     }
