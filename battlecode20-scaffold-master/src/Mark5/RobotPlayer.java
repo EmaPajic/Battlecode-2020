@@ -2,10 +2,7 @@ package Mark5;
 
 import Mark5.robots.*;
 import Mark5.sensors.HQSensor;
-import Mark5.utils.Blockchain;
-import Mark5.utils.Navigation;
-import Mark5.utils.Strategium;
-import Mark5.utils.Wall;
+import Mark5.utils.*;
 import battlecode.common.*;
 
 import java.util.ArrayList;
@@ -69,7 +66,7 @@ public strictfp class RobotPlayer {
         RobotPlayer.rc = rc;
         if (rc.getType() == RobotType.MINER)
             if (rc.getRoundNum() == 2) {
-                //myFun = 4;
+//                myFun = 4;
             }
         Strategium.init();
 
@@ -143,7 +140,7 @@ public strictfp class RobotPlayer {
                         runDeliveryDrone();
                         break;
                     case NET_GUN:
-                        runNetGun();
+                        NetGun.run();
                         break;
                 }
 
@@ -170,7 +167,7 @@ public strictfp class RobotPlayer {
 //                    return;
 //                }
 //        }
-            runNetGun();
+            NetGun.run();
     }
 
     static boolean builtFulfillmentCenter = false;
@@ -617,19 +614,7 @@ public strictfp class RobotPlayer {
         Drone.run();
     }
 
-    static void runNetGun() throws GameActionException {
-        RobotInfo[] targets = rc.senseNearbyRobots(GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED, Strategium.opponentTeam);
-        RobotInfo bestTarget = null;
-        int bestTargetRange = 100;
-        for (RobotInfo target : targets)
-            if (rc.canShootUnit(target.ID))
-                if (target.location.distanceSquaredTo(rc.getLocation()) < bestTargetRange) {
-                    bestTarget = target;
-                    bestTargetRange = target.location.distanceSquaredTo(rc.getLocation());
-                }
 
-        if (bestTarget != null) rc.shootUnit(bestTarget.ID);
-    }
 
     /**
      * Returns a random Direction.

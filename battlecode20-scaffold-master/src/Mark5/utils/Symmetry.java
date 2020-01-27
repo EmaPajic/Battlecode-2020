@@ -64,6 +64,8 @@ public class Symmetry {
                     return false;
             }
         }
+        System.out.println("Vertikalna simetrija");
+
         return true;
     }
 
@@ -86,6 +88,7 @@ public class Symmetry {
                     return false;
             }
         }
+        System.out.println("Horizontalna simetrija");
         return true;
     }
 }
