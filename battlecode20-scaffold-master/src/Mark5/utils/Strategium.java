@@ -71,6 +71,7 @@ public class Strategium {
     public static MapLocation nearestBuriedFriendlyBuilding = null;
     public static MapLocation nearestEnemyBuilding = null;
     public static List<MapLocation> overlapLocations = new LinkedList<>();
+    public static NetGun lastEnemyNetGunSeen = null;
 
     public static int[] dirSafetyCacheValid;
     public static boolean[] dirSafetyCache;
@@ -272,6 +273,16 @@ public class Strategium {
 
             case MINER:
             case DELIVERY_DRONE:
+                while (!upToDate || HQLocation == null){
+                    if(HQLocation != null)
+                        Blockchain.parsingProgress = max(Blockchain.parsingProgress, rc.getRoundNum() - 50);
+                    Blockchain.parseBlockchain(transactions);
+                    parseTransactions();
+
+                    if(rc.getRoundNum() == Blockchain.parsingProgress){
+                        upToDate = true;
+                    }
+                }
             case LANDSCAPER:
                 while (!upToDate || HQLocation == null){
                     if(HQLocation != null)
@@ -281,7 +292,6 @@ public class Strategium {
 
                     if(rc.getRoundNum() == Blockchain.parsingProgress){
                         upToDate = true;
-
                     }
                 }
             default:
@@ -326,6 +336,12 @@ public class Strategium {
                     Strategium.enemyHQLocation = new MapLocation(message[0], message[1]);
                     enemyNetGuns.add(new NetGun(Strategium.enemyHQLocation, -1, 10));
                     enemyBuildings.add(Strategium.enemyHQLocation);
+                case 98:
+                    MapLocation netGunLoc = new MapLocation(message[0], message[1]);
+                    lastEnemyNetGunSeen = new NetGun(netGunLoc, message[2], message[3]);
+                    if (!enemyNetGuns.contains(lastEnemyNetGunSeen)) {
+                        enemyNetGuns.add(lastEnemyNetGunSeen);
+                    }
                 default:
                     break;
             }
