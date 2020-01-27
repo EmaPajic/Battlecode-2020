@@ -46,8 +46,9 @@ public class NetGunSensor {
 
             }
         }
-        tpLocToAttack.addAll(lpLocToAttack);
         tpLocToAttack.sort(new LocationComparator());
+        lpLocToAttack.sort(new LocationComparator());
+        tpLocToAttack.addAll(lpLocToAttack);
 
     }
     public static void sense() throws GameActionException{
