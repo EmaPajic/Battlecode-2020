@@ -12,12 +12,45 @@ public class Grid {
     public static boolean[] unsafe;
     public static boolean[] taken;
     public static boolean[] flooded;
+    public static boolean[] checked;
     public static int rows;
     public static int cols;
     public static int size;
     public static int currentHuntingGround = -1;
     public static int idleTime;
     public static MapLocation waypoint;
+    public static int destination;
+    public static boolean circumnavigating;
+
+    private class Waypoint{
+        public final int tile;
+        public final Waypoint prev;
+
+        public Waypoint(int tile, Waypoint prev) {
+            this.tile = tile;
+            this.prev = prev;
+        }
+
+        public int up(){
+            if(tile / cols == rows - 1) return -1;
+            return tile + cols;
+        }
+
+        public int down(){
+            if(tile / cols == 0) return -1;
+            return tile - cols;
+        }
+
+        public int right(){
+            if(tile % cols == cols - 1) return -1;
+            return tile + 1;
+        }
+
+        public int left(){
+            if(tile % cols == 0) return -1;
+            return tile - 1;
+        }
+    }
 
     public static void init(){
         rows = rc.getMapHeight() / 7 + (rc.getMapHeight() % 7 > 0 ? 1 : 0);
@@ -55,6 +88,10 @@ public class Grid {
         }
     }
 
+    static MapLocation center(int tile){
+        return Navigation.clamp(new MapLocation(tile % cols * 7 + 3, tile / cols * 7 + 3));
+    }
+
     public static void findHuntingGround(){
         System.out.println("FINDING...");
         waypoint = null;
@@ -84,6 +121,12 @@ public class Grid {
         waypoint = Navigation.clamp(
                 new MapLocation(currentHuntingGround % cols * 7 + 3, currentHuntingGround / cols * 7 + 3));
 
+    }
+
+    public static void gridNav(MapLocation destination){
+        checked = new boolean[size];
+
+        destination = center(index(destination));
     }
 }
 

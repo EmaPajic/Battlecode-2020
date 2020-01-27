@@ -54,6 +54,7 @@ public class TwoMinerController {
     static MapLocation nearestNetGun = null;
     static MapLocation nearestDesignSchool = null;
     static MapLocation nearestFulfillmentCenter = null;
+    static MapLocation nearestVaporator = null;
     static boolean haveVaporator = false;
 
     static int factoriesBuilt;
@@ -290,7 +291,8 @@ public class TwoMinerController {
                         break;
 
                     case VAPORATOR:
-                        haveVaporator = true;
+                        if (Navigation.aerialDistance(nearestVaporator) > Navigation.aerialDistance(robot))
+                            nearestVaporator = robot.location;
                     case REFINERY:
                         if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
                         break;
@@ -362,7 +364,8 @@ public class TwoMinerController {
         if (haveVaporator || Navigation.aerialDistance(Strategium.HQLocation) <= 3){
             if (enemyBuildingsNearby || enemyLandscapersNearby || friendlyBuriedBuildingNearby ||
                     /*(Navigation.aerialDistance(Strategium.HQLocation) <= 3  && rc.getRoundNum() > 150)*/ //||
-                    (Navigation.aerialDistance(nearestDesignSchool) > 20 && haveVaporator))
+                    (Navigation.aerialDistance(nearestDesignSchool) > 20 && Navigation.aerialDistance(nearestVaporator)
+                    < 8))
                 makeRobotType = RobotType.DESIGN_SCHOOL;
         }
 
@@ -375,7 +378,9 @@ public class TwoMinerController {
             if (Navigation.aerialDistance(nearestFulfillmentCenter) > 8 &&
                     !enemyNetGunsNearby && !friendlyDronesNearby) {
                 if (makeRobotType == null && (Navigation.aerialDistance(Strategium.HQLocation) < 2 ||
-                        (Navigation.aerialDistance(nearestFulfillmentCenter) > 20 && haveVaporator))) {
+                        (Navigation.aerialDistance(nearestFulfillmentCenter) > 20 &&
+                                Navigation.aerialDistance(nearestVaporator)
+                                < 8))) {
                     makeRobotType = RobotType.FULFILLMENT_CENTER;
                 }
             }

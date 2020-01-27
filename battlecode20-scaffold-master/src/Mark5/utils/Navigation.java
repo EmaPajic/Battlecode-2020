@@ -17,6 +17,7 @@ public class Navigation {
     private static Direction lastDirection = Direction.NORTH;
     private static Direction lastAvoidingDirection = Direction.SOUTHEAST;
     private static MapLocation lastDestination = new MapLocation(100, 100);
+    private static boolean counterClockwise = false;
 
     private static int typeMobility(RobotType type) {
         switch (type) {
@@ -103,17 +104,21 @@ public class Navigation {
      * @throws GameActionException it doesn't
      */
     public static boolean bugPath(MapLocation destination) throws GameActionException {
-        if(!lastDestination.isAdjacentTo(destination) || (rc.getType() == RobotType.DELIVERY_DRONE && (
-                rc.getLocation().x == 0 || rc.getLocation().y == 0 || rc.getLocation().x == rc.getMapWidth() - 1 ||
-                rc.getLocation().y == rc.getMapHeight() - 1)
-                )) {
+        if (!lastDestination.isAdjacentTo(destination)) {
             avoiding = false;
             frustration = 0;
         }
 
+        if (rc.getType() == RobotType.DELIVERY_DRONE && (
+                rc.getLocation().x == 0 || rc.getLocation().y == 0 || rc.getLocation().x == rc.getMapWidth() - 1 ||
+                        rc.getLocation().y == rc.getMapHeight() - 1)) {
+            counterClockwise = !counterClockwise;
+            lastDirection = lastDirection.opposite();
+        }
+
         lastDestination = destination;
 
-        if(!avoiding || frustration > 30) {
+        if (!avoiding || frustration > 30) {
             lastIntersection = rc.getLocation();
             if (fuzzyNav(destination)) {
                 return true;
@@ -123,7 +128,7 @@ public class Navigation {
         avoiding = true;
         frustration++;
 
-        if(rc.getLocation().distanceSquaredTo(destination) <= lastIntersection.distanceSquaredTo(destination)) {
+        if (rc.getLocation().distanceSquaredTo(destination) <= lastIntersection.distanceSquaredTo(destination)) {
             if (fuzzyNav(destination)) {
                 avoiding = false;
                 lastIntersection = rc.getLocation();
@@ -131,18 +136,40 @@ public class Navigation {
             }
         }
 
-        Direction dir = lastDirection.opposite().rotateLeft();
+        Direction dir = lastDirection.opposite();
         int i = 0;
-        for(; Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++){
-            if(i == 8) {
+
+        if (!counterClockwise) {
+
+            dir = dir.rotateLeft();
+
+            for (; Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++) {
+            if (i == 8) {
                 avoiding = false;
                 return (fuzzyNav(destination));
             }
         }
 
-        for(; !Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++){
-            if(i == 8) {
+        for (; !Strategium.canSafelyMove(dir); dir = dir.rotateLeft(), i++) {
+            if (i == 8) {
                 return false;
+            }
+        }
+    } else {
+
+            dir = dir.rotateRight();
+
+            for (; Strategium.canSafelyMove(dir); dir = dir.rotateRight(), i++) {
+                if (i == 8) {
+                    avoiding = false;
+                    return (fuzzyNav(destination));
+                }
+            }
+
+            for (; !Strategium.canSafelyMove(dir); dir = dir.rotateRight(), i++) {
+                if (i == 8) {
+                    return false;
+                }
             }
         }
         rc.move(dir);
