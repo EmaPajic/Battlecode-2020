@@ -164,9 +164,13 @@ public class Strategium {
                             if (target.isWithinDistanceSquared(
                                     gun.location, GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED) &&
                                     Navigation.aerialDistance(target, gun.location) +
-                                            (gun.readyOnRound - rc.getRoundNum()) * 3 / 2 <= 5
-                            ) return false;
+                                            (gun.readyOnRound - rc.getRoundNum()) * 3 / 2 <= 6
+                            ) {
+                                rc.setIndicatorDot(target, 255, 0, 0);
+                                return false;
+                            }
                         }
+                        rc.setIndicatorDot(target, 0, 255, 0);
                         return true;
                 }
         }
