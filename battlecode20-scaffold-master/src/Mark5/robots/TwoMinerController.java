@@ -231,6 +231,10 @@ public class TwoMinerController {
     public static void control() throws GameActionException {
         Strategium.gatherInfo();
 
+        // Dodato zbog nullpointer exceptiona
+        if(buildWaypoint == null && Strategium.HQLocation != null)
+            buildWaypoint = Strategium.HQLocation;
+
         if(rc.getRoundNum() <= 600) {
             if (rc.canSenseLocation(currentTarget) || Navigation.frustration >= 50) {
 
