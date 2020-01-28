@@ -13,6 +13,8 @@ import static java.lang.Math.min;
 public class LandscaperSensor {
     public static MapLocation combatWaypoint;
     public static MapLocation nearestNetGun;
+    public static int numLandscapersMet = 0;
+    public static int numLandscapersMetWithLowerID = 0;
 
     public static void init() {
         elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
@@ -84,7 +86,7 @@ public class LandscaperSensor {
 
 
                         if (robot.dirtCarrying > 0 && !Lattice.isAdjacentToWater(robot.location) &&
-                                (!robot.location.isAdjacentTo(HQLocation) || rc.getRoundNum() < 300 ||
+                                (!robot.location.isAdjacentTo(HQLocation) ||
                                         robot.location == HQLocation)) {
                             if (Navigation.aerialDistance(robot) <
                                     Navigation.aerialDistance(nearestBuriedFriendlyBuilding))
@@ -95,6 +97,10 @@ public class LandscaperSensor {
 
 
                         break;
+                    case LANDSCAPER:
+                        ++numLandscapersMet;
+                        if(robot.getID() < rc.getID())
+                            ++numLandscapersMetWithLowerID;
                 }
             } else {
 

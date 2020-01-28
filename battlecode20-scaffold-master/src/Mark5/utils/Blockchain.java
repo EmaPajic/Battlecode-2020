@@ -120,7 +120,7 @@ public class Blockchain {
     }
     public static boolean reportRefineryLocation(int fee) throws GameActionException {
         int[] message = new int[7];
-        message[2] = reportLocalSoup();
+        message[2] = Math.min(reportLocalSoup(), 2500);
         message[5] = rc.getLocation().x;
         message[6] = rc.getLocation().y;
         addAuth(message, 42);

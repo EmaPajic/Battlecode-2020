@@ -200,10 +200,12 @@ public class Strategium {
                 try {
                     RobotInfo info = rc.senseRobotAtLocation(gun.location);
                     if (info == null){
+                        if(Grid.unsafe == null) return true;
                         Grid.unsafe[gun.location.x / 7 + gun.location.y / 7 * Grid.cols] = false;
                         return true;
                     }
                     if(info.getID() != gun.id && gun.id >= 0){
+                        if(Grid.unsafe == null) return true;
                         Grid.unsafe[gun.location.x / 7 + gun.location.y / 7 * Grid.cols] = false;
                         return true;
                     }

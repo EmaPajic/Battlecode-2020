@@ -54,7 +54,7 @@ public class DesignSchoolSensor {
                         if (Navigation.aerialDistance(nearestWater) > Navigation.aerialDistance(location) &&
                                 numThreats < 2)
                             nearestWater = location;
-                        numThreats++;
+                        //numThreats++;
                         priorityBuildDirections.add(rc.getLocation().directionTo(location));
                     }
 
