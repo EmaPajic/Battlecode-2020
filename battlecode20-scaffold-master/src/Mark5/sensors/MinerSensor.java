@@ -33,6 +33,7 @@ public class MinerSensor {
         //seenWater = false;
         vacantBuildSpot = null;
 
+        System.out.println("SENSING");
 
 
         int xMin = max(0, rc.getLocation().x - 5);
@@ -77,6 +78,8 @@ public class MinerSensor {
                 }
 
             }
+
+        System.out.println(Clock.getBytecodeNum());
 
 
         System.out.println("Senzor nije crko");
@@ -123,6 +126,9 @@ public class MinerSensor {
 
         }
 
+        System.out.println("SKENIRAM ROBOTE");
+        System.out.println(Clock.getBytecodeNum());
+
         //Wall.checkBaseStatus();
 
 
@@ -131,7 +137,7 @@ public class MinerSensor {
         if(myFun != 4 && rc.getRoundNum() <= 600) {
             nearestRefinery = null;
             for (MapLocation refinery : refineries) {
-                if (refinery == HQLocation && rc.getRoundNum() > 600)
+                if (refinery.equals(HQLocation) && rc.getRoundNum() > 600)
                     continue;
                 if (Navigation.aerialDistance(nearestRefinery, rc.getLocation()) >
                         Navigation.aerialDistance(refinery, rc.getLocation()))
@@ -153,6 +159,9 @@ public class MinerSensor {
                                 vacantBuildSpot = location;
                     }
         }
+
+        System.out.println("SKENIRANJE ZGRADA");
+        System.out.println(Clock.getBytecodeNum());
 
         //potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
 
