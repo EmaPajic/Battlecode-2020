@@ -6,6 +6,7 @@ import Mark5.utils.Strategium;
 import battlecode.common.*;
 
 import static Mark5.RobotPlayer.*;
+import static Mark5.sensors.MinerSensor.*;
 import static Mark5.utils.Strategium.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -14,6 +15,23 @@ public class MinerSensor {
     public static int visibleSoup;
     public static boolean seenWater = false;
     public static MapLocation vacantBuildSpot;
+    public static boolean enemyBuildingsNearby = false;
+    public static boolean friendlyDesignSchoolNearby = false;
+    public static boolean friendlyFulfilmentCenterNearby = false;
+    public static boolean friendlyBuriedBuildingNearby = false;
+    public static boolean enemyNetGunsNearby = false;
+    public static boolean enemyLandscapersNearby = false;
+    public static boolean enemySoftNearby = false;
+    public static boolean enemyDronesNearby = false;
+    public static boolean friendlyDronesNearby = false;
+    public static boolean enemyFulfillmentCenterNearby = false;
+    public static boolean friendlyNetGunsNearby = false;
+    public static boolean aroundEnemyHQ = false;
+    public static boolean refineryNearby = false;
+    public static MapLocation nearestNetGun = null;
+    public static MapLocation nearestDesignSchool = null;
+    public static MapLocation nearestFulfillmentCenter = null;
+    public static MapLocation nearestVaporator = null;
 
     public static void init() {
         soup = new boolean[rc.getMapWidth()][rc.getMapHeight()];
@@ -82,35 +100,99 @@ public class MinerSensor {
         System.out.println(Clock.getBytecodeNum());
 
 
+        boolean enemyBuildingsNearby = false;
+        boolean friendlyDesignSchoolNearby = false;
+        boolean friendlyFulfilmentCenterNearby = false;
+        boolean friendlyBuriedBuildingNearby = false;
+        boolean enemyNetGunsNearby = false;
+        boolean enemyLandscapersNearby = false;
+        boolean enemySoftNearby = false;
+        boolean enemyDronesNearby = false;
+        boolean friendlyDronesNearby = false;
+        boolean enemyFulfillmentCenterNearby = false;
+        boolean friendlyNetGunsNearby = false;
+        boolean aroundEnemyHQ = false;
+        boolean refineryNearby = false;
+
         System.out.println("Senzor nije crko");
         RobotInfo[] robots = rc.senseNearbyRobots();
+
+        if(nearestDesignSchool != null)
+            if(rc.canSenseLocation(nearestDesignSchool)) nearestDesignSchool = null;
+
+        if(nearestFulfillmentCenter != null)
+            if(rc.canSenseLocation(nearestFulfillmentCenter)) nearestFulfillmentCenter = null;
+
+        if(nearestNetGun != null)
+            if(rc.canSenseLocation(nearestNetGun)) nearestNetGun = Strategium.HQLocation;
 
         for (RobotInfo robot : robots) {
             occupied[robot.location.x][robot.location.y] = true;
 
             if (robot.team == myTeam) {
-
-                if (robot.type == RobotType.HQ) {
-
-                    if (HQLocation == null) {
-
-                        HQLocation = robot.location;
-
-                        Strategium.updatePotentialEnemyHQLocations();
-
-                    }
-
-                }
-                if (robot.type.canRefine()) if (!refineries.contains(robot.location)) refineries.add(robot.location);
-
-            } else {
                 switch (robot.type) {
+                    case DESIGN_SCHOOL:
+                        friendlyDesignSchoolNearby = true;
+                        if(rc.senseElevation(robot.location) >= 5 || rc.getRoundNum() <= 600)
+                            if(Navigation.aerialDistance(nearestDesignSchool) > Navigation.aerialDistance(robot))
+                                nearestDesignSchool = robot.location;
+                        break;
+
+                    case FULFILLMENT_CENTER:
+                        friendlyFulfilmentCenterNearby = true;
+                        if(rc.senseElevation(robot.location) >= 5 || rc.getRoundNum() <= 600)
+                            if(Navigation.aerialDistance(nearestFulfillmentCenter) > Navigation.aerialDistance(robot))
+                                nearestFulfillmentCenter = robot.location;
+                        if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
+                        break;
+
+                    case VAPORATOR:
+                        if (Navigation.aerialDistance(nearestVaporator) > Navigation.aerialDistance(robot))
+                            nearestVaporator = robot.location;
+                        break;
+
+                    case REFINERY:
+                        refineryNearby = true;
+                        if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
+                        if (!refineries.contains(robot.location)) refineries.add(robot.location);
+                        break;
+
+                    case HQ:
+                        if (!refineries.contains(robot.location)) refineries.add(robot.location);
+                        if (HQLocation == null) {
+
+                            HQLocation = robot.location;
+
+                            Strategium.updatePotentialEnemyHQLocations();
+
+                        }
+                        break;
+
+                    case NET_GUN:
+                        if (rc.getLocation().distanceSquaredTo(robot.location) <= 15) friendlyNetGunsNearby = true;
+                        if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
+                        if (Navigation.aerialDistance(nearestNetGun) > Navigation.aerialDistance(robot))
+                            nearestNetGun = robot.location;
+                        break;
 
                     case DELIVERY_DRONE:
+                        friendlyDronesNearby = true;
+                        break;
+                }
+            } else {
+                switch (robot.type) {
+                    case FULFILLMENT_CENTER:
+                        enemyFulfillmentCenterNearby = true;
+                        enemyBuildingsNearby = true;
+                        break;
+
+                    case DELIVERY_DRONE:
+                        enemyDronesNearby = true;
                         enemyDrones.add(robot);
                         if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyDrone))
                             nearestEnemyDrone = robot;
                         break;
+
                     case HQ:
                         if (enemyHQLocation == null) {
                             potentialEnemyHQLocations.clear();
@@ -118,12 +200,25 @@ public class MinerSensor {
                             currentEnemyHQTarget = enemyHQLocation;
                             Blockchain.reportEnemyHQLocation(2);
                         }
+                        aroundEnemyHQ = true;
+                    case NET_GUN:
+                        if (rc.getLocation().distanceSquaredTo(robot.location) <= 35) enemyNetGunsNearby = true;
+                    case VAPORATOR:
+                    case REFINERY:
+                    case DESIGN_SCHOOL:
+                        enemyBuildingsNearby = true;
+                        break;
+
+                    case LANDSCAPER:
+                        enemyLandscapersNearby = true;
+                        break;
+
+                    case COW:
+                    case MINER:
+                        enemySoftNearby = true;
                         break;
                 }
-
-
             }
-
         }
 
         System.out.println("SKENIRAM ROBOTE");
