@@ -58,7 +58,7 @@ public class NetGunSensor {
             }
         }
         tpLocToAttack.sort(new teamComparator());
-        System.out.println(tpLocToAttack.get(0));
+//        System.out.println(tpLocToAttack.get(0));
         tpLocToAttack.sort(new LocationComparator());
         lpLocToAttack.sort(new LocationComparator());
         tpLocToAttack.addAll(lpLocToAttack);
