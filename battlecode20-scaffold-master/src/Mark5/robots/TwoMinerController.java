@@ -372,6 +372,8 @@ public class TwoMinerController {
                 makeRobotType = RobotType.DESIGN_SCHOOL;
         }
 
+            System.out.println(friendlyNetGunsNearby + " " + enemyDronesNearby + " " + enemyFulfillmentCenterNearby
+            + " " + refineryNearby + " " + MinerSensor.visibleSoup);
             if (makeRobotType == null && !friendlyNetGunsNearby &&
                     (enemyDronesNearby || enemyFulfillmentCenterNearby) &&
                     (rc.senseElevation(rc.getLocation()) >= 8 || refineryNearby || MinerSensor.visibleSoup > 20)) {
@@ -416,7 +418,8 @@ public class TwoMinerController {
 
         if(nearestNetGun != null) rc.setIndicatorLine(rc.getLocation(), nearestNetGun, 0, 255, 0);
 
-        if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8) {
+        if(!(makeRobotType == RobotType.NET_GUN && rc.getTeamSoup() >= 250) &&
+                Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8) {
 
             if (Navigation.fleeToSafety(Strategium.nearestEnemyDrone.location, nearestNetGun)) return;
         }
