@@ -154,7 +154,7 @@ public class MinerSensor {
                     }
         }
 
-        potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
+        //potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
 
 
 
