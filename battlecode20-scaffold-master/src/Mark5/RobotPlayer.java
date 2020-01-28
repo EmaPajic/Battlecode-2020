@@ -112,7 +112,7 @@ public strictfp class RobotPlayer {
             turnCount += 1;
             if(turnCount == 1 && rc.getType() != RobotType.HQ)
                 Blockchain.init();
-            else if(turnCount == 3)
+            else if(turnCount == 3 && rc.getType() == RobotType.HQ)
                 Blockchain.init();
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
