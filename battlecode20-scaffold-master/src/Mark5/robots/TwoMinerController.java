@@ -351,10 +351,10 @@ public class TwoMinerController {
             buildNetGunNearEnemy();
         }
 
-        if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8) {
+        /*if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8) {
             if (!Strategium.nearestEnemyDrone.currentlyHoldingUnit)
             if (Navigation.fuzzyNav(nearestNetGun)) return;
-        }
+        }*/
 
         if (rc.getTeamSoup() > RobotType.DESIGN_SCHOOL.cost + RobotType.LANDSCAPER.cost ||
                 Navigation.aerialDistance(Strategium.HQLocation) <= 3) {
@@ -375,7 +375,7 @@ public class TwoMinerController {
             + " " + refineryNearby + " " + MinerSensor.visibleSoup);
             if (makeRobotType == null && !friendlyNetGunsNearby &&
                     (enemyDronesNearby || enemyFulfillmentCenterNearby) &&
-                    (rc.senseElevation(rc.getLocation()) >= 8 || refineryNearby || MinerSensor.visibleSoup > 20)) {
+                    (rc.senseElevation(rc.getLocation()) >= 8 || refineryNearby || MinerSensor.visibleSoup > 250)) {
                 makeRobotType = RobotType.NET_GUN;
             }
 
