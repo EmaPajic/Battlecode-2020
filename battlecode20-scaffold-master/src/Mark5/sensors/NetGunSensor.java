@@ -31,9 +31,9 @@ public class NetGunSensor {
         @Override
         public int compare(RobotInfo rbA, RobotInfo rbB) {
             if(rbA.team == myTeam && rbB.team == opponentTeam)
-                    return 1;
-            else if(rbA.team == opponentTeam && rbB.team == myTeam)
                 return -1;
+            else if(rbA.team == opponentTeam && rbB.team == myTeam)
+                return 1;
             else return 0;
         }
     }
@@ -48,20 +48,33 @@ public class NetGunSensor {
         lpLocToAttack.clear();
 
 
-        RobotInfo[] robots = rc.senseNearbyRobots(GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED, Strategium.opponentTeam);
+        RobotInfo[] robots = rc.senseNearbyRobots();
         for (RobotInfo robot : robots){
-            if(robot.type == RobotType.DELIVERY_DRONE) {
-                    if(robot.currentlyHoldingUnit){
-                            tpLocToAttack.add(robot);
-                    }else lpLocToAttack.add(robot);
+            if(robot.team == myTeam) {
+                if(robot.type == RobotType.DELIVERY_DRONE){
+                    alliedDrones.add(robot);
+                }
 
+            } else {
+                if (robot.type == RobotType.DELIVERY_DRONE) {
+                    if (robot.currentlyHoldingUnit) {
+                        tpLocToAttack.add(robot);
+                    } else lpLocToAttack.add(robot);
+                }
             }
         }
+
         tpLocToAttack.sort(new teamComparator());
 //        System.out.println(tpLocToAttack.get(0));
         tpLocToAttack.sort(new LocationComparator());
-        lpLocToAttack.sort(new LocationComparator());
-        tpLocToAttack.addAll(lpLocToAttack);
+        if(alliedDrones.isEmpty()){
+            // moze clear lpLocToAttack, ali ne mora
+        } else{
+            lpLocToAttack.sort(new LocationComparator());
+            tpLocToAttack.addAll(lpLocToAttack);
+        }
+
+
 
     }
     public static void sense() throws GameActionException{
