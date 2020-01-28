@@ -30,7 +30,7 @@ public class MinerSensor {
         enemyDrones.clear();
         nearestEnemyDrone = null;
         visibleSoup = 0;
-        seenWater = false;
+        //seenWater = false;
         vacantBuildSpot = null;
 
 
@@ -45,9 +45,9 @@ public class MinerSensor {
 
                 MapLocation location = new MapLocation(i, j);
                 if (rc.canSenseLocation(location)) {
-                    if (rc.senseFlooding(location)) seenWater = true;
+                    //if (rc.senseFlooding(location)) seenWater = true;
                     occupied[i][j] = false;
-                    if(myFun != 4 && rc.getRoundNum() <= 600) {
+                    if(rc.getRoundNum() <= 600) {
                         visibleSoup += rc.senseSoup(location);
                         if (rc.senseSoup(location) > 0) {
                             //explored[i][j] = true;

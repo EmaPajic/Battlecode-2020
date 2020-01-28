@@ -34,7 +34,6 @@ public class TwoMinerController {
                     Navigation.aerialDistance(hqLocation, locA), Navigation.aerialDistance(hqLocation, locB));
         }
     }
-
     public static ArrayList<MapLocation> searchRoute;
     static ArrayList<MapLocation> searchRouteVisited;
 
@@ -66,7 +65,7 @@ public class TwoMinerController {
 
     static void findRoute() {
         int stepX = (rc.getMapWidth() - 10) / 3;
-        int stepY = (rc.getMapWidth() - 10) / 3;
+        int stepY = (rc.getMapHeight() - 10) / 3;
         for (int currX = 4; currX <= rc.getMapWidth() - 1; currX += stepX) {
             for (int currY = 4; currY <= rc.getMapHeight() - 1; currY += stepY) {
                 searchRoute.add(new MapLocation(currX, currY));
