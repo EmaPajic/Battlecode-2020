@@ -75,6 +75,8 @@ public class FulfillmentCenter {
                     System.out.println("Nasih jedinica: "+ FulfillmentCenterSensor.dronesNearby +
                             " Protivnickih jedinica: " + FulfillmentCenterSensor.importantEnemyUnitsNum);
                     System.out.println("\n Neprijateljskih lendskejpera ima: " + FulfillmentCenterSensor.enemyLandscapersNearby);
+                    System.out.println(numDrones);
+
                     if ((rc.getTeamSoup() > 650 ||
                             (FulfillmentCenterSensor.enemyLandscapersNearby && rc.getTeamSoup() > 300) ||
                             numDrones < 2) &&
