@@ -363,7 +363,7 @@ public class TwoMinerController {
             System.out.println("DOVOLJNO ZA GRADNJU");
 
         if (Navigation.aerialDistance(nearestDesignSchool) > 8)
-        if (haveVaporator || Navigation.aerialDistance(Strategium.HQLocation) <= 3){
+        {
             if (enemyBuildingsNearby || enemyLandscapersNearby || friendlyBuriedBuildingNearby ||
                     /*(Navigation.aerialDistance(Strategium.HQLocation) <= 3  && rc.getRoundNum() > 150)*/ //||
                     (Navigation.aerialDistance(nearestDesignSchool) > 20 && Navigation.aerialDistance(nearestVaporator)
