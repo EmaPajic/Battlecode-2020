@@ -90,7 +90,7 @@ public class Landscaper {
 
         if(Strategium.nearestEnemyDrone != null &&
                 LandscaperSensor.nearestNetGun.distanceSquaredTo(rc.getLocation()) >= 8)
-            if(Navigation.fuzzyNav(LandscaperSensor.nearestNetGun)) return;
+            if(Navigation.fleeToSafety(Strategium.nearestEnemyDrone.location, LandscaperSensor.nearestNetGun)) return;
 
         //System.out.println("DREIN");
 
@@ -194,7 +194,7 @@ public class Landscaper {
                 return true;
             }
             Direction dir = Lattice.bestDigDirection();
-            if (dir == null) return false;
+            if (dir == null) return Navigation.bugPath(Strategium.HQLocation);
             if (rc.canDigDirt(dir)) {
                 rc.digDirt(dir);
                 rc.setIndicatorDot(rc.adjacentLocation(dir), 0, 0, 255);

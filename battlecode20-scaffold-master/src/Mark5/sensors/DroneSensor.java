@@ -255,14 +255,22 @@ public class DroneSensor {
                         if (Grid.interesting[index] && !Grid.unsafe[index]) Grid.huntingGround[index] = true;
 
                     case LANDSCAPER:
-                    case COW:
                         enemyUnits.add(robot);
                         if (priority(robot.type) >= priority(targetType))
                             if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyUnit)) {
                                 nearestEnemyUnit = robot;
                                 targetType = robot.type;
                             }
+                        break;
 
+                    case COW:
+                        if(rc.sensePollution(robot.location) > 8000) break;
+                        enemyUnits.add(robot);
+                        if (priority(robot.type) >= priority(targetType))
+                            if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyUnit)) {
+                                nearestEnemyUnit = robot;
+                                targetType = robot.type;
+                            }
                 }
 
             }

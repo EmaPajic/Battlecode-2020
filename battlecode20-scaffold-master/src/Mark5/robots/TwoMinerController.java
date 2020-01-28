@@ -413,8 +413,10 @@ public class TwoMinerController {
 
         if(nearestNetGun != null) rc.setIndicatorLine(rc.getLocation(), nearestNetGun, 0, 255, 0);
 
-        if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8)
-            if(Navigation.fuzzyNav(nearestNetGun)) return;
+        if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8) {
+
+            if (Navigation.fleeToSafety(Strategium.nearestEnemyDrone.location, nearestNetGun)) return;
+        }
 
         if (rc.getRoundNum() <= 600) {
             if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {

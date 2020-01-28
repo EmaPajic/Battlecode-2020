@@ -46,6 +46,54 @@ public class Navigation {
         return Math.abs(distance.x) == Math.abs(distance.y);
     }
 
+    public static boolean fleeToSafety(MapLocation danger, MapLocation safety) throws GameActionException {
+
+        if(Navigation.aerialDistance(danger, rc.adjacentLocation(moveTowards(safety))) <
+                Navigation.aerialDistance(danger))
+            if(Strategium.canSafelyMove(moveTowards(safety))){
+                rc.move(moveTowards(safety));
+                return true;
+            }
+
+        for(Direction dir : dir8)
+            if(Navigation.aerialDistance(danger, rc.adjacentLocation(dir)) > Navigation.aerialDistance(danger) &&
+            Navigation.aerialDistance(safety, rc.adjacentLocation(dir)) < Navigation.aerialDistance(safety))
+                if(Strategium.canSafelyMove(dir)){
+                    rc.move(dir);
+                    return true;
+                }
+
+        for(Direction dir : dir8)
+            if(Navigation.aerialDistance(danger, rc.adjacentLocation(dir)) > Navigation.aerialDistance(danger))
+                if(Strategium.canSafelyMove(dir)){
+                    rc.move(dir);
+                    return true;
+                }
+
+        for(Direction dir : dir8)
+            if(rc.adjacentLocation(dir).distanceSquaredTo(danger) > rc.getLocation().distanceSquaredTo(danger))
+                if(Strategium.canSafelyMove(dir)){
+                    rc.move(dir);
+                    return true;
+                }
+
+        for(Direction dir : dir8)
+            if(Navigation.aerialDistance(safety, rc.adjacentLocation(dir)) < Navigation.aerialDistance(safety))
+                if(Strategium.canSafelyMove(dir)){
+                    rc.move(dir);
+                    return true;
+                }
+
+        for(Direction dir : dir8)
+            if(rc.adjacentLocation(dir).distanceSquaredTo(safety) < rc.getLocation().distanceSquaredTo(safety))
+                if(Strategium.canSafelyMove(dir)){
+                    rc.move(dir);
+                    return true;
+                }
+
+        return false;
+    }
+
     /**
      * the amount of obstacles encountered while bug pathing
      */
