@@ -407,6 +407,8 @@ public class TwoMinerController {
                             }
         }
 
+        System.out.println("uso ovde");
+
         if(Strategium.nearestEnemyDrone != null) rc.setIndicatorLine(rc.getLocation(),
                 Strategium.nearestEnemyDrone.location,
                 255, 0, 0);
@@ -418,7 +420,9 @@ public class TwoMinerController {
             if (Navigation.fleeToSafety(Strategium.nearestEnemyDrone.location, nearestNetGun)) return;
         }
 
-        if (rc.getRoundNum() <= 600) {
+        if (rc.getRoundNum() <= 600 && (rc.getRoundNum() < 200 ||
+                GameConstants.getWaterLevel(rc.getRoundNum()) < rc.senseElevation(rc.getLocation()) ||
+                Strategium.nearestSoup != null)) {
             if (rc.getSoupCarrying() < RobotType.MINER.soupLimit) {
                 tryToReturn = false;
                 pastLocation = rc.getLocation();

@@ -86,7 +86,7 @@ public class LandscaperSensor {
 
 
                         if (robot.dirtCarrying > 0 && !Lattice.isAdjacentToWater(robot.location) &&
-                                (!robot.location.isAdjacentTo(HQLocation) || rc.getRoundNum() < 300 ||
+                                (!robot.location.isAdjacentTo(HQLocation) ||
                                         robot.location == HQLocation)) {
                             if (Navigation.aerialDistance(robot) <
                                     Navigation.aerialDistance(nearestBuriedFriendlyBuilding))

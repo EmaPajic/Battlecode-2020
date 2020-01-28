@@ -79,6 +79,7 @@ public class MinerSensor {
             }
 
 
+        System.out.println("Senzor nije crko");
         RobotInfo[] robots = rc.senseNearbyRobots();
 
         for (RobotInfo robot : robots) {
