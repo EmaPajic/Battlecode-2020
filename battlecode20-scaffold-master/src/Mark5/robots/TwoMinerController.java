@@ -17,6 +17,7 @@ import static Mark5.RobotPlayer.*;
 import static java.lang.Integer.min;
 import static java.lang.Math.max;
 import static java.util.Collections.swap;
+import static Mark5.sensors.MinerSensor.*;
 
 public class TwoMinerController {
 
@@ -50,10 +51,7 @@ public class TwoMinerController {
     static int buildRadius = 0;
     static MapLocation buildWaypoint;
 
-    static MapLocation nearestNetGun = null;
-    static MapLocation nearestDesignSchool = null;
-    static MapLocation nearestFulfillmentCenter = null;
-    static MapLocation nearestVaporator = null;
+
     static boolean haveVaporator = false;
 
     static int factoriesBuilt;
@@ -245,107 +243,6 @@ public class TwoMinerController {
                 if(Navigation.fuzzyNav(nearestNetGun)) return;
             if (mineAndRefine()) return;
         }
-
-        System.out.println("Nisam crko");
-
-
-        boolean enemyBuildingsNearby = false;
-        boolean friendlyDesignSchoolNearby = false;
-        boolean friendlyFulfilmentCenterNearby = false;
-        boolean friendlyBuriedBuildingNearby = false;
-        boolean enemyNetGunsNearby = false;
-        boolean enemyLandscapersNearby = false;
-        boolean enemySoftNearby = false;
-        boolean enemyDronesNearby = false;
-        boolean friendlyDronesNearby = false;
-        boolean enemyFulfillmentCenterNearby = false;
-        boolean friendlyNetGunsNearby = false;
-        boolean aroundEnemyHQ = false;
-        boolean refineryNearby = false;
-
-        RobotInfo[] robots = rc.senseNearbyRobots();
-        //System.println(robots.length);
-
-        if(nearestDesignSchool != null)
-            if(rc.canSenseLocation(nearestDesignSchool)) nearestDesignSchool = null;
-
-        if(nearestFulfillmentCenter != null)
-            if(rc.canSenseLocation(nearestFulfillmentCenter)) nearestFulfillmentCenter = null;
-
-        if(nearestNetGun != null)
-            if(rc.canSenseLocation(nearestNetGun)) nearestNetGun = Strategium.HQLocation;
-
-        for (RobotInfo robot : robots) {
-            if (robot.team == Strategium.myTeam) {
-
-                switch (robot.type) {
-                    case DESIGN_SCHOOL:
-                        friendlyDesignSchoolNearby = true;
-                        if(rc.senseElevation(robot.location) >= 5 || rc.getRoundNum() <= 600)
-                        if(Navigation.aerialDistance(nearestDesignSchool) > Navigation.aerialDistance(robot))
-                            nearestDesignSchool = robot.location;
-                        break;
-
-                    case FULFILLMENT_CENTER:
-                        friendlyFulfilmentCenterNearby = true;
-                        if(rc.senseElevation(robot.location) >= 5 || rc.getRoundNum() <= 600)
-                        if(Navigation.aerialDistance(nearestFulfillmentCenter) > Navigation.aerialDistance(robot))
-                            nearestFulfillmentCenter = robot.location;
-                        if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
-                        break;
-
-                    case VAPORATOR:
-                        if (Navigation.aerialDistance(nearestVaporator) > Navigation.aerialDistance(robot))
-                            nearestVaporator = robot.location;
-                    case REFINERY:
-                        refineryNearby = true;
-                        if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
-                        break;
-
-                    case HQ:
-                    case NET_GUN:
-                        if (rc.getLocation().distanceSquaredTo(robot.location) <= 15) friendlyNetGunsNearby = true;
-                        if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
-                        if (Navigation.aerialDistance(nearestNetGun) > Navigation.aerialDistance(robot))
-                            nearestNetGun = robot.location;
-                        break;
-
-                    case DELIVERY_DRONE:
-                        friendlyDronesNearby = true;
-                        break;
-
-                }
-            } else {
-
-                switch (robot.type) {
-                    case HQ:
-                        aroundEnemyHQ = true;
-                    case NET_GUN:
-                        if (rc.getLocation().distanceSquaredTo(robot.location) <= 35) enemyNetGunsNearby = true;
-
-                    case VAPORATOR:
-                    case REFINERY:
-                    case DESIGN_SCHOOL:
-                        enemyBuildingsNearby = true;
-                        break;
-                    case FULFILLMENT_CENTER:
-                        enemyFulfillmentCenterNearby = true;
-                        break;
-                    case DELIVERY_DRONE:
-                        enemyDronesNearby = true;
-                        break;
-                    case LANDSCAPER:
-                        enemyLandscapersNearby = true;
-                        break;
-                    case COW:
-                    case MINER:
-                        enemySoftNearby = true;
-                        break;
-                }
-
-            }
-        }
-
 
         RobotType makeRobotType = null;
 
