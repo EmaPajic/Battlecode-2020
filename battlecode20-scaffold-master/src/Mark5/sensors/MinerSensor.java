@@ -100,19 +100,19 @@ public class MinerSensor {
         System.out.println(Clock.getBytecodeNum());
 
 
-        boolean enemyBuildingsNearby = false;
-        boolean friendlyDesignSchoolNearby = false;
-        boolean friendlyFulfilmentCenterNearby = false;
-        boolean friendlyBuriedBuildingNearby = false;
-        boolean enemyNetGunsNearby = false;
-        boolean enemyLandscapersNearby = false;
-        boolean enemySoftNearby = false;
-        boolean enemyDronesNearby = false;
-        boolean friendlyDronesNearby = false;
-        boolean enemyFulfillmentCenterNearby = false;
-        boolean friendlyNetGunsNearby = false;
-        boolean aroundEnemyHQ = false;
-        boolean refineryNearby = false;
+        enemyBuildingsNearby = false;
+        friendlyDesignSchoolNearby = false;
+        friendlyFulfilmentCenterNearby = false;
+        friendlyBuriedBuildingNearby = false;
+        enemyNetGunsNearby = false;
+        enemyLandscapersNearby = false;
+        enemySoftNearby = false;
+        enemyDronesNearby = false;
+        friendlyDronesNearby = false;
+        enemyFulfillmentCenterNearby = false;
+        friendlyNetGunsNearby = false;
+        aroundEnemyHQ = false;
+        refineryNearby = false;
 
         System.out.println("Senzor nije crko");
         RobotInfo[] robots = rc.senseNearbyRobots();
@@ -149,6 +149,7 @@ public class MinerSensor {
                     case VAPORATOR:
                         if (Navigation.aerialDistance(nearestVaporator) > Navigation.aerialDistance(robot))
                             nearestVaporator = robot.location;
+                        if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
                         break;
 
                     case REFINERY:
@@ -158,23 +159,18 @@ public class MinerSensor {
                         break;
 
                     case HQ:
+                        refineryNearby = true;
                         if (!refineries.contains(robot.location)) refineries.add(robot.location);
                         if (HQLocation == null) {
-
                             HQLocation = robot.location;
-
                             Strategium.updatePotentialEnemyHQLocations();
-
                         }
-                        break;
-
                     case NET_GUN:
                         if (rc.getLocation().distanceSquaredTo(robot.location) <= 15) friendlyNetGunsNearby = true;
                         if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
                         if (Navigation.aerialDistance(nearestNetGun) > Navigation.aerialDistance(robot))
                             nearestNetGun = robot.location;
                         break;
-
                     case DELIVERY_DRONE:
                         friendlyDronesNearby = true;
                         break;
