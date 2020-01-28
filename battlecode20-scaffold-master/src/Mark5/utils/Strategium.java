@@ -256,24 +256,24 @@ public class Strategium {
                 break;
         }
 
-        int tmp = Clock.getBytecodeNum();
-        if(Symmetry.nonVerticalCount <= 5) {
-            Symmetry.checkVerticalSymmetry();
+        if(rc.getType() == RobotType.DELIVERY_DRONE && Strategium.enemyHQLocation == null) {
+            if (Symmetry.nonVerticalCount <= 5) {
+                Symmetry.checkVerticalSymmetry();
+            }
+            if (Symmetry.nonHorizontalCount <= 5) {
+                Symmetry.checkHorizontalSymmetry();
+            }
+            if (HQLocation != null) {
+                potentialEnemyHQLocations.removeIf(location -> {
+                    try {
+                        return Symmetry.removeWrongSymmetry(location);
+                    } catch (GameActionException e) {
+                        //e.printStackTrace();
+                        return false;
+                    }
+                });
+            }
         }
-        if(Symmetry.nonHorizontalCount <= 5) {
-            Symmetry.checkHorizontalSymmetry();
-        }
-        if(HQLocation != null) {
-            potentialEnemyHQLocations.removeIf(location -> {
-                try {
-                    return Symmetry.removeWrongSymmetry(location);
-                } catch (GameActionException e) {
-                    //e.printStackTrace();
-                    return false;
-                }
-            });
-        }
-        System.out.println(Clock.getBytecodeNum() - tmp);
         if(enemyHQLocation != null) currentEnemyHQTarget = enemyHQLocation;
         else if(!potentialEnemyHQLocations.isEmpty()) currentEnemyHQTarget = potentialEnemyHQLocations.get(0);
         potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
