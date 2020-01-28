@@ -27,12 +27,23 @@ public class NetGunSensor {
         }
     }
 
+    static class teamComparator implements Comparator<RobotInfo> {
+        @Override
+        public int compare(RobotInfo rbA, RobotInfo rbB) {
+            if(rbA.team == myTeam && rbB.team == opponentTeam)
+                    return 1;
+            else if(rbA.team == opponentTeam && rbB.team == myTeam)
+                return -1;
+            else return 0;
+        }
+    }
+
     // probably this is unnecessary as one attack per turn is possible?
     public static ArrayList<RobotInfo> tpLocToAttack = new ArrayList<>();
     public static ArrayList<RobotInfo> lpLocToAttack = new ArrayList<>();
 
 
-    public static void senseNearbyUnits(){
+    public static void senseNearbyUnits() throws GameActionException {
         tpLocToAttack.clear();
         lpLocToAttack.clear();
 
@@ -46,6 +57,8 @@ public class NetGunSensor {
 
             }
         }
+        tpLocToAttack.sort(new teamComparator());
+//        System.out.println(tpLocToAttack.get(0));
         tpLocToAttack.sort(new LocationComparator());
         lpLocToAttack.sort(new LocationComparator());
         tpLocToAttack.addAll(lpLocToAttack);
