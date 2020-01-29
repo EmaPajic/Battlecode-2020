@@ -29,6 +29,7 @@ public class MinerSensor {
     public static MapLocation nearestDesignSchool = null;
     public static MapLocation nearestFulfillmentCenter = null;
     public static MapLocation nearestVaporator = null;
+    public static boolean designSchoolNearby = false;
 
     public static void init() {
         soup = new boolean[rc.getMapWidth()][rc.getMapHeight()];
@@ -126,6 +127,7 @@ public class MinerSensor {
             if (robot.team == myTeam) {
                 switch (robot.type) {
                     case DESIGN_SCHOOL:
+                        designSchoolNearby = true;
                         if(rc.senseElevation(robot.location) >= 5 || rc.getRoundNum() <= 600)
                             if(Navigation.aerialDistance(nearestDesignSchool) > Navigation.aerialDistance(robot))
                                 nearestDesignSchool = robot.location;

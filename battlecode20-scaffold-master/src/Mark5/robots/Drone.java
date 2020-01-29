@@ -99,11 +99,12 @@ public class Drone {
             return false;
         if(!rc.canSenseLocation(location))
             return false;
-        if(Strategium.enemyHQLocation != null)
+        if(Strategium.enemyHQLocation == null)
             return false;
         if(rc.senseFlooding(location))
             return false;
-        if(rc.senseElevation(location) >= 8 && Navigation.aerialDistance(Strategium.enemyHQLocation, location) <= 2)
+        if((rc.senseElevation(location) >= 100 && Navigation.aerialDistance(Strategium.enemyHQLocation, location) <= 2)
+            || Navigation.aerialDistance(Strategium.enemyHQLocation, location) == 1)
             return true;
         return false;
     }
@@ -127,11 +128,20 @@ public class Drone {
                 state = State.PREDATOR;
             }
         }
+        if(Strategium.enemyHQLocation != null) {
+            if (rc.getLocation().isWithinDistanceSquared(Strategium.enemyHQLocation,
+                    GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED))
+                state = State.SWARMER;
+        }
 
         numOfDefensiveDrones = Strategium.numDronesMet > 65 ? 15 : 6;
         if(Strategium.dronesMetWithLowerID < (rc.getRoundNum() < 1200 ? 1 : numOfDefensiveDrones)) state = State.SENTRY;
 
         //if(rc.getRoundNum() < 150) state = State.SENTRY;
+        if (state == State.SWARMER && isCrunchingTime() && Navigation.aerialDistance(Strategium.enemyHQLocation) == 1 &&
+            !rc.isCurrentlyHoldingUnit()) {
+            rc.disintegrate();
+        }
 
         System.out.println(state);
         System.out.println(payload);
@@ -169,7 +179,9 @@ public class Drone {
             case RUSH_MINER:
             case FRIENDLY_LANDSCAPER:
             case FRIENDLY_MINER:
-                if(rc.getRoundNum() < 1300 || (state == State.SENTRY && payload == Payload.FRIENDLY_LANDSCAPER))
+                if(rc.getRoundNum() < 1300 || (state == State.SENTRY && payload == Payload.FRIENDLY_LANDSCAPER) ||
+                        (state == State.SWARMER && (payload == Payload.FRIENDLY_LANDSCAPER ||
+                                payload == Payload.FRIENDLY_MINER)))
                     climb();
                 else
                     patrol();
@@ -245,9 +257,6 @@ public class Drone {
                 return true;
             } else return Navigation.bugPath(Strategium.nearestWater);
 
-        }
-        if (state == State.SWARMER) {
-            rc.disintegrate();
         }
 
         return patrol();
@@ -398,6 +407,7 @@ public class Drone {
                             state = State.SWARMER;
                             payload = Payload.POTENTIAL;
                             crunchComplete = true;
+                            System.out.println("Svarmovao");
                             return true;
                         }
                 if (crunchComplete) {
