@@ -240,7 +240,7 @@ public class TwoMinerController {
 
             }
             if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8)
-                if(Navigation.fuzzyNav(nearestNetGun)) return;
+                if(Navigation.fleeToSafety(Strategium.nearestEnemyDrone.location, nearestNetGun)) return;
             if (mineAndRefine()) return;
         }
 

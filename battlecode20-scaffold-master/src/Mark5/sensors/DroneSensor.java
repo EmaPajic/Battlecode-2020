@@ -14,6 +14,7 @@ public class DroneSensor {
     public static DroneSensor strategium = null;
     public static RobotInfo potentialTaxiPayload = null;
     private static RobotType targetType;
+    public static boolean netGunNearby = false;
 
     private static int priority(RobotType type) {
         switch (type) {
@@ -57,6 +58,7 @@ public class DroneSensor {
         nearestLandscaper = null;
         nearestMiner = null;
         nearestPayload = null;
+        netGunNearby = false;
 
 
         if (!rc.isReady()) {
@@ -195,6 +197,9 @@ public class DroneSensor {
                             numDronesMet++;
                             if (robot.getID() < rc.getID()) dronesMetWithLowerID++;
                         }
+                        break;
+                    case NET_GUN:
+                        if(rc.getLocation().distanceSquaredTo(robot.location) < 15) netGunNearby = true;
                 }
             } else {
 
