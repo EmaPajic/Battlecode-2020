@@ -52,6 +52,9 @@ public class NetGun {
                                     bestTarget = tpLoc;
                                     break;
                             }
+                        } else {
+                            bestTarget = tpLoc;
+                            break;
                         }
                     } else {
                         bestTarget = tpLoc;
