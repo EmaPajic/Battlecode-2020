@@ -63,12 +63,12 @@ public class Drone {
             return false;
         if(!rc.canSenseLocation(Strategium.enemyHQLocation))
             return false;
-        if(rc.getRoundNum() > 1500 && rc.getRoundNum() <= 1600 && !rc.isCurrentlyHoldingUnit())
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() <= 1550 && !rc.isCurrentlyHoldingUnit())
             return true;
-        if(rc.getRoundNum() > 1590 && rc.getRoundNum() <= 1690 && rc.isCurrentlyHoldingUnit())
+        if(rc.getRoundNum() > 1515 && rc.getRoundNum() <= 1565 && rc.isCurrentlyHoldingUnit())
             if(payload == Payload.FRIENDLY_MINER)
-            return true;
-        if(rc.getRoundNum() > 1600 && rc.getRoundNum() <= 1700 && rc.isCurrentlyHoldingUnit())
+                return true;
+        if(rc.getRoundNum() > 1525 && rc.getRoundNum() <= 1575 && rc.isCurrentlyHoldingUnit())
             if(payload == Payload.FRIENDLY_LANDSCAPER)
                 return true;
         /*if(rc.getRoundNum() > 1600 && rc.getRoundNum() <= 1700 && !rc.isCurrentlyHoldingUnit())
@@ -76,12 +76,18 @@ public class Drone {
             return true;
         if(rc.getRoundNum() > 1555 && rc.getRoundNum() <= 1565 && rc.isCurrentlyHoldingUnit())
             return true;
-        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 100 > 50 && rc.getRoundNum() % 100 <= 60 &&
+        */
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 200 > 100 && rc.getRoundNum() % 200 <= 150 &&
            !rc.isCurrentlyHoldingUnit())
             return true;
-        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 100 > 55 && rc.getRoundNum() % 100 <= 65 &&
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 200 > 115 && rc.getRoundNum() % 200 <= 165 &&
                 rc.isCurrentlyHoldingUnit())
-            return true;*/
+            if(payload == Payload.FRIENDLY_MINER)
+                return true;
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 200 > 125 && rc.getRoundNum() % 200 <= 175 &&
+                rc.isCurrentlyHoldingUnit())
+            if(payload == Payload.FRIENDLY_LANDSCAPER)
+                return true;
         return false;
     }
 
