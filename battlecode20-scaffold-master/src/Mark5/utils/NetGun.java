@@ -48,8 +48,7 @@ public class NetGun {
                 for (RobotInfo tpLoc : tpLocToAttack) {
                     if (!rc.senseFlooding(tpLoc.location)) {
                         if (tpLoc.currentlyHoldingUnit) {
-                            if ((max(rc.getLocation().x - 2, 0) <= tpLoc.location.x && tpLoc.location.x <= min(rc.getLocation().x + 2, rc.getMapWidth() - 1))
-                                        && (max(rc.getLocation().y - 2, 0) <= tpLoc.location.y && tpLoc.location.y <= min(rc.getLocation().y + 2, rc.getMapHeight() - 1))) {
+                            if (Navigation.aerialDistance(tpLoc) <= 2) {
                                     bestTarget = tpLoc;
                                     break;
                             }

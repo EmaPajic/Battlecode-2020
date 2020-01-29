@@ -288,7 +288,7 @@ public class TwoMinerController {
             + " " + refineryNearby + " " + MinerSensor.visibleSoup);
             if (makeRobotType == null && !friendlyNetGunsNearby &&
                     (enemyDronesNearby || enemyFulfillmentCenterNearby) &&
-                    (rc.senseElevation(rc.getLocation()) >= 8 || refineryNearby || MinerSensor.visibleSoup > 250)) {
+                    (rc.senseElevation(rc.getLocation()) >= 5 || refineryNearby || MinerSensor.visibleSoup > 250)) {
                 makeRobotType = RobotType.NET_GUN;
             }
 
