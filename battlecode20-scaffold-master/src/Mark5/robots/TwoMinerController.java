@@ -226,6 +226,15 @@ public class TwoMinerController {
         return false;
     }
 
+    public static boolean buildDesignSchoolNearEnemy() throws GameActionException {
+        for (Direction dir : dir8) {
+            if ( Navigation.aerialDistance(rc.getLocation().add(dir), Strategium.currentEnemyHQTarget) <= 3 )
+                if (tryBuild(RobotType.DESIGN_SCHOOL, dir)) {
+                    return true;
+                }
+        }
+        return false;
+    }
     public static void control() throws GameActionException {
         Strategium.gatherInfo();
 
@@ -250,6 +259,9 @@ public class TwoMinerController {
 
         if (aroundEnemyHQ && rc.getRoundNum() > 1300 && enemyDronesNearby && !friendlyNetGunsNearby) {
             buildNetGunNearEnemy();
+        }
+        if (aroundEnemyHQ && rc.getRoundNum() > 1300 && rc.senseElevation(rc.getLocation()) > 8) {
+            buildDesignSchoolNearEnemy();
         }
 
         /*if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8) {
@@ -276,7 +288,7 @@ public class TwoMinerController {
             + " " + refineryNearby + " " + MinerSensor.visibleSoup);
             if (makeRobotType == null && !friendlyNetGunsNearby &&
                     (enemyDronesNearby || enemyFulfillmentCenterNearby) &&
-                    (rc.senseElevation(rc.getLocation()) >= 8 || refineryNearby || MinerSensor.visibleSoup > 250)) {
+                    (rc.senseElevation(rc.getLocation()) >= 5 || refineryNearby || MinerSensor.visibleSoup > 250)) {
                 makeRobotType = RobotType.NET_GUN;
             }
 

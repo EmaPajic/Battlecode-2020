@@ -16,12 +16,9 @@ public class MinerSensor {
     public static boolean seenWater = false;
     public static MapLocation vacantBuildSpot;
     public static boolean enemyBuildingsNearby = false;
-    public static boolean friendlyDesignSchoolNearby = false;
-    public static boolean friendlyFulfilmentCenterNearby = false;
     public static boolean friendlyBuriedBuildingNearby = false;
     public static boolean enemyNetGunsNearby = false;
     public static boolean enemyLandscapersNearby = false;
-    public static boolean enemySoftNearby = false;
     public static boolean enemyDronesNearby = false;
     public static boolean friendlyDronesNearby = false;
     public static boolean enemyFulfillmentCenterNearby = false;
@@ -101,12 +98,9 @@ public class MinerSensor {
 
 
         enemyBuildingsNearby = false;
-        friendlyDesignSchoolNearby = false;
-        friendlyFulfilmentCenterNearby = false;
         friendlyBuriedBuildingNearby = false;
         enemyNetGunsNearby = false;
         enemyLandscapersNearby = false;
-        enemySoftNearby = false;
         enemyDronesNearby = false;
         friendlyDronesNearby = false;
         enemyFulfillmentCenterNearby = false;
@@ -132,14 +126,12 @@ public class MinerSensor {
             if (robot.team == myTeam) {
                 switch (robot.type) {
                     case DESIGN_SCHOOL:
-                        friendlyDesignSchoolNearby = true;
                         if(rc.senseElevation(robot.location) >= 5 || rc.getRoundNum() <= 600)
                             if(Navigation.aerialDistance(nearestDesignSchool) > Navigation.aerialDistance(robot))
                                 nearestDesignSchool = robot.location;
                         break;
 
                     case FULFILLMENT_CENTER:
-                        friendlyFulfilmentCenterNearby = true;
                         if(rc.senseElevation(robot.location) >= 5 || rc.getRoundNum() <= 600)
                             if(Navigation.aerialDistance(nearestFulfillmentCenter) > Navigation.aerialDistance(robot))
                                 nearestFulfillmentCenter = robot.location;
@@ -207,11 +199,6 @@ public class MinerSensor {
 
                     case LANDSCAPER:
                         enemyLandscapersNearby = true;
-                        break;
-
-                    case COW:
-                    case MINER:
-                        enemySoftNearby = true;
                         break;
                 }
             }

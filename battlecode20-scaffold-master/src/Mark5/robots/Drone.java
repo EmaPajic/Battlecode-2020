@@ -38,10 +38,11 @@ public class Drone {
 
     public static Payload payload = Payload.POTENTIAL;
 
-    private static int patrolRange = 3;
+    private static int patrolRange = 4;
     private static int numOfDefensiveDrones = 16;
     private static int patrolWaypointIndex = 1;
     private static MapLocation waypoint;
+    private static boolean crunchComplete = false;
 
     private static Iterator<MapLocation> target = null;
 
@@ -62,20 +63,31 @@ public class Drone {
             return false;
         if(!rc.canSenseLocation(Strategium.enemyHQLocation))
             return false;
-        if(rc.getRoundNum() > 1500 && rc.getRoundNum() <= 1510 && !rc.isCurrentlyHoldingUnit())
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() <= 1550 && !rc.isCurrentlyHoldingUnit())
             return true;
-        if(rc.getRoundNum() > 1505 && rc.getRoundNum() <= 1515 && rc.isCurrentlyHoldingUnit())
-            return true;
-        if(rc.getRoundNum() > 1550 && rc.getRoundNum() <= 1560 && !rc.isCurrentlyHoldingUnit())
+        if(rc.getRoundNum() > 1515 && rc.getRoundNum() <= 1565 && rc.isCurrentlyHoldingUnit())
+            if(payload == Payload.FRIENDLY_MINER)
+                return true;
+        if(rc.getRoundNum() > 1525 && rc.getRoundNum() <= 1575 && rc.isCurrentlyHoldingUnit())
+            if(payload == Payload.FRIENDLY_LANDSCAPER)
+                return true;
+        /*if(rc.getRoundNum() > 1600 && rc.getRoundNum() <= 1700 && !rc.isCurrentlyHoldingUnit())
+            if(payload == Payload.FRIENDLY_LANDSCAPER)
             return true;
         if(rc.getRoundNum() > 1555 && rc.getRoundNum() <= 1565 && rc.isCurrentlyHoldingUnit())
             return true;
-        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 100 > 50 && rc.getRoundNum() % 100 <= 60 &&
+        */
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 200 > 100 && rc.getRoundNum() % 200 <= 150 &&
            !rc.isCurrentlyHoldingUnit())
             return true;
-        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 100 > 55 && rc.getRoundNum() % 100 <= 65 &&
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 200 > 115 && rc.getRoundNum() % 200 <= 165 &&
                 rc.isCurrentlyHoldingUnit())
-            return true;
+            if(payload == Payload.FRIENDLY_MINER)
+                return true;
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 200 > 125 && rc.getRoundNum() % 200 <= 175 &&
+                rc.isCurrentlyHoldingUnit())
+            if(payload == Payload.FRIENDLY_LANDSCAPER)
+                return true;
         return false;
     }
 
@@ -103,7 +115,7 @@ public class Drone {
 
         Strategium.gatherInfo();
 
-        //patrolRange = 3 + (Strategium.numDronesMet - 24) / 8;
+        patrolRange = rc.getRoundNum() > 1000 ? 2 : 4;
         if(isCrunchingTime())
             state = State.SWARMER;
         else
@@ -119,7 +131,7 @@ public class Drone {
             }
         }
 
-        numOfDefensiveDrones = 0;
+        numOfDefensiveDrones = Strategium.numDronesMet > 65 ? 15 : 6;
         if(Strategium.dronesMetWithLowerID < (rc.getRoundNum() < 1200 ? 1 : numOfDefensiveDrones)) state = State.SENTRY;
 
         //if(rc.getRoundNum() < 150) state = State.SENTRY;
@@ -217,6 +229,9 @@ public class Drone {
             } else return Navigation.bugPath(Strategium.nearestWater);
 
         }
+        if (state == State.SWARMER) {
+            rc.disintegrate();
+        }
 
         return patrol();
     }
@@ -309,9 +324,9 @@ public class Drone {
 
                  */
                 case SENTRY:
-                    if(Navigation.aerialDistance(Strategium.HQLocation) > 4)
+                    if(Navigation.aerialDistance(Strategium.HQLocation) > patrolRange)
                         return Navigation.bugPath(Strategium.HQLocation);
-                    if(Navigation.aerialDistance(Strategium.HQLocation) < 4) {
+                    if(Navigation.aerialDistance(Strategium.HQLocation) < patrolRange) {
                         List<Direction> dirs = Navigation.moveAwayFrom(Strategium.HQLocation);
                         for (Direction dir : dirs)
                             if(Strategium.canSafelyMove(dir)){
@@ -365,8 +380,12 @@ public class Drone {
                             rc.dropUnit(dir);
                             state = State.SWARMER;
                             payload = Payload.POTENTIAL;
+                            crunchComplete = true;
                             return true;
                         }
+                if (crunchComplete) {
+                    rc.disintegrate();
+                }
                 return patrol();
             case PREDATOR:
             case SENTRY:
