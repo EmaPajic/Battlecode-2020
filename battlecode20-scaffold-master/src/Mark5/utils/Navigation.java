@@ -51,7 +51,7 @@ public class Navigation {
         System.out.println("BEG0");
         System.out.println(Clock.getBytecodeNum());
 
-        if(Navigation.aerialDistance(danger, rc.adjacentLocation(moveTowards(safety))) <
+        if(Navigation.aerialDistance(danger, rc.adjacentLocation(moveTowards(safety))) >
                 Navigation.aerialDistance(danger))
             if(Strategium.canSafelyMove(moveTowards(safety))){
                 rc.move(moveTowards(safety));

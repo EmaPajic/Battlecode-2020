@@ -102,17 +102,19 @@ public class Lattice {
      * @return the direction. If there is no suitable direction, returns null.
      */
     public static Direction bestDigDirection() throws GameActionException {
+        System.out.println("KOPAM");
         for (Direction dir : Direction.allDirections()) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
             if (isAdjacentToWater(location)) continue;
-            System.out.println(dir + " JE PIT: " + isPit(location));
             if (isPit(location) &&
                     (!Strategium.water[location.x][location.y] ||
-                            Strategium.elevation[location.x][location.y] < -100 ||
-                            rc.getLocation().isAdjacentTo(Strategium.HQLocation)))
+                            rc.getLocation().isAdjacentTo(Strategium.HQLocation))) {
+                rc.setIndicatorDot(location, 0, 0, 0);
                 return dir;
+            }
         }
+        System.out.println("KOPAM LOSE");
         for (Direction dir : Direction.allDirections()) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
@@ -130,12 +132,15 @@ public class Lattice {
      * @return true if it is adjacent to water, false otherwise
      */
     public static boolean isAdjacentToWater(MapLocation location) {
-        if (Strategium.water[location.x][location.y]) return false;
+        System.out.println("ADJ: " + Strategium.nearestWater);
         if (Strategium.nearestWater == null) return false;
+        if (Strategium.water[location.x][location.y]) return false;
+
         for (Direction dir : dir8) {
             MapLocation loc = location.add(dir);
             if (rc.onTheMap(loc))
                 if (Strategium.water[loc.x][loc.y]) return true;
+                else System.out.println(loc + " NEMA VODE");
         }
         return false;
     }

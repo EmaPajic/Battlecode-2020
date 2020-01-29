@@ -17,11 +17,11 @@ public class Landscaper {
 
         if (rc.getRoundNum() > 1497 && rc.getRoundNum() < 1500) {
             if (Navigation.aerialDistance(Strategium.enemyHQLocation) <= 5 &&
-            Navigation.aerialDistance(Strategium.enemyHQLocation) > 2) {
+                    Navigation.aerialDistance(Strategium.enemyHQLocation) > 2) {
                 rc.disintegrate();
             }
             if (Navigation.aerialDistance(Strategium.enemyHQLocation) == 2 &&
-            rc.senseElevation(rc.getLocation()) < 300) {
+                    rc.senseElevation(rc.getLocation()) < 300) {
                 rc.disintegrate();
             }
         }
@@ -67,11 +67,11 @@ public class Landscaper {
 //            }
             // Strategium decides which building should be prioritized, if not in building perimeter
             // try to reach it
-            if(attack(Strategium.nearestEnemyBuilding)) return;
+            if (attack(Strategium.nearestEnemyBuilding)) return;
         }
 
-        if(LandscaperSensor.numLandscapersMetWithLowerID < 3 &&
-           rc.getRoundNum() > 300 && rc.getRoundNum() < 400 && !rc.canSenseLocation(Strategium.HQLocation)) {
+        if (LandscaperSensor.numLandscapersMetWithLowerID < 3 &&
+                rc.getRoundNum() > 300 && rc.getRoundNum() < 400 && !rc.canSenseLocation(Strategium.HQLocation)) {
             Navigation.fuzzyNav(Strategium.HQLocation);
         }
 
@@ -81,17 +81,17 @@ public class Landscaper {
         }
 
         if (LandscaperSensor.combatWaypoint != null) {
-                Direction dir = BFS.step(LandscaperSensor.combatWaypoint);
-                if (Strategium.canSafelyMove(dir)) {
-                    rc.move(dir);
-                    return;
-                }
+            Direction dir = BFS.step(LandscaperSensor.combatWaypoint);
+            if (Strategium.canSafelyMove(dir)) {
+                rc.move(dir);
+                return;
+            }
 
         }
 
-        if(Strategium.nearestEnemyDrone != null &&
+        if (Strategium.nearestEnemyDrone != null &&
                 LandscaperSensor.nearestNetGun.distanceSquaredTo(rc.getLocation()) >= 8)
-            if(Navigation.fleeToSafety(Strategium.nearestEnemyDrone.location, LandscaperSensor.nearestNetGun)) return;
+            if (Navigation.fleeToSafety(Strategium.nearestEnemyDrone.location, LandscaperSensor.nearestNetGun)) return;
 
         //System.out.println("DREIN");
 
@@ -105,7 +105,7 @@ public class Landscaper {
     }
 
     private static boolean buildTheWall() throws GameActionException {
-        if(Wall.reposition()) return true;
+        if (Wall.reposition()) return true;
         if (rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit) {
             Direction dir = Lattice.bestDigDirection();
             if (rc.canDigDirt(dir)) {
@@ -156,8 +156,8 @@ public class Landscaper {
                     }
                 }
                 if (Navigation.aerialDistance(rc.getLocation(), Strategium.enemyHQLocation) == 2 &&
-                Math.abs(rc.senseElevation(rc.getLocation().add(Navigation.moveTowards(Strategium.enemyHQLocation))) -
-                        rc.senseElevation(rc.getLocation())) > 3) {
+                        Math.abs(rc.senseElevation(rc.getLocation().add(Navigation.moveTowards(Strategium.enemyHQLocation))) -
+                                rc.senseElevation(rc.getLocation())) > 3) {
                     if (rc.canDigDirt(Navigation.moveTowards(Strategium.enemyHQLocation))) {
                         rc.digDirt(Navigation.moveTowards(Strategium.enemyHQLocation));
                         return true;
@@ -194,21 +194,39 @@ public class Landscaper {
                 rc.setIndicatorDot(location, 255, 0, 0);
                 return true;
             }
-            Direction dir = Lattice.bestDigDirection();
-            if (dir == null) return Navigation.bugPath(Strategium.HQLocation);
-            if (rc.canDigDirt(dir)) {
-                rc.digDirt(dir);
-                rc.setIndicatorDot(rc.adjacentLocation(dir), 0, 0, 255);
-                return true;
+            //Direction dir = Lattice.bestDigDirection();
+            for (Direction dir : dir8) {
+                MapLocation digLocation = rc.adjacentLocation(dir);
+                if (digLocation.equals(location)) continue;
+                if (Lattice.isPit(digLocation) && (!Lattice.isAdjacentToWater(digLocation) ||
+                        rc.senseFlooding(digLocation)))
+                    if (rc.canDigDirt(dir)) {
+                        rc.digDirt(dir);
+                        rc.setIndicatorDot(digLocation, 0, 0, 255);
+                        return true;
+                    }
             }
-            return false;
+
+            for (Direction dir : dir8) {
+                MapLocation digLocation = rc.adjacentLocation(dir);
+                if (digLocation.equals(location)) continue;
+                if (!Lattice.isAdjacentToWater(digLocation))
+                    if (rc.canDigDirt(dir)) {
+                        rc.digDirt(dir);
+                        rc.setIndicatorDot(digLocation, 0, 0, 255);
+                        return true;
+                    }
+            }
+
+            return Navigation.bugPath(Strategium.HQLocation);
+
         }
         return false;
     }
 
-    private static boolean patrol() throws GameActionException {
+    private static void patrol() throws GameActionException {
         if (Lattice.isPit(rc.getLocation()) && waypoint != null) {
-            if (Navigation.bugPath(waypoint)) return true;
+            if (Navigation.bugPath(waypoint)) return;
         }
 
         /*int waterLevel = (int) GameConstants.getWaterLevel(
@@ -225,19 +243,20 @@ public class Landscaper {
         if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y] &&
                 !Lattice.isPit(rc.getLocation())) {
             Direction dir = Lattice.bestDigDirection();
-            if(dir != null)
-            if (rc.canDigDirt(dir)) {
-                rc.digDirt(dir);
-                return true;
-            }
+            if (dir != null)
+                if (rc.canDigDirt(dir)) {
+                    rc.digDirt(dir);
+                    return;
+                }
             if (rc.canDepositDirt(Direction.CENTER)) {
                 rc.depositDirt(Direction.CENTER);
-                return true;
+                return;
             }
         }
 
-        //System.out.println("treba da kopam");
+
         if (rc.getRoundNum() > 1000 && rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit - 1) {
+            System.out.println("treba da kopam");
             if (Strategium.enemyHQLocation != null) {
                 if (Navigation.aerialDistance(Strategium.enemyHQLocation) > 5) {
                     //System.out.println("Cmoncmon kopaj");
@@ -245,19 +264,18 @@ public class Landscaper {
                     if (dir != null)
                         if (rc.canDigDirt(dir)) {
                             rc.digDirt(dir);
-                            return true;
+                            return;
                         }
                 }
+            } else {
+                //System.out.println("Cmoncmon kopaj");
+                Direction dir = Lattice.bestDigDirection();
+                if (dir != null)
+                    if (rc.canDigDirt(dir)) {
+                        rc.digDirt(dir);
+                        return;
+                    }
             }
-            else {
-                    //System.out.println("Cmoncmon kopaj");
-                    Direction dir = Lattice.bestDigDirection();
-                    if (dir != null)
-                        if (rc.canDigDirt(dir)) {
-                            rc.digDirt(dir);
-                            return true;
-                        }
-                }
         }
 
         for (Direction dir : dir8) {
@@ -268,7 +286,7 @@ public class Landscaper {
                     rc.setIndicatorDot(location, 255, 255, 0);
                     if (rc.canDepositDirt(dir)) {
                         rc.depositDirt(dir);
-                        return true;
+                        return;
                     }
                 }
         }
@@ -281,7 +299,7 @@ public class Landscaper {
                 if (waterLevel > Strategium.elevation[location.x][location.y]) {
                     if (rc.canDepositDirt(dir)) {
                         rc.depositDirt(dir);
-                        return true;
+                        return;
                     }
                 }
         }
@@ -293,32 +311,31 @@ public class Landscaper {
                         (Lattice.isBuildingSite(location) && !Strategium.occupied[location.x][location.y])) ||
                         Navigation.aerialDistance(location, Strategium.enemyHQLocation) < 3)
                     if (Strategium.elevation[location.x][location.y] >
-                            3 + Strategium.elevation[rc.getLocation().x][rc.getLocation().y])
-                        if (!Lattice.isAdjacentToWater(location)) {
-                            if (rc.canDigDirt(dir)) {
+                            3 + Strategium.elevation[rc.getLocation().x][rc.getLocation().y]) {
+                        if (rc.canDigDirt(dir)) {
 
-                                rc.digDirt(dir);
-                                return true;
-                            }
+                            rc.digDirt(dir);
+                            return;
                         }
+                    }
             }
 
         if (rc.getDirtCarrying() == RobotType.LANDSCAPER.dirtLimit) {
             Direction dir = Lattice.bestDepositDirection();
-            if(dir != null)
-            if (rc.canDepositDirt(dir)) {
-                rc.depositDirt(dir);
-                return true;
-            }
+            if (dir != null)
+                if (rc.canDepositDirt(dir)) {
+                    rc.depositDirt(dir);
+                    return;
+                }
         }
 
         if (rc.getDirtCarrying() == 0) {
             Direction dir = Lattice.bestDigDirection();
-            if(dir != null)
-            if (rc.canDigDirt(dir)) {
-                rc.digDirt(dir);
-                return true;
-            }
+            if (dir != null)
+                if (rc.canDigDirt(dir)) {
+                    rc.digDirt(dir);
+                    return;
+                }
         }
 
         MapLocation bestWaypoint = null;
@@ -336,7 +353,7 @@ public class Landscaper {
                                 bestWaypoint = location;
                         } else {
                             rc.move(dir);
-                            return true;
+                            return;
                         }
 
                     }
@@ -362,7 +379,7 @@ public class Landscaper {
         }
 
         rc.setIndicatorLine(rc.getLocation(), waypoint, 255, 255, 255);
-        return Navigation.bugPath(waypoint);
+        Navigation.bugPath(waypoint);
 
     }
 

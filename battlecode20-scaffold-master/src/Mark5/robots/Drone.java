@@ -1,10 +1,7 @@
 package Mark5.robots;
 
 import Mark5.sensors.DroneSensor;
-import Mark5.utils.Grid;
-import Mark5.utils.Navigation;
-import Mark5.utils.Strategium;
-import Mark5.utils.Wall;
+import Mark5.utils.*;
 import battlecode.common.*;
 
 import java.util.Iterator;
@@ -131,11 +128,20 @@ public class Drone {
                 state = State.PREDATOR;
             }
         }
+        if(Strategium.enemyHQLocation != null) {
+            if (rc.getLocation().isWithinDistanceSquared(Strategium.enemyHQLocation,
+                    GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED))
+                state = State.SWARMER;
+        }
 
         numOfDefensiveDrones = Strategium.numDronesMet > 65 ? 15 : 6;
         if(Strategium.dronesMetWithLowerID < (rc.getRoundNum() < 1200 ? 1 : numOfDefensiveDrones)) state = State.SENTRY;
 
         //if(rc.getRoundNum() < 150) state = State.SENTRY;
+        if (state == State.SWARMER && isCrunchingTime() && Navigation.aerialDistance(Strategium.enemyHQLocation) == 1 &&
+            !rc.isCurrentlyHoldingUnit() && Strategium.nearestEnemyUnit == null) {
+            rc.disintegrate();
+        }
 
         System.out.println(state);
         System.out.println(payload);
@@ -179,6 +185,26 @@ public class Drone {
                     climb();
                 else
                     patrol();
+                if(rc.getRoundNum() >= 1300){
+                    MapLocation location = Siege.dropSite();
+                    if(location == null) break;
+                    Direction dir = rc.getLocation().directionTo(location);
+                    switch (payload){
+                        case FRIENDLY_LANDSCAPER:
+                            if(rc.senseFlooding(location))
+                                if(rc.canDropUnit(dir)){
+                                    rc.dropUnit(dir);
+                                    return;
+                                }
+                        case FRIENDLY_MINER:
+                            if(!rc.senseFlooding(location))
+                                if(rc.canDropUnit(dir)){
+                                    rc.dropUnit(dir);
+                                    return;
+                                }
+                    }
+                }
+
                 break;
         }
 
@@ -231,9 +257,6 @@ public class Drone {
                 return true;
             } else return Navigation.bugPath(Strategium.nearestWater);
 
-        }
-        if (state == State.SWARMER) {
-            rc.disintegrate();
         }
 
         return patrol();
