@@ -15,7 +15,6 @@ public class DroneSensor {
     public static RobotInfo potentialTaxiPayload = null;
     private static RobotType targetType;
     public static boolean netGunNearby = false;
-    public static boolean seenAliveEnemyLandscapers = false;
 
     private static int priority(RobotType type) {
         switch (type) {
@@ -102,7 +101,6 @@ public class DroneSensor {
         RobotInfo[] robots = rc.senseNearbyRobots();
 
         int index;
-        seenAliveEnemyLandscapers = false;
 
         for (RobotInfo robot : robots) {
 
@@ -262,7 +260,6 @@ public class DroneSensor {
                         if (Grid.interesting[index] && !Grid.unsafe[index]) Grid.huntingGround[index] = true;
 
                     case LANDSCAPER:
-                        seenAliveEnemyLandscapers = true;
                         enemyUnits.add(robot);
                         if (priority(robot.type) >= priority(targetType))
                             if (Navigation.aerialDistance(robot) < Navigation.aerialDistance(nearestEnemyUnit)) {

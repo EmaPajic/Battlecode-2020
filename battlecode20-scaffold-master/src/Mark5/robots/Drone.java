@@ -139,7 +139,7 @@ public class Drone {
 
         //if(rc.getRoundNum() < 150) state = State.SENTRY;
         if (state == State.SWARMER && isCrunchingTime() && Navigation.aerialDistance(Strategium.enemyHQLocation) == 1 &&
-            !rc.isCurrentlyHoldingUnit()) {
+            !rc.isCurrentlyHoldingUnit() && Strategium.nearestEnemyUnit == null) {
             rc.disintegrate();
         }
 
