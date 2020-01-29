@@ -99,12 +99,14 @@ public class Wall {
     }
 
     public static MapLocation buildSpot() throws GameActionException {
+        scanWall();
         MapLocation buildSpot = rc.getLocation();
         for (int i = wall.length; i-- > 0; ) {
             if (rc.getLocation().isAdjacentTo(wall[i]))
                 if (rc.canSenseLocation(wall[i]))
                     if (Strategium.robotAt(wall[i]) == RobotType.LANDSCAPER || rc.getRoundNum() > 600 ||
-                    rc.senseElevation(wall[i]) < rc.senseElevation(HQLocation) + 3)
+                    rc.senseElevation(wall[i]) < rc.senseElevation(HQLocation) + 3 ||
+                            (minHeight < GameConstants.getWaterLevel(rc.getRoundNum() + 50)))
                         if (rc.senseElevation(wall[i]) < rc.senseElevation(buildSpot))
                             buildSpot = wall[i];
         }

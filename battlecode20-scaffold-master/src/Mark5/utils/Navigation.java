@@ -48,6 +48,9 @@ public class Navigation {
 
     public static boolean fleeToSafety(MapLocation danger, MapLocation safety) throws GameActionException {
 
+        System.out.println("BEG0");
+        System.out.println(Clock.getBytecodeNum());
+
         if(Navigation.aerialDistance(danger, rc.adjacentLocation(moveTowards(safety))) <
                 Navigation.aerialDistance(danger))
             if(Strategium.canSafelyMove(moveTowards(safety))){
@@ -55,13 +58,18 @@ public class Navigation {
                 return true;
             }
 
+        System.out.println("BEG1");
+        System.out.println(Clock.getBytecodeNum());
+
         for(Direction dir : dir8)
             if(Navigation.aerialDistance(danger, rc.adjacentLocation(dir)) > Navigation.aerialDistance(danger) &&
-            Navigation.aerialDistance(safety, rc.adjacentLocation(dir)) < Navigation.aerialDistance(safety))
+            safety.distanceSquaredTo(rc.getLocation()) > safety.distanceSquaredTo(rc.adjacentLocation(dir)))
                 if(Strategium.canSafelyMove(dir)){
                     rc.move(dir);
                     return true;
                 }
+        System.out.println("BEG2");
+        System.out.println(Clock.getBytecodeNum());
 
         for(Direction dir : dir8)
             if(Navigation.aerialDistance(danger, rc.adjacentLocation(dir)) > Navigation.aerialDistance(danger))
@@ -69,27 +77,31 @@ public class Navigation {
                     rc.move(dir);
                     return true;
                 }
+        System.out.println("BEG3");
+        System.out.println(Clock.getBytecodeNum());
 
-        for(Direction dir : dir8)
+        /*for(Direction dir : dir8)
             if(rc.adjacentLocation(dir).distanceSquaredTo(danger) > rc.getLocation().distanceSquaredTo(danger))
                 if(Strategium.canSafelyMove(dir)){
                     rc.move(dir);
                     return true;
-                }
+                }*/
 
         for(Direction dir : dir8)
-            if(Navigation.aerialDistance(safety, rc.adjacentLocation(dir)) < Navigation.aerialDistance(safety))
+            if(safety.distanceSquaredTo(rc.getLocation()) > safety.distanceSquaredTo(rc.adjacentLocation(dir)))
                 if(Strategium.canSafelyMove(dir)){
                     rc.move(dir);
                     return true;
                 }
+        System.out.println("BEG4");
+        System.out.println(Clock.getBytecodeNum());
 
-        for(Direction dir : dir8)
+        /*for(Direction dir : dir8)
             if(rc.adjacentLocation(dir).distanceSquaredTo(safety) < rc.getLocation().distanceSquaredTo(safety))
                 if(Strategium.canSafelyMove(dir)){
                     rc.move(dir);
                     return true;
-                }
+                }*/
 
         return false;
     }

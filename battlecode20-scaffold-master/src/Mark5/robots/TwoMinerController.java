@@ -17,6 +17,7 @@ import static Mark5.RobotPlayer.*;
 import static java.lang.Integer.min;
 import static java.lang.Math.max;
 import static java.util.Collections.swap;
+import static Mark5.sensors.MinerSensor.*;
 
 public class TwoMinerController {
 
@@ -34,7 +35,6 @@ public class TwoMinerController {
                     Navigation.aerialDistance(hqLocation, locA), Navigation.aerialDistance(hqLocation, locB));
         }
     }
-
     public static ArrayList<MapLocation> searchRoute;
     static ArrayList<MapLocation> searchRouteVisited;
 
@@ -51,10 +51,7 @@ public class TwoMinerController {
     static int buildRadius = 0;
     static MapLocation buildWaypoint;
 
-    static MapLocation nearestNetGun = null;
-    static MapLocation nearestDesignSchool = null;
-    static MapLocation nearestFulfillmentCenter = null;
-    static MapLocation nearestVaporator = null;
+
     static boolean haveVaporator = false;
 
     static int factoriesBuilt;
@@ -66,7 +63,7 @@ public class TwoMinerController {
 
     static void findRoute() {
         int stepX = (rc.getMapWidth() - 10) / 3;
-        int stepY = (rc.getMapWidth() - 10) / 3;
+        int stepY = (rc.getMapHeight() - 10) / 3;
         for (int currX = 4; currX <= rc.getMapWidth() - 1; currX += stepX) {
             for (int currY = 4; currY <= rc.getMapHeight() - 1; currY += stepY) {
                 searchRoute.add(new MapLocation(currX, currY));
@@ -232,6 +229,10 @@ public class TwoMinerController {
     public static void control() throws GameActionException {
         Strategium.gatherInfo();
 
+        // Dodato zbog nullpointer exceptiona
+        if(buildWaypoint == null && Strategium.HQLocation != null)
+            buildWaypoint = Strategium.HQLocation;
+
         if(rc.getRoundNum() <= 600) {
             if (rc.canSenseLocation(currentTarget) || Navigation.frustration >= 50) {
 
@@ -243,107 +244,6 @@ public class TwoMinerController {
             if (mineAndRefine()) return;
         }
 
-        System.out.println("Nisam crko");
-
-
-        boolean enemyBuildingsNearby = false;
-        boolean friendlyDesignSchoolNearby = false;
-        boolean friendlyFulfilmentCenterNearby = false;
-        boolean friendlyBuriedBuildingNearby = false;
-        boolean enemyNetGunsNearby = false;
-        boolean enemyLandscapersNearby = false;
-        boolean enemySoftNearby = false;
-        boolean enemyDronesNearby = false;
-        boolean friendlyDronesNearby = false;
-        boolean enemyFulfillmentCenterNearby = false;
-        boolean friendlyNetGunsNearby = false;
-        boolean aroundEnemyHQ = false;
-        boolean refineryNearby = false;
-
-        RobotInfo[] robots = rc.senseNearbyRobots();
-        //System.println(robots.length);
-
-        if(nearestDesignSchool != null)
-            if(rc.canSenseLocation(nearestDesignSchool)) nearestDesignSchool = null;
-
-        if(nearestFulfillmentCenter != null)
-            if(rc.canSenseLocation(nearestFulfillmentCenter)) nearestFulfillmentCenter = null;
-
-        if(nearestNetGun != null)
-            if(rc.canSenseLocation(nearestNetGun)) nearestNetGun = Strategium.HQLocation;
-
-        for (RobotInfo robot : robots) {
-            if (robot.team == Strategium.myTeam) {
-
-                switch (robot.type) {
-                    case DESIGN_SCHOOL:
-                        friendlyDesignSchoolNearby = true;
-                        if(rc.senseElevation(robot.location) >= 5 || rc.getRoundNum() <= 600)
-                        if(Navigation.aerialDistance(nearestDesignSchool) > Navigation.aerialDistance(robot))
-                            nearestDesignSchool = robot.location;
-                        break;
-
-                    case FULFILLMENT_CENTER:
-                        friendlyFulfilmentCenterNearby = true;
-                        if(rc.senseElevation(robot.location) >= 5 || rc.getRoundNum() <= 600)
-                        if(Navigation.aerialDistance(nearestFulfillmentCenter) > Navigation.aerialDistance(robot))
-                            nearestFulfillmentCenter = robot.location;
-                        if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
-                        break;
-
-                    case VAPORATOR:
-                        if (Navigation.aerialDistance(nearestVaporator) > Navigation.aerialDistance(robot))
-                            nearestVaporator = robot.location;
-                    case REFINERY:
-                        refineryNearby = true;
-                        if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
-                        break;
-
-                    case HQ:
-                    case NET_GUN:
-                        if (rc.getLocation().distanceSquaredTo(robot.location) <= 15) friendlyNetGunsNearby = true;
-                        if (robot.dirtCarrying > 0) friendlyBuriedBuildingNearby = true;
-                        if (Navigation.aerialDistance(nearestNetGun) > Navigation.aerialDistance(robot))
-                            nearestNetGun = robot.location;
-                        break;
-
-                    case DELIVERY_DRONE:
-                        friendlyDronesNearby = true;
-                        break;
-
-                }
-            } else {
-
-                switch (robot.type) {
-                    case HQ:
-                        aroundEnemyHQ = true;
-                    case NET_GUN:
-                        if (rc.getLocation().distanceSquaredTo(robot.location) <= 35) enemyNetGunsNearby = true;
-
-                    case VAPORATOR:
-                    case REFINERY:
-                    case DESIGN_SCHOOL:
-                        enemyBuildingsNearby = true;
-                        break;
-                    case FULFILLMENT_CENTER:
-                        enemyFulfillmentCenterNearby = true;
-                        break;
-                    case DELIVERY_DRONE:
-                        enemyDronesNearby = true;
-                        break;
-                    case LANDSCAPER:
-                        enemyLandscapersNearby = true;
-                        break;
-                    case COW:
-                    case MINER:
-                        enemySoftNearby = true;
-                        break;
-                }
-
-            }
-        }
-
-
         RobotType makeRobotType = null;
 
         System.out.println(rc.getTeamSoup());
@@ -352,10 +252,10 @@ public class TwoMinerController {
             buildNetGunNearEnemy();
         }
 
-        if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8) {
+        /*if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8) {
             if (!Strategium.nearestEnemyDrone.currentlyHoldingUnit)
             if (Navigation.fuzzyNav(nearestNetGun)) return;
-        }
+        }*/
 
         if (rc.getTeamSoup() > RobotType.DESIGN_SCHOOL.cost + RobotType.LANDSCAPER.cost ||
                 Navigation.aerialDistance(Strategium.HQLocation) <= 3) {
@@ -372,9 +272,11 @@ public class TwoMinerController {
                 makeRobotType = RobotType.DESIGN_SCHOOL;
         }
 
+            System.out.println(friendlyNetGunsNearby + " " + enemyDronesNearby + " " + enemyFulfillmentCenterNearby
+            + " " + refineryNearby + " " + MinerSensor.visibleSoup);
             if (makeRobotType == null && !friendlyNetGunsNearby &&
                     (enemyDronesNearby || enemyFulfillmentCenterNearby) &&
-                    (rc.senseElevation(rc.getLocation()) >= 8 || refineryNearby || MinerSensor.visibleSoup > 20)) {
+                    (rc.senseElevation(rc.getLocation()) >= 8 || refineryNearby || MinerSensor.visibleSoup > 250)) {
                 makeRobotType = RobotType.NET_GUN;
             }
 
@@ -416,7 +318,8 @@ public class TwoMinerController {
 
         if(nearestNetGun != null) rc.setIndicatorLine(rc.getLocation(), nearestNetGun, 0, 255, 0);
 
-        if(Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8) {
+        if(!(makeRobotType == RobotType.NET_GUN && rc.getTeamSoup() >= 250) &&
+                Strategium.nearestEnemyDrone != null && rc.getLocation().distanceSquaredTo(nearestNetGun) >= 8) {
 
             if (Navigation.fleeToSafety(Strategium.nearestEnemyDrone.location, nearestNetGun)) return;
         }
