@@ -260,7 +260,7 @@ public class TwoMinerController {
         if (aroundEnemyHQ && rc.getRoundNum() > 1300 && enemyDronesNearby && !friendlyNetGunsNearby) {
             buildNetGunNearEnemy();
         }
-        if (aroundEnemyHQ && rc.getRoundNum() > 1300 && !Drone.goodSwarmingLandingSpot(nearestDesignSchool)) {
+        if (aroundEnemyHQ && rc.getRoundNum() > 1300 && !designSchoolNearby) {
             buildDesignSchoolNearEnemy();
         }
 
