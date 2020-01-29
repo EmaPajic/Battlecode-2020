@@ -1,10 +1,7 @@
 package Mark5.robots;
 
 import Mark5.sensors.DroneSensor;
-import Mark5.utils.Grid;
-import Mark5.utils.Navigation;
-import Mark5.utils.Strategium;
-import Mark5.utils.Wall;
+import Mark5.utils.*;
 import battlecode.common.*;
 
 import java.util.Iterator;
@@ -176,6 +173,26 @@ public class Drone {
                     climb();
                 else
                     patrol();
+                if(rc.getRoundNum() >= 1300){
+                    MapLocation location = Siege.dropSite();
+                    if(location == null) break;
+                    Direction dir = rc.getLocation().directionTo(location);
+                    switch (payload){
+                        case FRIENDLY_LANDSCAPER:
+                            if(rc.senseFlooding(location))
+                                if(rc.canDropUnit(dir)){
+                                    rc.dropUnit(dir);
+                                    return;
+                                }
+                        case FRIENDLY_MINER:
+                            if(!rc.senseFlooding(location))
+                                if(rc.canDropUnit(dir)){
+                                    rc.dropUnit(dir);
+                                    return;
+                                }
+                    }
+                }
+
                 break;
         }
 

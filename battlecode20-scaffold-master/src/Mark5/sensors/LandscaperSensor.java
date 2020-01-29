@@ -46,7 +46,7 @@ public class LandscaperSensor {
                 MapLocation location = new MapLocation(i, j);
                 if (rc.canSenseLocation(location)) {
                     elevation[i][j] = rc.senseElevation(location);
-                    //water[i][j] = rc.senseFlooding(location);
+                    water[i][j] = rc.senseFlooding(location);
                     occupied[i][j] = false;
                     if(rc.senseFlooding(location)){
                         if(Navigation.aerialDistance(nearestWater) > Navigation.aerialDistance(location)) {
