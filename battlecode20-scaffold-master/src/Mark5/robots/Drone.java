@@ -136,6 +136,10 @@ public class Drone {
         if(Strategium.dronesMetWithLowerID < (rc.getRoundNum() < 1200 ? 1 : numOfDefensiveDrones)) state = State.SENTRY;
 
         //if(rc.getRoundNum() < 150) state = State.SENTRY;
+        if (state == State.SWARMER && isCrunchingTime() && Navigation.aerialDistance(Strategium.enemyHQLocation) == 1 &&
+            !rc.isCurrentlyHoldingUnit()) {
+            rc.disintegrate();
+        }
 
         System.out.println(state);
         System.out.println(payload);
@@ -231,9 +235,6 @@ public class Drone {
                 return true;
             } else return Navigation.bugPath(Strategium.nearestWater);
 
-        }
-        if (state == State.SWARMER) {
-            rc.disintegrate();
         }
 
         return patrol();
