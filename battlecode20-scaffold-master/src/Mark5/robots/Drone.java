@@ -175,7 +175,7 @@ public class Drone {
                 if (Strategium.nearestEnemyUnit != null) if (attack(Strategium.nearestEnemyUnit)) break;
                 if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
                 if (state == State.PREDATOR && rc.getRoundNum() > 1400 &&
-                    Navigation.aerialDistance(Strategium.enemyHQLocation) >= 8) {
+                    Navigation.aerialDistance(Strategium.enemyHQLocation) >= 6) {
                     if(Strategium.nearestMiner != null) {
                         if(Navigation.aerialDistance(Strategium.nearestMiner.location,
                                                      Strategium.HQLocation) >= 2) {
