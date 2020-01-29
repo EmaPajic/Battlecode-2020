@@ -110,8 +110,8 @@ public class NetGunSensor {
                 if (robot.type == RobotType.DELIVERY_DRONE) {
                     switch (rc.getType()) {
                         case HQ:
-                            if ((max(robot.location.x - 1, 0) <= rc.getLocation().x || min(robot.location.x + 1, rc.getMapWidth()) >= rc.getLocation().x)
-                                    && (max(robot.location.y - 1, 0) <= rc.getLocation().y && min(robot.location.y + 1, rc.getMapWidth()) >= rc.getLocation().y)) {
+                            if ((max(robot.location.x - 1, 0) <= rc.getLocation().x || min(robot.location.x + 1, rc.getMapWidth() - 1) >= rc.getLocation().x)
+                                    && (max(robot.location.y - 1, 0) <= rc.getLocation().y && min(robot.location.y + 1, rc.getMapWidth() - 1) >= rc.getLocation().y)) {
 
                             } else if (robot.currentlyHoldingUnit) {
                                 tpLocToAttack.add(robot);
