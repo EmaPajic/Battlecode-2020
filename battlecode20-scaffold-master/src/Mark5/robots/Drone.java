@@ -131,6 +131,11 @@ public class Drone {
                 state = State.PREDATOR;
             }
         }
+        if(Strategium.enemyHQLocation != null) {
+            if (rc.getLocation().isWithinDistanceSquared(Strategium.enemyHQLocation,
+                    GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED))
+                state = State.SWARMER;
+        }
 
         numOfDefensiveDrones = Strategium.numDronesMet > 65 ? 15 : 6;
         if(Strategium.dronesMetWithLowerID < (rc.getRoundNum() < 1200 ? 1 : numOfDefensiveDrones)) state = State.SENTRY;
