@@ -17,6 +17,19 @@ public class Blockchain {
     static int opponentTransactionMinFee = 1000;
     static int opponentTransactionMaxFee = 0;
     static int[] lastTurnSent;
+    public static int[][] falseMessages = {{-6333, 9396173, 0, 64824852, 0, 0, 8495},
+            {1793301902, 0, 0, 0, 0, 0, 0}, {2012808, 1, 12345, 0, 0, 0, 111105},
+            {274216, 2624708, 0, 0, 0, 0, 2140403},
+            {1539306196, -1216614434, 1861738430, -571490483, -1142980880, 2008993856, -276956202},
+            {51351235, 59, 7, 5, 0, 1543200769, -699082112}, {2, 17, 19, 25, 19, 4, -14976},
+            {-999777234, 0, 2949, 272, 7311469, 9014476, 4968225}, {444444444, 982, 49, 46, 0, 0, 0},
+            {18537659, 3, 55, 0, 0, 0, 0},
+            {483608781, 1381610858, 33213801, 157067759, 1704169077, 1285648416, 1172763438},
+            {7079, 56160260, 34414615, 1041039905, 537723415, 0, 0},
+            {-1995934416, 1683562844, 420546096, -781956804, 708194569, -898951878, 304908421},
+            {2126161, 2126102, 2120261, 2126102, 2120202, 2120261, 0}};
+    public static int[] false2ndturn = {-841228799, -507634211, 1558560349, 1892830, 0, 0, 1903101830};
+    public static int[] false3rdTurn = {374789, 33554431, 0, 0, 0, 0, 4534654};
 
     public static void init() {
          lastTurnSent = new int[GameConstants.MAX_ROBOT_ID + 1];
@@ -136,5 +149,11 @@ public class Blockchain {
             for(Transaction transaction : block) if(checkAuth(transaction)) transactions.add(transaction);
             parsingProgress++;
         }
+    }
+
+    public static boolean sendFalseMessage(int[] message, int fee) throws GameActionException {
+        if(!rc.canSubmitTransaction(message, fee)) { System.out.println("FEJL"); return false; }
+        rc.submitTransaction(message, fee);
+        return true;
     }
 }
