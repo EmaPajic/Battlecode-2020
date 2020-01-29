@@ -174,6 +174,21 @@ public class Drone {
                  */
                 if (Strategium.nearestEnemyUnit != null) if (attack(Strategium.nearestEnemyUnit)) break;
                 if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
+                if (state == State.PREDATOR && rc.getRoundNum() > 1400 &&
+                    Navigation.aerialDistance(Strategium.enemyHQLocation) >= 4) {
+                    if(Strategium.nearestMiner != null) {
+                        if(Navigation.aerialDistance(Strategium.nearestMiner.location,
+                                                     Strategium.HQLocation) >= 2) {
+                            if(attack(Strategium.nearestMiner)) break;
+                        }
+                    }
+                    if(Strategium.nearestLandscaper != null) {
+                        if(Navigation.aerialDistance(Strategium.nearestLandscaper.location,
+                                                     Strategium.HQLocation) >= 3) {
+                            if(attack(Strategium.nearestLandscaper)) break;
+                        }
+                    }
+                }
                 patrol();
                 break;
             case RUSH_MINER:
