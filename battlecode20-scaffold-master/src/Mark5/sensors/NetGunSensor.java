@@ -110,7 +110,7 @@ public class NetGunSensor {
                 if (robot.type == RobotType.DELIVERY_DRONE) {
                     switch (rc.getType()) {
                         case HQ:
-                            if (robot.location.isAdjacentTo(rc.getLocation())) {
+                            if (robot.location.isAdjacentTo(rc.getLocation()) && !robot.currentlyHoldingUnit) {
 
                             } else if (robot.currentlyHoldingUnit) {
                                 tpLocToAttack.add(robot);
