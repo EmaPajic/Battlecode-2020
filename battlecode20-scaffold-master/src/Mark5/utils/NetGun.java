@@ -1,13 +1,12 @@
 package Mark5.utils;
 
-import battlecode.common.GameActionException;
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotInfo;
+import battlecode.common.*;
 
 import static Mark5.RobotPlayer.rc;
 import static Mark5.sensors.NetGunSensor.sense;
 import static Mark5.sensors.NetGunSensor.tpLocToAttack;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 
 // netgunovi da priorituzuju protivnicke dronove koji nose protivnicke unite i iznad vode
@@ -45,9 +44,25 @@ public class NetGun {
         sense();
         RobotInfo bestTarget = null;
         if(!tpLocToAttack.isEmpty()) {
-            bestTarget = tpLocToAttack.get(0);
+            if (rc.getType() == RobotType.HQ) {
+                for (RobotInfo tpLoc : tpLocToAttack) {
+                    if (!rc.senseFlooding(tpLoc.location)) {
+                        if (tpLoc.currentlyHoldingUnit) {
+                            if ((max(rc.getLocation().x - 2, 0) <= tpLoc.location.x && tpLoc.location.x <= min(rc.getLocation().x + 2, rc.getMapWidth()))
+                                        && (max(rc.getLocation().y - 2, 0) <= tpLoc.location.y && tpLoc.location.y <= min(rc.getLocation().y + 2, rc.getMapHeight()))) {
+                                    bestTarget = tpLoc;
+                                    break;
+                            }
+                        }
+                    } else {
+                        bestTarget = tpLoc;
+                        break;
+                    }
+                }
+            } else { // maybe if not in HQ vicinity should be added
+                bestTarget = tpLocToAttack.get(0);
+            }
         }
-
 
         if (bestTarget != null) rc.shootUnit(bestTarget.ID);
     }
