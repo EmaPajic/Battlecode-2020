@@ -11,7 +11,9 @@ import static Mark5.RobotPlayer.rc;
 
 public class Siege {
     public static MapLocation dropSite() throws GameActionException {
-        if(Navigation.aerialDistance(Strategium.HQLocation) > 7 || Strategium.enemyDrones.size() < 4) return null;
+        System.out.println("DRONOVA: " + Strategium.enemyDrones.size());
+
+        if(Navigation.aerialDistance(Strategium.enemyHQLocation) > 8 || Strategium.enemyDrones.size() < 4) return null;
         int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 200) - 24;
         if(Strategium.enemyHQLocation == null) return null;
 
@@ -97,12 +99,17 @@ public class Siege {
     }
 
     public static Direction minerDropDir() throws GameActionException {
-        if(Navigation.aerialDistance(Strategium.HQLocation) > 7 || Strategium.enemyDrones.size() < 4) return null;
+        System.out.println("DROP CHECK");
+        if(Navigation.aerialDistance(Strategium.enemyHQLocation) > 8 || Strategium.enemyDrones.size() < 4) return null;
         if(Strategium.enemyHQLocation == null) return null;
+        if(rc.getTeamSoup() < 400) return null;
         for(Direction dir : dir8){
+            System.out.println("dir: " + dir);
             MapLocation location = rc.getLocation().add(dir);
             if(!rc.canSenseLocation(location)) continue;
             if(rc.senseFlooding(location)) continue;
+            if(location.isAdjacentTo(Strategium.nearestEnemyDrone.location)) continue;
+
             for(Direction dir2 : dir8){
                 MapLocation netGunSite = location.add(dir2);
                 if(rc.getLocation().equals(netGunSite)) continue;

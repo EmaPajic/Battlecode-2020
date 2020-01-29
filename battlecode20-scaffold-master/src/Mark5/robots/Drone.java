@@ -36,7 +36,7 @@ public class Drone {
     public static Payload payload = Payload.POTENTIAL;
 
     private static int patrolRange = 4;
-    private static int numOfDefensiveDrones = 16;
+    private static int numOfDefensiveDrones = 15;
     private static int patrolWaypointIndex = 1;
     private static MapLocation waypoint;
     private static boolean crunchComplete = false;
@@ -200,30 +200,6 @@ public class Drone {
                     climb();
                 else
                     patrol();
-                if(rc.getRoundNum() >= 1300){
-                    Direction dir;
-                    switch (payload){
-                        case FRIENDLY_LANDSCAPER:
-                            MapLocation location = Siege.dropSite();
-                            if(location == null) break;
-                            dir = rc.getLocation().directionTo(location);
-                            if(!rc.getLocation().isAdjacentTo(location)) Navigation.bugPath(location);
-                            if(rc.senseFlooding(location))
-                                if(rc.canDropUnit(dir)){
-                                    rc.dropUnit(dir);
-                                    return;
-                                }
-                            break;
-                        case FRIENDLY_MINER:
-                            dir = Siege.minerDropDir();
-                            if(dir != null)
-                                if(rc.canDropUnit(dir)){
-                                    rc.dropUnit(dir);
-                                    return;
-                                }
-                            break;
-                    }
-                }
 
                 break;
         }
