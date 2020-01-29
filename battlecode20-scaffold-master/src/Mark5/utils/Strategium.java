@@ -136,6 +136,10 @@ public class Strategium {
         if(rc.sensePollution(target) >= 9600) return false;
         switch (rc.getType()) {
             case MINER:
+                if(rc.canSenseLocation(target))
+                    if(rc.senseElevation(target) < GameConstants.getWaterLevel(rc.getRoundNum() + 10) &&
+                            rc.senseElevation(rc.getLocation()) >= 5 && (rc.getRoundNum() > 600 || nearestSoup == null))
+                        return false;
             case LANDSCAPER:
                 for (RobotInfo drone : enemyDrones) if (target.isAdjacentTo(drone.location)) return false;
                 if (rc.senseFlooding(target)) return false;

@@ -14,6 +14,7 @@ public class Siege {
         if(Navigation.aerialDistance(Strategium.HQLocation) > 7 || Strategium.enemyDrones.size() < 4) return null;
         int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 200) - 24;
         if(Strategium.enemyHQLocation == null) return null;
+
         if(Math.abs(Strategium.enemyHQLocation.x - rc.getLocation().x) <= 4) {
             if(rc.getLocation().x < Strategium.enemyHQLocation.x) {
                 int xMin = Math.max(rc.getLocation().x - 4, 0);
