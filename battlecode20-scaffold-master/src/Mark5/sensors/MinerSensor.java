@@ -116,7 +116,9 @@ public class MinerSensor {
             if(rc.canSenseLocation(nearestDesignSchool)) nearestDesignSchool = null;
 
         if(nearestFulfillmentCenter != null)
-            if(rc.canSenseLocation(nearestFulfillmentCenter)) nearestFulfillmentCenter = null;
+            if(rc.canSenseLocation(nearestFulfillmentCenter) || (nearestFulfillmentCenter.isAdjacentTo(HQLocation)) &&
+            rc.getRoundNum() > 300)
+                nearestFulfillmentCenter = null;
 
         if(nearestNetGun != null)
             if(rc.canSenseLocation(nearestNetGun)) nearestNetGun = Strategium.HQLocation;
