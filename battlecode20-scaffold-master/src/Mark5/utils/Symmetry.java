@@ -44,7 +44,7 @@ public class Symmetry {
             return false;
         if(Math.abs(rc.senseElevation(locA) - rc.senseElevation(locB)) >= rc.getRoundNum() / 2)
             return true;
-        if(rc.getRoundNum() > 100)
+        if(rc.getRoundNum() > 200)
             return false;
         if(rc.senseFlooding(locA) && !rc.senseFlooding(locB))
             return true;

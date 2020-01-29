@@ -2,6 +2,7 @@ package Mark5.robots;
 
 import Mark5.RobotPlayer;
 import Mark5.sensors.HQSensor;
+import Mark5.utils.Blockchain;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
 import battlecode.common.*;
@@ -15,6 +16,21 @@ import static Mark5.RobotPlayer.rc;
 public class HQ {
     public static void run(){
         rc.getTeamSoup();
+    }
+
+    public static void spamBlockchain() throws GameActionException {
+        if (rc.getRoundNum() == 1) {
+            for (int[] msg : Blockchain.falseMessages) {
+                Blockchain.sendFalseMessage(msg, 1);
+            }
+        }
+        if (rc.getRoundNum() == 2) {
+            Blockchain.sendFalseMessage(Blockchain.false2ndturn, 2);
+        }
+        if (rc.getRoundNum() == 3) {
+            Blockchain.sendFalseMessage(Blockchain.false3rdTurn, 1);
+        }
+
     }
 
     public static void produceMiners() throws GameActionException {

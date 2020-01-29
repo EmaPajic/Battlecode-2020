@@ -162,6 +162,7 @@ public strictfp class RobotPlayer {
     static void runHQ() throws GameActionException {
         Strategium.gatherInfo();
 
+        HQ.spamBlockchain();
         HQ.produceMiners();
 //        } else if (Strategium.leastAmountOfSoup > numMiners*100) { // if we have sufficient amount of soup send more miners
 //            Direction dirToSoup = rc.getLocation().directionTo(Strategium.nearestSoup);

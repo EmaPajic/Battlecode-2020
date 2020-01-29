@@ -76,7 +76,7 @@ public class Landscaper {
         }
 
         if (rc.getLocation().isAdjacentTo(Strategium.HQLocation) && rc.getRoundNum() > 300) {
-            System.out.println("HQ: " + Strategium.HQLocation);
+            //System.out.println("HQ: " + Strategium.HQLocation);
             if (buildTheWall()) return;
         }
 
@@ -98,7 +98,7 @@ public class Landscaper {
         if (Strategium.nearestWater != null)
             if (drain(Strategium.nearestWater)) return;
 
-        System.out.println("PATROL");
+        //System.out.println("PATROL");
 
         patrol();
 
@@ -235,7 +235,7 @@ public class Landscaper {
         if (waterLevel > 25) waterLevel = 25;
 
         if (rc.getRoundNum() > 2000) waterLevel = 1000;*/
-        System.out.println("Kopajjj ");
+        //System.out.println("Kopajjj ");
         int waterLevel = 8;
         if (rc.getRoundNum() > 1600) waterLevel = 10000;
         else if (rc.getRoundNum() < 300) waterLevel = 5;
@@ -256,7 +256,7 @@ public class Landscaper {
 
 
         if (rc.getRoundNum() > 1000 && rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit - 1) {
-            System.out.println("treba da kopam");
+            //System.out.println("treba da kopam");
             if (Strategium.enemyHQLocation != null) {
                 if (Navigation.aerialDistance(Strategium.enemyHQLocation) > 5) {
                     //System.out.println("Cmoncmon kopaj");

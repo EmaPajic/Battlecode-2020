@@ -255,7 +255,7 @@ public class TwoMinerController {
 
         RobotType makeRobotType = null;
 
-        System.out.println(rc.getTeamSoup());
+        //System.out.println(rc.getTeamSoup());
 
         if (aroundEnemyHQ && rc.getRoundNum() > 1300 && enemyDronesNearby && !friendlyNetGunsNearby) {
             buildNetGunNearEnemy();
@@ -272,7 +272,7 @@ public class TwoMinerController {
         if (rc.getTeamSoup() > RobotType.DESIGN_SCHOOL.cost + RobotType.LANDSCAPER.cost ||
                 Navigation.aerialDistance(Strategium.HQLocation) <= 3) {
 
-            System.out.println("DOVOLJNO ZA GRADNJU");
+            //System.out.println("DOVOLJNO ZA GRADNJU");
 
         if (Navigation.aerialDistance(nearestDesignSchool) > 10)
         {
@@ -284,8 +284,6 @@ public class TwoMinerController {
                 makeRobotType = RobotType.DESIGN_SCHOOL;
         }
 
-            System.out.println(friendlyNetGunsNearby + " " + enemyDronesNearby + " " + enemyFulfillmentCenterNearby
-            + " " + refineryNearby + " " + MinerSensor.visibleSoup);
             if (!friendlyNetGunsNearby &&
                     (enemyDronesNearby || enemyFulfillmentCenterNearby) &&
                     (rc.senseElevation(rc.getLocation()) >= 5 || refineryNearby || MinerSensor.visibleSoup > 250)) {
@@ -307,7 +305,7 @@ public class TwoMinerController {
                 makeRobotType = RobotType.VAPORATOR;
 
             }
-            System.out.println(makeRobotType);
+            //System.out.println(makeRobotType);
             if (rc.getTeamSoup() >= makeRobotType.cost && rc.getRoundNum() < 1200)
                 for (Direction dir : dir8)
                     if (rc.canBuildRobot(makeRobotType, dir))
@@ -322,7 +320,7 @@ public class TwoMinerController {
                             }
         }
 
-        System.out.println("uso ovde");
+        //System.out.println("uso ovde");
 
         if(Strategium.nearestEnemyDrone != null) rc.setIndicatorLine(rc.getLocation(),
                 Strategium.nearestEnemyDrone.location,
@@ -354,13 +352,13 @@ public class TwoMinerController {
                         System.out.println(dir);
 
                         Direction pastDir = pastLocation.directionTo((rc.getLocation()));
-                        System.out.println(pastDir);
-                        System.out.println("Prethodna lok " + pastLocation + "Trenu lokacija" + rc.getLocation());
+                        //System.out.println(pastDir);
+                        //System.out.println("Prethodna lok " + pastLocation + "Trenu lokacija" + rc.getLocation());
                         if(!dir.contains(pastDir) && pastDir != Direction.CENTER) {
 
-                            System.out.println("Hallelujah, country roadds");
+                            //System.out.println("Hallelujah, country roadds");
                             tryToReturn = true;
-                            System.out.println(tryToReturn + "pokusao sam ka " + pastDir);
+                            //System.out.println(tryToReturn + "pokusao sam ka " + pastDir);
                             return;
                         }
 

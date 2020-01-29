@@ -143,8 +143,8 @@ public class Drone {
             rc.disintegrate();
         }
 
-        System.out.println(state);
-        System.out.println(payload);
+        //System.out.println(state);
+        //System.out.println(payload);
         //System.out.println(state);
 
         if (!rc.isReady()) return;
@@ -175,7 +175,7 @@ public class Drone {
                 if (Strategium.nearestEnemyUnit != null) if (attack(Strategium.nearestEnemyUnit)) break;
                 if (Strategium.blockedUnit != null) if (attack(Strategium.blockedUnit)) break;
                 if (state == State.PREDATOR && rc.getRoundNum() > 1400 &&
-                    Navigation.aerialDistance(Strategium.enemyHQLocation) >= 4) {
+                    Navigation.aerialDistance(Strategium.enemyHQLocation) >= 6) {
                     if(Strategium.nearestMiner != null) {
                         if(Navigation.aerialDistance(Strategium.nearestMiner.location,
                                                      Strategium.HQLocation) >= 2) {
@@ -386,7 +386,7 @@ public class Drone {
         }
          */
         rc.setIndicatorLine(rc.getLocation(), waypoint, 255, 255, 255);
-        System.out.println("FRUSTRATION: " + Navigation.frustration);
+        //System.out.println("FRUSTRATION: " + Navigation.frustration);
 
         return Navigation.bugPath(waypoint);
 
@@ -403,7 +403,7 @@ public class Drone {
                             state = State.SWARMER;
                             payload = Payload.POTENTIAL;
                             crunchComplete = true;
-                            System.out.println("Svarmovao");
+                            //System.out.println("Svarmovao");
                             return true;
                         }
                 if (crunchComplete) {
