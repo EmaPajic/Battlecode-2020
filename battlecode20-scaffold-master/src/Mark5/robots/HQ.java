@@ -28,7 +28,7 @@ public class HQ {
             Blockchain.sendFalseMessage(Blockchain.false2ndturn, 2);
         }
         if (rc.getRoundNum() == 3) {
-            Blockchain.sendFalseMessage(Blockchain.false3rdTurn, 2);
+            Blockchain.sendFalseMessage(Blockchain.false3rdTurn, 1);
         }
 
     }
