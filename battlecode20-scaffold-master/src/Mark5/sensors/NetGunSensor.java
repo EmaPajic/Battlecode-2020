@@ -62,10 +62,14 @@ public class NetGunSensor {
                     onWaterB = rc.senseFlooding(rbB.location);
 
                     if(onWaterA && !onWaterB){
-                        return -1;
+                        if(rbACarry.team == myTeam)
+                            return 1;
+                        else return -1;
                     }
                     else if(!onWaterA && onWaterB){
-                        return 1;
+                        if(rbBCarry.team == myTeam)
+                            return -1;
+                        else return 1;
                     }
                 } catch (GameActionException e){
                     e.printStackTrace();
