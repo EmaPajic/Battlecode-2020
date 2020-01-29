@@ -26,6 +26,7 @@ public class Landscaper {
             }
         }
 
+
         if (!Strategium.overlapLocations.contains(rc.getLocation()))
             for (MapLocation location : Strategium.overlapLocations) {
                 if (rc.getLocation().isAdjacentTo(location))
@@ -222,17 +223,29 @@ public class Landscaper {
 
         if (waterLevel > Strategium.elevation[rc.getLocation().x][rc.getLocation().y] &&
                 !Lattice.isPit(rc.getLocation())) {
-            if (rc.canDepositDirt(Direction.CENTER)) {
-                rc.depositDirt(Direction.CENTER);
-                return true;
-            }
             Direction dir = Lattice.bestDigDirection();
             if(dir != null)
             if (rc.canDigDirt(dir)) {
                 rc.digDirt(dir);
                 return true;
             }
+            if (rc.canDepositDirt(Direction.CENTER)) {
+                rc.depositDirt(Direction.CENTER);
+                return true;
+            }
         }
+
+        /*if (rc.getRoundNum() > 1100 && rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit) {
+            if (Strategium.enemyHQLocation != null)
+                if (Navigation.aerialDistance(Strategium.enemyHQLocation) > 5) {
+                    Direction dir = Lattice.bestDigDirection();
+                    if (dir != null)
+                        if (rc.canDigDirt(dir)) {
+                            rc.digDirt(dir);
+                            return true;
+                        }
+                }
+        }*/
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);

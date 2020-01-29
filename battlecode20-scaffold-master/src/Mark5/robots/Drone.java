@@ -42,6 +42,7 @@ public class Drone {
     private static int numOfDefensiveDrones = 16;
     private static int patrolWaypointIndex = 1;
     private static MapLocation waypoint;
+    private static boolean crunchComplete = false;
 
     private static Iterator<MapLocation> target = null;
 
@@ -62,11 +63,16 @@ public class Drone {
             return false;
         if(!rc.canSenseLocation(Strategium.enemyHQLocation))
             return false;
-        if(rc.getRoundNum() > 1500 && rc.getRoundNum() <= 1510 && !rc.isCurrentlyHoldingUnit())
+        if(rc.getRoundNum() > 1500 && rc.getRoundNum() <= 1600 && !rc.isCurrentlyHoldingUnit())
             return true;
-        if(rc.getRoundNum() > 1505 && rc.getRoundNum() <= 1515 && rc.isCurrentlyHoldingUnit())
+        if(rc.getRoundNum() > 1590 && rc.getRoundNum() <= 1690 && rc.isCurrentlyHoldingUnit())
+            if(payload == Payload.FRIENDLY_MINER)
             return true;
-        if(rc.getRoundNum() > 1550 && rc.getRoundNum() <= 1560 && !rc.isCurrentlyHoldingUnit())
+        if(rc.getRoundNum() > 1600 && rc.getRoundNum() <= 1700 && rc.isCurrentlyHoldingUnit())
+            if(payload == Payload.FRIENDLY_LANDSCAPER)
+                return true;
+        /*if(rc.getRoundNum() > 1600 && rc.getRoundNum() <= 1700 && !rc.isCurrentlyHoldingUnit())
+            if(payload == Payload.FRIENDLY_LANDSCAPER)
             return true;
         if(rc.getRoundNum() > 1555 && rc.getRoundNum() <= 1565 && rc.isCurrentlyHoldingUnit())
             return true;
@@ -75,7 +81,7 @@ public class Drone {
             return true;
         if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 100 > 55 && rc.getRoundNum() % 100 <= 65 &&
                 rc.isCurrentlyHoldingUnit())
-            return true;
+            return true;*/
         return false;
     }
 
@@ -216,6 +222,9 @@ public class Drone {
                 return true;
             } else return Navigation.bugPath(Strategium.nearestWater);
 
+        }
+        if (state == State.SWARMER) {
+            rc.disintegrate();
         }
 
         return patrol();
@@ -365,8 +374,12 @@ public class Drone {
                             rc.dropUnit(dir);
                             state = State.SWARMER;
                             payload = Payload.POTENTIAL;
+                            crunchComplete = true;
                             return true;
                         }
+                if (crunchComplete) {
+                    rc.disintegrate();
+                }
                 return patrol();
             case PREDATOR:
             case SENTRY:
