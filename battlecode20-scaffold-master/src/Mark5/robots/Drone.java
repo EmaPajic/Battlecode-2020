@@ -201,22 +201,27 @@ public class Drone {
                 else
                     patrol();
                 if(rc.getRoundNum() >= 1300){
-                    MapLocation location = Siege.dropSite();
-                    if(location == null) break;
-                    Direction dir = rc.getLocation().directionTo(location);
+                    Direction dir;
                     switch (payload){
                         case FRIENDLY_LANDSCAPER:
+                            MapLocation location = Siege.dropSite();
+                            if(location == null) break;
+                            dir = rc.getLocation().directionTo(location);
+                            if(!rc.getLocation().isAdjacentTo(location)) Navigation.bugPath(location);
                             if(rc.senseFlooding(location))
                                 if(rc.canDropUnit(dir)){
                                     rc.dropUnit(dir);
                                     return;
                                 }
+                            break;
                         case FRIENDLY_MINER:
-                            if(!rc.senseFlooding(location))
+                            dir = Siege.minerDropDir();
+                            if(dir != null)
                                 if(rc.canDropUnit(dir)){
                                     rc.dropUnit(dir);
                                     return;
                                 }
+                            break;
                     }
                 }
 

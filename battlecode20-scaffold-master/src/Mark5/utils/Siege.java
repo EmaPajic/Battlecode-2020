@@ -11,8 +11,8 @@ import static Mark5.RobotPlayer.rc;
 
 public class Siege {
     public static MapLocation dropSite() throws GameActionException {
-        if(Strategium.nearestEnemyDrone == null || DroneSensor.netGunNearby) return null;
-        int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 500) - 24;
+        if(Navigation.aerialDistance(Strategium.HQLocation) > 7 || Strategium.enemyDrones.size() < 4) return null;
+        int waterLevel = (int) GameConstants.getWaterLevel(rc.getRoundNum() + 200) - 24;
         if(Strategium.enemyHQLocation == null) return null;
         if(Math.abs(Strategium.enemyHQLocation.x - rc.getLocation().x) <= 4) {
             if(rc.getLocation().x < Strategium.enemyHQLocation.x) {
@@ -23,6 +23,7 @@ public class Siege {
                     if (!rc.canSenseLocation(location)) continue;
                     if (rc.senseElevation(location) < waterLevel ||
                             Strategium.occupied[i][rc.getLocation().y]) continue;
+                    if(Strategium.nearestEnemyDrone.location.isAdjacentTo(location)) continue;
                     if (!rc.senseFlooding(location)) return suitableAdjacentSpot(location);
                     if(suitableAdjacentSpot(location) != null) return location;
                 }
@@ -36,7 +37,9 @@ public class Siege {
                     if (!rc.canSenseLocation(location)) continue;
                     if (rc.senseElevation(location) < waterLevel ||
                             Strategium.occupied[i][rc.getLocation().y]) continue;
+                    if(Strategium.nearestEnemyDrone.location.isAdjacentTo(location)) continue;
                     if (!rc.senseFlooding(location)) return suitableAdjacentSpot(location);
+                    if(suitableAdjacentSpot(location) != null) return location;
                 }
             }
 
@@ -50,6 +53,7 @@ public class Siege {
                     if (!rc.canSenseLocation(location)) continue;
                     if (rc.senseElevation(location) < waterLevel ||
                             Strategium.occupied[i][rc.getLocation().y]) continue;
+                    if(Strategium.nearestEnemyDrone.location.isAdjacentTo(location)) continue;
                     if (!rc.senseFlooding(location)) return suitableAdjacentSpot(location);
                     if(suitableAdjacentSpot(location) != null) return location;
                 }
@@ -63,7 +67,9 @@ public class Siege {
                     if (!rc.canSenseLocation(location)) continue;
                     if (rc.senseElevation(location) < waterLevel ||
                             Strategium.occupied[i][rc.getLocation().y]) continue;
+                    if(Strategium.nearestEnemyDrone.location.isAdjacentTo(location)) continue;
                     if (!rc.senseFlooding(location)) return suitableAdjacentSpot(location);
+                    if(suitableAdjacentSpot(location) != null) return location;
                 }
             }
         }
@@ -85,6 +91,24 @@ public class Siege {
                     (Math.abs(rc.senseElevation(location) -
                             rc.senseElevation(netGunSite) - 24) <= 3 &&
                             !rc.senseFlooding(location))) return location;
+        }
+        return null;
+    }
+
+    public static Direction minerDropDir() throws GameActionException {
+        if(Navigation.aerialDistance(Strategium.HQLocation) > 7 || Strategium.enemyDrones.size() < 4) return null;
+        if(Strategium.enemyHQLocation == null) return null;
+        for(Direction dir : dir8){
+            MapLocation location = rc.getLocation().add(dir);
+            if(!rc.canSenseLocation(location)) continue;
+            if(rc.senseFlooding(location)) continue;
+            for(Direction dir2 : dir8){
+                MapLocation netGunSite = location.add(dir2);
+                if(rc.getLocation().equals(netGunSite)) continue;
+                if(!rc.canSenseLocation(netGunSite)) continue;
+                if(rc.senseFlooding(netGunSite)) continue;
+                if(Math.abs(rc.senseElevation(netGunSite) - rc.senseElevation(location)) <= 3) return dir;
+            }
         }
         return null;
     }
