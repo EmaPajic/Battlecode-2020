@@ -143,8 +143,8 @@ public class Drone {
             rc.disintegrate();
         }
 
-        System.out.println(state);
-        System.out.println(payload);
+        //System.out.println(state);
+        //System.out.println(payload);
         //System.out.println(state);
 
         if (!rc.isReady()) return;
@@ -410,7 +410,7 @@ public class Drone {
         }
          */
         rc.setIndicatorLine(rc.getLocation(), waypoint, 255, 255, 255);
-        System.out.println("FRUSTRATION: " + Navigation.frustration);
+        //System.out.println("FRUSTRATION: " + Navigation.frustration);
 
         return Navigation.bugPath(waypoint);
 
@@ -427,7 +427,7 @@ public class Drone {
                             state = State.SWARMER;
                             payload = Payload.POTENTIAL;
                             crunchComplete = true;
-                            System.out.println("Svarmovao");
+                            //System.out.println("Svarmovao");
                             return true;
                         }
                 if (crunchComplete) {
