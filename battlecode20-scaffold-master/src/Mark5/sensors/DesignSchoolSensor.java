@@ -38,22 +38,21 @@ public class DesignSchoolSensor {
         nearestEnemyBuilding = null;
         nearestBuriedFriendlyBuilding = null;
 
-
         int xMin = rc.getLocation().x - 4;
         int yMin = rc.getLocation().y - 4;
         int xMax = rc.getLocation().x + 4;
         int yMax = rc.getLocation().y + 4;
         if(HQLocation != null && rc.senseElevation(rc.getLocation()) < 5)
-        for (int i = min(xMin, 0); i <= max(xMax, rc.getMapWidth() - 1); i++)
-            for (int j = min(yMin, 0); j <= max(yMax, rc.getMapHeight() - 1); j++) {
+        for (int i = max(xMin, 0); i <= min(xMax, rc.getMapWidth() - 1); i++)
+            for (int j = max(yMin, 0); j <= min(yMax, rc.getMapHeight() - 1); j++) {
 
                 MapLocation location = new MapLocation(i, j);
                 if (rc.canSenseLocation(location))
                     if (rc.senseFlooding(location))
                         if(!Lattice.isPit(location)){
-                        if (Navigation.aerialDistance(nearestWater) > Navigation.aerialDistance(location) &&
-                                numThreats < 2)
-                            nearestWater = location;
+                        //if (Navigation.aerialDistance(nearestWater) > Navigation.aerialDistance(location) &&
+                        //        numThreats < 2)
+                        //    nearestWater = location;
                         //numThreats++;
                         priorityBuildDirections.add(rc.getLocation().directionTo(location));
                     }
