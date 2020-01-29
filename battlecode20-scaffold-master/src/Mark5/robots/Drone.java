@@ -38,7 +38,7 @@ public class Drone {
 
     public static Payload payload = Payload.POTENTIAL;
 
-    private static int patrolRange = 3;
+    private static int patrolRange = 4;
     private static int numOfDefensiveDrones = 16;
     private static int patrolWaypointIndex = 1;
     private static MapLocation waypoint;
@@ -115,7 +115,7 @@ public class Drone {
 
         Strategium.gatherInfo();
 
-        //patrolRange = 3 + (Strategium.numDronesMet - 24) / 8;
+        patrolRange = rc.getRoundNum() > 1000 ? 2 : 4;
         if(isCrunchingTime())
             state = State.SWARMER;
         else
@@ -131,7 +131,7 @@ public class Drone {
             }
         }
 
-        numOfDefensiveDrones = 0;
+        numOfDefensiveDrones = Strategium.numDronesMet > 65 ? 15 : 6;
         if(Strategium.dronesMetWithLowerID < (rc.getRoundNum() < 1200 ? 1 : numOfDefensiveDrones)) state = State.SENTRY;
 
         //if(rc.getRoundNum() < 150) state = State.SENTRY;
@@ -324,9 +324,9 @@ public class Drone {
 
                  */
                 case SENTRY:
-                    if(Navigation.aerialDistance(Strategium.HQLocation) > 4)
+                    if(Navigation.aerialDistance(Strategium.HQLocation) > patrolRange)
                         return Navigation.bugPath(Strategium.HQLocation);
-                    if(Navigation.aerialDistance(Strategium.HQLocation) < 4) {
+                    if(Navigation.aerialDistance(Strategium.HQLocation) < patrolRange) {
                         List<Direction> dirs = Navigation.moveAwayFrom(Strategium.HQLocation);
                         for (Direction dir : dirs)
                             if(Strategium.canSafelyMove(dir)){
