@@ -98,7 +98,7 @@ public class Landscaper {
         if (Strategium.nearestWater != null)
             if (drain(Strategium.nearestWater)) return;
 
-        //System.out.println("PATROL");
+        System.out.println("PATROL");
 
         patrol();
 
@@ -217,6 +217,7 @@ public class Landscaper {
         if (waterLevel > 25) waterLevel = 25;
 
         if (rc.getRoundNum() > 2000) waterLevel = 1000;*/
+        System.out.println("Kopajjj ");
         int waterLevel = 8;
         if (rc.getRoundNum() > 1600) waterLevel = 10000;
         else if (rc.getRoundNum() < 300) waterLevel = 5;
@@ -235,9 +236,11 @@ public class Landscaper {
             }
         }
 
-        /*if (rc.getRoundNum() > 1100 && rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit) {
-            if (Strategium.enemyHQLocation != null)
+        //System.out.println("treba da kopam");
+        if (rc.getRoundNum() > 1000 && rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit - 1) {
+            if (Strategium.enemyHQLocation != null) {
                 if (Navigation.aerialDistance(Strategium.enemyHQLocation) > 5) {
+                    //System.out.println("Cmoncmon kopaj");
                     Direction dir = Lattice.bestDigDirection();
                     if (dir != null)
                         if (rc.canDigDirt(dir)) {
@@ -245,7 +248,17 @@ public class Landscaper {
                             return true;
                         }
                 }
-        }*/
+            }
+            else {
+                    //System.out.println("Cmoncmon kopaj");
+                    Direction dir = Lattice.bestDigDirection();
+                    if (dir != null)
+                        if (rc.canDigDirt(dir)) {
+                            rc.digDirt(dir);
+                            return true;
+                        }
+                }
+        }
 
         for (Direction dir : dir8) {
             MapLocation location = rc.adjacentLocation(dir);
