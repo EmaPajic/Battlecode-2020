@@ -22,7 +22,8 @@ public class DesignSchool {
 
         if (DesignSchoolSensor.droneNearby && !DesignSchoolSensor.netGunNearby) return;
 
-        if (DesignSchoolSensor.numThreats > DesignSchoolSensor.numLandscapers) {
+        if (DesignSchoolSensor.numThreats > DesignSchoolSensor.numLandscapers || (
+                rc.getRoundNum() > 1200 && rc.getRoundNum() % 3 == 0 && rc.getTeamSoup() > 400)) {
             if (Strategium.enemyHQLocation != null) {
                 Direction dirToEnemyHQ = rc.getLocation().directionTo(Strategium.enemyHQLocation);
                 List<Direction> towards = Navigation.moveAwayFrom(rc.getLocation().add(dirToEnemyHQ.opposite()));
@@ -54,7 +55,7 @@ public class DesignSchool {
             }
 
         } else if (RobotType.VAPORATOR.cost + RobotType.LANDSCAPER.cost <= rc.getTeamSoup() ||
-                (numLandscapers < rc.getRoundNum() / 100 &&
+                ((numLandscapers < rc.getRoundNum() / 100 || numLandscapers < 5) &&
                         rc.getTeamSoup() > 2 * RobotType.LANDSCAPER.cost && rc.getRoundNum() > 150)) {
             if (Strategium.enemyHQLocation != null) {
                 Direction dirToEnemyHQ = rc.getLocation().directionTo(Strategium.enemyHQLocation);
