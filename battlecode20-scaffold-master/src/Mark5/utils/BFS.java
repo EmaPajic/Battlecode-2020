@@ -58,15 +58,6 @@ public class BFS {
         stack.clear();
         queue.add(new LocationNode(rc.getLocation(), null));
 
-        /*switch (rc.getType()) {
-            case MINER:
-                visitedLocations = new boolean[11][11];
-                break;
-            case LANDSCAPER:
-            case DELIVERY_DRONE:
-                visitedLocations = new boolean[9][9];
-                break;
-        }*/
         visitedLocations = new boolean[11][11];
 
         LocationNode currHead;

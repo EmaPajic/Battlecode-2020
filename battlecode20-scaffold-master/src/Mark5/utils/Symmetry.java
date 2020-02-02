@@ -57,7 +57,6 @@ public class Symmetry {
         return false;
     }
 
-    // Returns false if it can detect that the map is not vertically symmetric, otherwise true.
     public static void checkVerticalSymmetry() throws GameActionException {
         if(!nearVerticalLine(rc.getLocation()))
             return;
@@ -101,13 +100,13 @@ public class Symmetry {
             return false;
         if(nonHorizontalCount > 5 && location.x == Strategium.HQLocation.x &&
                                         location.y == rc.getMapHeight() - Strategium.HQLocation.y - 1) {
-            System.out.println("Nije horizontal");
+            System.out.println("Not horizontal");
             return true;
         }
 
         if(nonVerticalCount > 5 && location.y == Strategium.HQLocation.y &&
                 location.x == rc.getMapWidth() - Strategium.HQLocation.x - 1) {
-            System.out.println("Nije vertikal");
+            System.out.println("Not vertical");
             return true;
         }
         return false;

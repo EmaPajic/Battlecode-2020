@@ -58,13 +58,6 @@ public class Landscaper {
             if (defend(Strategium.nearestBuriedFriendlyBuilding)) return;
 
         if (Strategium.nearestEnemyBuilding != null) {
-//            RobotInfo[] robots = rc.senseNearbyRobots();
-//            for (RobotInfo robot : robots) {
-//                if(robot.team != Strategium.myTeam && robot.type == RobotType.HQ) {
-//                    if(attack(robot.location)) return;
-//                    if(Navigation.fuzzyNav(robot.location)) return;
-//                }
-//            }
             // Strategium decides which building should be prioritized, if not in building perimeter
             // try to reach it
             if (attack(Strategium.nearestEnemyBuilding)) return;
@@ -76,7 +69,6 @@ public class Landscaper {
         }
 
         if (rc.getLocation().isAdjacentTo(Strategium.HQLocation) && rc.getRoundNum() > 300) {
-            //System.out.println("HQ: " + Strategium.HQLocation);
             if (buildTheWall()) return;
         }
 
@@ -86,19 +78,14 @@ public class Landscaper {
                 rc.move(dir);
                 return;
             }
-
         }
 
         if (Strategium.nearestEnemyDrone != null &&
                 LandscaperSensor.nearestNetGun.distanceSquaredTo(rc.getLocation()) >= 8)
             if (Navigation.fleeToSafety(Strategium.nearestEnemyDrone.location, LandscaperSensor.nearestNetGun)) return;
 
-        //System.out.println("DREIN");
-
         if (Strategium.nearestWater != null)
             if (drain(Strategium.nearestWater)) return;
-
-        //System.out.println("PATROL");
 
         patrol();
 
@@ -229,13 +216,7 @@ public class Landscaper {
             if (Navigation.bugPath(waypoint)) return;
         }
 
-        /*int waterLevel = (int) GameConstants.getWaterLevel(
-                rc.getRoundNum() + 1000
-        );
-        if (waterLevel > 25) waterLevel = 25;
-
-        if (rc.getRoundNum() > 2000) waterLevel = 1000;*/
-        //System.out.println("Kopajjj ");
+        // bad name, but it defines min lattice height at the moment
         int waterLevel = 8;
         if (rc.getRoundNum() > 1600) waterLevel = 10000;
         else if (rc.getRoundNum() < 300) waterLevel = 5;
@@ -256,10 +237,8 @@ public class Landscaper {
 
 
         if (rc.getRoundNum() > 1000 && rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit - 1) {
-            //System.out.println("treba da kopam");
             if (Strategium.enemyHQLocation != null) {
                 if (Navigation.aerialDistance(Strategium.enemyHQLocation) > 5) {
-                    //System.out.println("Cmoncmon kopaj");
                     Direction dir = Lattice.bestDigDirection();
                     if (dir != null)
                         if (rc.canDigDirt(dir)) {
@@ -268,7 +247,6 @@ public class Landscaper {
                         }
                 }
             } else {
-                //System.out.println("Cmoncmon kopaj");
                 Direction dir = Lattice.bestDigDirection();
                 if (dir != null)
                     if (rc.canDigDirt(dir)) {

@@ -1,5 +1,7 @@
 package Mark5.sensors;
 
+import Mark5.RobotPlayer;
+import Mark5.robots.Miner;
 import Mark5.utils.Blockchain;
 import Mark5.utils.Navigation;
 import Mark5.utils.Strategium;
@@ -33,10 +35,7 @@ public class MinerSensor {
 
     public static void init() {
         soup = new boolean[rc.getMapWidth()][rc.getMapHeight()];
-        //explored = new boolean[rc.getMapWidth()][rc.getMapHeight()];
-        //elevation = new int[rc.getMapWidth()][rc.getMapHeight()];
         occupied = new boolean[rc.getMapWidth()][rc.getMapHeight()];
-        //water = new boolean[rc.getMapWidth()][rc.getMapHeight()];
         dirSafetyCacheValid = new int[10];
         dirSafetyCache = new boolean[10];
     }
@@ -46,7 +45,6 @@ public class MinerSensor {
         enemyDrones.clear();
         nearestEnemyDrone = null;
         visibleSoup = 0;
-        //seenWater = false;
         vacantBuildSpot = null;
 
         System.out.println("SENSING");
@@ -62,12 +60,12 @@ public class MinerSensor {
 
                 MapLocation location = new MapLocation(i, j);
                 if (rc.canSenseLocation(location)) {
-                    //if (rc.senseFlooding(location)) seenWater = true;
                     occupied[i][j] = false;
+                    // next line is only used for rush miner
+                    //if (rc.senseFlooding(location)) seenWater = true;
                     if(rc.getRoundNum() <= 600) {
                         visibleSoup += rc.senseSoup(location);
                         if (rc.senseSoup(location) > 0) {
-                            //explored[i][j] = true;
                             if (!soup[i][j]) {
                                 ++knownSoup;
                                 soup[i][j] = true;
@@ -109,7 +107,6 @@ public class MinerSensor {
         aroundEnemyHQ = false;
         refineryNearby = false;
 
-        System.out.println("Senzor nije crko");
         RobotInfo[] robots = rc.senseNearbyRobots();
 
         if(nearestDesignSchool != null)
@@ -208,15 +205,9 @@ public class MinerSensor {
             }
         }
 
-        System.out.println("SKENIRAM ROBOTE");
         System.out.println(Clock.getBytecodeNum());
 
-        //Wall.checkBaseStatus();
-
-
-
-
-        if(myFun != 4 && rc.getRoundNum() <= 600) {
+        if(minerType == Miner.MinerType.SEARCH && rc.getRoundNum() <= 600) {
             nearestRefinery = null;
             for (MapLocation refinery : refineries) {
                 if (refinery.equals(HQLocation) && rc.getRoundNum() > 600)
@@ -242,12 +233,7 @@ public class MinerSensor {
                     }
         }
 
-        System.out.println("SKENIRANJE ZGRADA");
         System.out.println(Clock.getBytecodeNum());
-
-        //potentialEnemyHQLocations.removeIf(location -> rc.canSenseLocation(location));
-
-
 
     }
 

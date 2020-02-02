@@ -58,6 +58,12 @@ public class Drone {
     public static boolean isCrunchingTime() {
         if(Strategium.enemyHQLocation == null)
             return false;
+
+        /* first crunch - turn 1500
+        first - empty drones that should kill enemy landscapers
+        second - drones with miners so that enemy drones can be killed
+        trird - drones with landscapers for attack
+         */
         if(!rc.canSenseLocation(Strategium.enemyHQLocation))
             return false;
         if(rc.getRoundNum() > 1500 && rc.getRoundNum() <= 1550 && !rc.isCurrentlyHoldingUnit())
@@ -68,12 +74,8 @@ public class Drone {
         if(rc.getRoundNum() > 1525 && rc.getRoundNum() <= 1575 && rc.isCurrentlyHoldingUnit())
             if(payload == Payload.FRIENDLY_LANDSCAPER)
                 return true;
-        /*if(rc.getRoundNum() > 1600 && rc.getRoundNum() <= 1700 && !rc.isCurrentlyHoldingUnit())
-            if(payload == Payload.FRIENDLY_LANDSCAPER)
-            return true;
-        if(rc.getRoundNum() > 1555 && rc.getRoundNum() <= 1565 && rc.isCurrentlyHoldingUnit())
-            return true;
-        */
+
+        // periodic crunch
         if(rc.getRoundNum() > 1500 && rc.getRoundNum() % 200 > 100 && rc.getRoundNum() % 200 <= 150 &&
            !rc.isCurrentlyHoldingUnit())
             return true;

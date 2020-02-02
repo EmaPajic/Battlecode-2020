@@ -82,11 +82,6 @@ public class Blockchain {
                 return true;
             }
 
-        //opponentTransactionCosts += transaction.getCost();
-        //opponentTransactions++;
-        //if (transaction.getCost() > opponentTransactionMaxFee) opponentTransactionMaxFee = transaction.getCost();
-        //if (transaction.getCost() < opponentTransactionMinFee) opponentTransactionMinFee = transaction.getCost();
-
         return false;
     }
 
@@ -95,7 +90,7 @@ public class Blockchain {
         message[0] = rc.getLocation().x;
         message[1] = rc.getLocation().y;
         addAuth(message, 73);
-        if(!rc.canSubmitTransaction(message, fee)) { System.out.println("FEJL"); return false; }
+        if(!rc.canSubmitTransaction(message, fee)) { System.out.println("failed"); return false; }
         rc.submitTransaction(message, fee);
         return true;
     }
@@ -105,7 +100,7 @@ public class Blockchain {
         message[0] = Strategium.enemyHQLocation.x;
         message[1] = Strategium.enemyHQLocation.y;
         addAuth(message, 17);
-        if(!rc.canSubmitTransaction(message, fee)) { System.out.println("FEJL"); return false; }
+        if(!rc.canSubmitTransaction(message, fee)) { System.out.println("failed"); return false; }
         rc.submitTransaction(message, fee);
         return true;
     }
@@ -117,7 +112,7 @@ public class Blockchain {
         message[2] = Strategium.lastEnemyNetGunSeen.id;
         message[5] = Strategium.lastEnemyNetGunSeen.readyOnRound;
         addAuth(message, 98);
-        if(!rc.canSubmitTransaction(message, fee)) { System.out.println("FEJL"); return false; }
+        if(!rc.canSubmitTransaction(message, fee)) { System.out.println("failed"); return false; }
         rc.submitTransaction(message, fee);
         return true;
     }
@@ -151,7 +146,7 @@ public class Blockchain {
     }
 
     public static boolean sendFalseMessage(int[] message, int fee) throws GameActionException {
-        if(!rc.canSubmitTransaction(message, fee)) { System.out.println("FEJL"); return false; }
+        if(!rc.canSubmitTransaction(message, fee)) { System.out.println("failed"); return false; }
         rc.submitTransaction(message, fee);
         return true;
     }

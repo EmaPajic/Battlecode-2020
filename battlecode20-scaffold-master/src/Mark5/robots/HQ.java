@@ -4,6 +4,7 @@ import Mark5.RobotPlayer;
 import Mark5.sensors.HQSensor;
 import Mark5.utils.Blockchain;
 import Mark5.utils.Navigation;
+import Mark5.utils.NetGun;
 import Mark5.utils.Strategium;
 import battlecode.common.*;
 
@@ -14,8 +15,12 @@ import static Mark5.RobotPlayer.rc;
 
 
 public class HQ {
-    public static void run(){
+    public static void run() throws GameActionException {
         rc.getTeamSoup();
+        Strategium.gatherInfo();
+        spamBlockchain();
+        produceMiners();
+        NetGun.run();
     }
 
     public static void spamBlockchain() throws GameActionException {

@@ -19,7 +19,7 @@ import static java.lang.Math.max;
 import static java.util.Collections.swap;
 import static Mark5.sensors.MinerSensor.*;
 
-public class TwoMinerController {
+public class Miner {
 
     //    static class RobotsComparator implements Array<RobotInfo> {
 //        @Override
@@ -32,7 +32,8 @@ public class TwoMinerController {
         @Override
         public int compare(MapLocation locA, MapLocation locB) {
             return Integer.compare(
-                    Navigation.aerialDistance(hqLocation, locA), Navigation.aerialDistance(hqLocation, locB));
+                    Navigation.aerialDistance(Strategium.HQLocation, locA),
+                    Navigation.aerialDistance(Strategium.HQLocation, locB));
         }
     }
     public static ArrayList<MapLocation> searchRoute;
@@ -59,7 +60,10 @@ public class TwoMinerController {
     public static MapLocation pastLocation = null;
     public static boolean tryToReturn = false;
 
-
+    public enum MinerType {
+        RUSH,
+        SEARCH
+    }
 
     static void findRoute() {
         int stepX = (rc.getMapWidth() - 10) / 3;
@@ -105,9 +109,9 @@ public class TwoMinerController {
         lastMadeRobotType = RobotType.DESIGN_SCHOOL;
         triedToBuildRefinery = false;
         findRoute();
-        if (searchRoute.contains(hqLocation)) {
-            searchRoute.remove(hqLocation);
-            searchRouteVisited.add(hqLocation);
+        if (searchRoute.contains(Strategium.HQLocation)) {
+            searchRoute.remove(Strategium.HQLocation);
+            searchRouteVisited.add(Strategium.HQLocation);
         }
         searchRoute.sort(new LocationComparator());
         randomizeBit();
@@ -179,7 +183,7 @@ public class TwoMinerController {
 
     public static boolean refineryRentability() throws GameActionException {
         if (Navigation.aerialDistance(Strategium.nearestRefinery) > 7 &&
-                Navigation.aerialDistance(hqLocation) > 4) {
+                Navigation.aerialDistance(Strategium.HQLocation) > 4) {
 
             if (MinerSensor.visibleSoup > RobotType.REFINERY.cost && rc.getTeamSoup() > RobotType.REFINERY.cost) {
                 for (Direction dir : dir8) {
@@ -238,7 +242,6 @@ public class TwoMinerController {
     public static void control() throws GameActionException {
         Strategium.gatherInfo();
 
-        // Dodato zbog nullpointer exceptiona
         if(buildWaypoint == null && Strategium.HQLocation != null)
             buildWaypoint = Strategium.HQLocation;
 
@@ -255,8 +258,6 @@ public class TwoMinerController {
 
         RobotType makeRobotType = null;
 
-        //System.out.println(rc.getTeamSoup());
-
         if (aroundEnemyHQ && rc.getRoundNum() > 1300 && enemyDronesNearby && !friendlyNetGunsNearby) {
             buildNetGunNearEnemy();
         }
@@ -272,7 +273,6 @@ public class TwoMinerController {
         if (rc.getTeamSoup() > RobotType.DESIGN_SCHOOL.cost + RobotType.LANDSCAPER.cost ||
                 Navigation.aerialDistance(Strategium.HQLocation) <= 3) {
 
-            //System.out.println("DOVOLJNO ZA GRADNJU");
 
         if (Navigation.aerialDistance(nearestDesignSchool) > 10)
         {
@@ -320,8 +320,6 @@ public class TwoMinerController {
                             }
         }
 
-        //System.out.println("uso ovde");
-
         if(Strategium.nearestEnemyDrone != null) rc.setIndicatorLine(rc.getLocation(),
                 Strategium.nearestEnemyDrone.location,
                 255, 0, 0);
@@ -352,13 +350,8 @@ public class TwoMinerController {
                         System.out.println(dir);
 
                         Direction pastDir = pastLocation.directionTo((rc.getLocation()));
-                        //System.out.println(pastDir);
-                        //System.out.println("Prethodna lok " + pastLocation + "Trenu lokacija" + rc.getLocation());
                         if(!dir.contains(pastDir) && pastDir != Direction.CENTER) {
-
-                            //System.out.println("Hallelujah, country roadds");
                             tryToReturn = true;
-                            //System.out.println(tryToReturn + "pokusao sam ka " + pastDir);
                             return;
                         }
 

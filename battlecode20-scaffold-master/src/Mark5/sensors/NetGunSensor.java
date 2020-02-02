@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import static Mark5.RobotPlayer.*;
-import static Mark5.RobotPlayer.hqLocation;
 import static Mark5.utils.Strategium.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -54,7 +53,7 @@ public class NetGunSensor {
                 return -1;
             else if(rbACarry.type != RobotType.MINER && rbBCarry.type == RobotType.MINER )
                 return 1;
-            else { // ako nose istu stvar, prioritizuj onog ko je iznad vode
+            else { // if they are carrying the same type of robot prioritize the one above the water
                 boolean onWaterA = false;
                 boolean onWaterB = false;
                 try{
@@ -94,11 +93,11 @@ public class NetGunSensor {
     public static void senseNearbyUnits() throws GameActionException {
         tpLocToAttack.clear();
         lpLocToAttack.clear();
-        // PRIORITET :
-        // gadjaj prvo dronove sa minerima, ako su iznad vode
-        // gadjaj prvo dronove sa lendskejperima, ako su iznad vode
-        // gadjaj prvo dronove koji su prazni, pod uslovom da i dalje ima nasih lendskejpera i minera
-        // ne gadjaj ako je neprijateljski dron iznad naseg zida ili praznog neprijateljskog drona ako je prazan nas zid
+        // Priority :
+        // shoot drones with miners - if above water
+        // shoot drones with landscapers - if above water
+        // shoot empty drones if there are still friendly landscapers or miners around
+        // if our wall is empty, don't shoot empty drones
 
         RobotInfo[] robots = rc.senseNearbyRobots(GameConstants.NET_GUN_SHOOT_RADIUS_SQUARED);
         for (RobotInfo robot : robots){
@@ -106,7 +105,7 @@ public class NetGunSensor {
                 switch(rc.getType()) {
                     case HQ:
                         if (robot.type == RobotType.LANDSCAPER || robot.type == RobotType.MINER) {
-                            notAttackDrones = false; // ako se ovaj deo odnosi samo da ih nema na zidu, onda treba dodati samo jos taj uslov u if iznad
+                            notAttackDrones = false;
                         }
                         break;
                 }
@@ -131,10 +130,7 @@ public class NetGunSensor {
         }
 
         tpLocToAttack.sort(new attackPriorityComparator());
-//        System.out.println(tpLocToAttack.get(0));
-//        tpLocToAttack.sort(new LocationComparator());
         if(notAttackDrones && rc.getType() == RobotType.HQ){
-            // moze clear lpLocToAttack, ali ne mora
 
         } else{
             lpLocToAttack.sort(new LocationComparator());

@@ -1,16 +1,10 @@
 package Mark5.utils;
 
-import Mark5.robots.DesignSchool;
 import Mark5.robots.Drone;
-import Mark5.robots.HQ;
-import Mark5.robots.TwoMinerController;
-import Mark5.utils.Symmetry.*;
 
 import Mark5.sensors.*;
 import battlecode.common.*;
 
-import java.awt.*;
-import java.util.*;
 import java.util.*;
 import java.util.List;
 
@@ -77,7 +71,6 @@ public class Strategium {
     public static boolean[] dirSafetyCache;
 
     public static Random rand;
-    // iskreno nisam znao kom bloku polja da ovo polje pridruzim, sometimes i feel like coravi boromir
     public static int leastAmountOfSoup = 0;
 
     public static void init() {
@@ -183,8 +176,6 @@ public class Strategium {
     }
 
     static private void sense() throws GameActionException {
-
-
         enemyBuildings.removeIf(building -> {
             if (rc.canSenseLocation(building)) {
                 try {
@@ -335,13 +326,7 @@ public class Strategium {
     }
 
     public static void parseTransactions() throws GameActionException {
-//        if (transactions == null) {
-//            upToDate = true;
-//            return;
-//        }
-
         while (!transactions.isEmpty()) {
-
             int[] message = transactions.get(0).getMessage();
 
             switch (Blockchain.getType(message)) {

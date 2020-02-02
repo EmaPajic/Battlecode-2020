@@ -102,7 +102,6 @@ public class Lattice {
      * @return the direction. If there is no suitable direction, returns null.
      */
     public static Direction bestDigDirection() throws GameActionException {
-        System.out.println("KOPAM");
         for (Direction dir : Direction.allDirections()) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
@@ -114,7 +113,6 @@ public class Lattice {
                 return dir;
             }
         }
-        System.out.println("KOPAM LOSE");
         for (Direction dir : Direction.allDirections()) {
             MapLocation location = rc.adjacentLocation(dir);
             if (!rc.onTheMap(location)) continue;
@@ -140,7 +138,7 @@ public class Lattice {
             MapLocation loc = location.add(dir);
             if (rc.onTheMap(loc))
                 if (Strategium.water[loc.x][loc.y]) return true;
-                else System.out.println(loc + " NEMA VODE");
+                else System.out.println(loc + " no water");
         }
         return false;
     }

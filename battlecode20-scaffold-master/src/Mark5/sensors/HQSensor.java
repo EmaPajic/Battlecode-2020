@@ -5,7 +5,6 @@ import Mark5.utils.Strategium;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 
-import static Mark5.RobotPlayer.myFun;
 import static Mark5.RobotPlayer.rc;
 import static Mark5.utils.Strategium.*;
 import static java.lang.Math.max;

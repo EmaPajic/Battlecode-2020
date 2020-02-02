@@ -1,6 +1,5 @@
 package Mark5.robots;
 
-import Mark5.sensors.FulfillmentCenterSensor;
 import Mark5.sensors.MinerSensor;
 import Mark5.utils.BFS;
 import Mark5.utils.Lattice;
@@ -9,7 +8,6 @@ import Mark5.utils.Strategium;
 import battlecode.common.*;
 
 import java.util.List;
-import java.util.Map;
 
 import static Mark5.RobotPlayer.*;
 
@@ -50,10 +48,10 @@ public class RushMiner {
                     buildToAttack();
                     return;
                 } else {
-                    TwoMinerController.updateEnemyHQTarget();
+                    Miner.updateEnemyHQTarget();
                 }
             } else {
-                TwoMinerController.updateEnemyHQTarget();
+                Miner.updateEnemyHQTarget();
             }
         }
 
@@ -165,7 +163,7 @@ public class RushMiner {
             buildNetGunNearEnemy();
         }
         if (numDesignSchools == 0) {
-            TwoMinerController.buildDesignCenterNearEnemy();
+            Miner.buildDesignCenterNearEnemy();
         }
     }
 
